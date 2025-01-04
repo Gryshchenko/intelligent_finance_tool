@@ -51,6 +51,7 @@ describe('POST /transaction/create - expense', () => {
             const incomeId = incomes[0].incomeId;
             const accountId = accounts[0].accountId;
             const currencyId = accounts[0].currencyId;
+            const categoryId = categories[0].categoryId;
 
             const {
                 body: { data: accountBefor },
@@ -69,6 +70,7 @@ describe('POST /transaction/create - expense', () => {
                     transactionTypeId: 2,
                     amount: num,
                     description: 'Test',
+                    categoryId,
                 })
                 .expect(201);
             const {

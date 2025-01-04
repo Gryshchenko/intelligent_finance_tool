@@ -50,15 +50,15 @@ export default class Utils {
     }
 
     public static isNotEmpty(val: string): boolean {
-        return typeof val !== 'undefined' && val !== null && val.length > 0;
+        return typeof val !== 'undefined' && val !== null && val.length > 0 && val !== undefined;
     }
 
     public static isNotNull(value: unknown): boolean {
-        return value !== null && value !== 'undefined';
+        return value !== null && value !== 'undefined' && value !== undefined;
     }
 
     public static isNull(val: unknown): boolean {
-        return typeof val === 'undefined' || val === null;
+        return typeof val === 'undefined' || val === null || val === undefined;
     }
 
     public static isArrayNotEmpty(val: unknown[]): boolean {

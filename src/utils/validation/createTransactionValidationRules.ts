@@ -10,29 +10,30 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
 
     const validationMap: Record<
         TransactionType,
-        { expectFields: unknown[]; notExpectFields: unknown[]; errorCode: ErrorCode; message: string }
+        { expectFields: Map<string, unknown>; notExpectFields: Map<string, unknown>; errorCode: ErrorCode; message: string }
     > = {
         [TransactionType.Income]: {
-            expectFields: [incomeId, accountId],
-            notExpectFields: [categoryId],
+            expectFields: new Map().set('incomeId', incomeId).set('accountId', accountId),
+            notExpectFields: new Map().set('categoryId', categoryId),
             errorCode: ErrorCode.INCOME_ID_ERROR,
             message: 'accountId and incomeId are required; categoryId should not be present.',
         },
         [TransactionType.Expense]: {
-            expectFields: [categoryId, accountId],
-            notExpectFields: [incomeId],
+            expectFields: new Map().set('categoryId', categoryId).set('accountId', accountId),
+            notExpectFields: new Map().set('incomeId', incomeId),
             errorCode: ErrorCode.CATEGORY_ID_ERROR,
             message: 'accountId and categoryId are required; incomeId should not be present.',
         },
         [TransactionType.Transafer]: {
-            expectFields: [accountId, targetAccountId],
-            notExpectFields: [incomeId, categoryId],
+            expectFields: new Map().set('accountId', accountId).set('targetAccountId', targetAccountId),
+            notExpectFields: new Map().set('incomeId', incomeId).set('categoryId', categoryId),
             errorCode: ErrorCode.ACCOUNT_ID_ERROR,
             message: 'accountId is required; incomeId and categoryId should not be present.',
         },
     };
 
     const validation = validationMap[transactionTypeId as TransactionType];
+    console.log(22222, req.body, validation.notExpectFields);
 
     if (!validation) {
         throw new ValidationError({
@@ -41,7 +42,11 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
         });
     }
 
-    const missingField = validation.expectFields.find(Utils.isNull);
+    const missingField = (validation.expectFields.keys() as unknown as string[]).find((key) =>
+        Utils.isNull(validation.expectFields.get(key)),
+    );
+
+    console.log(missingField);
     if (missingField) {
         throw new ValidationError({
             message: `Validation failed at '${path}': Missing required field '${missingField}'.`,
@@ -49,7 +54,10 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
         });
     }
 
-    const forbiddenField = validation.notExpectFields.find(Utils.isNotNull);
+    const forbiddenField = (validation.notExpectFields.keys() as unknown as string[]).find((key) =>
+        Utils.isNotNull(validation.notExpectFields.get(key)),
+    );
+    console.log(forbiddenField);
     if (forbiddenField) {
         throw new ValidationError({
             message: `Validation failed at '${path}': Field '${forbiddenField}' should not be present.`,
@@ -62,7 +70,7 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
 
 const createTransactionValidationRules = [
     body('transactionTypeId').custom(atLeastOneFieldRequired).bail(),
-    ...createSignupValidationRules('currencyId', 'number', {}),
+    ...createSignupValidationRules('currencyId', 'number', { optional: true }),
     ...createSignupValidationRules('transactionTypeId', 'number', {}),
     ...createSignupValidationRules('amount', 'number', {}),
     ...createSignupValidationRules('description', 'string', { max: 200, optional: true }),

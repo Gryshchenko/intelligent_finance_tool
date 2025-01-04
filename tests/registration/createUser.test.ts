@@ -1,5 +1,11 @@
 // @ts-nocheck
-import { generateRandomEmail, generateRandomPassword, generateRandomString, generateSecureRandom } from '../TestsUtils.';
+import {
+    deleteUserAfterTest,
+    generateRandomEmail,
+    generateRandomPassword,
+    generateRandomString,
+    generateSecureRandom,
+} from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { LanguageType } from '../../src/types/LanguageType';
