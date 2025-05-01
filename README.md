@@ -19,20 +19,54 @@ Budgeting App is a personal finance management application that helps users trac
 - Notifications and reminders for upcoming payments.
 - Mobile apps for iOS and Android for budgeting on the go.
 
-# SonarCloud Badges
+## Contributing
 
-## Project Overview
+We welcome contributions from the community! If you'd like to improve this project, please follow the guidelines below.
+
+### 💡 How to Contribute
+1. **Fork the Repository** – Click the "Fork" button at the top right of this repository and clone it locally.
+2. **Create a Feature Branch** – Use a meaningful name for your branch:
+   git checkout -b feature-your-feature-name
+3. **Make Your Changes** – Ensure your modifications follow best practices and project structure.
+4. **Commit Your Changes** – Write clear, descriptive commit messages:
+   git commit -m "Added feature: description of change"
+5. **Push Your Branch** – Push your changes to your fork:
+   git push origin feature-your-feature-name
+6. Submit a Pull Request – Open a Pull Request (PR) with a detailed description of your changes.
+
+## Contribution Guidelines
+
+- **Follow the project's coding style and naming conventions.**
+- **Keep pull requests focused on a single feature or fix.**
+- **Include documentation for new features if necessary.**
+- **Ensure your code passes all tests before submitting.**
+- **Be respectful and provide constructive feedback during code reviews.**
+
+## Issues and Discussions
+
+- **Found a bug?** Report it in the [Issues](https://github.com/Gryshchenko/finance_app/issues) section.
+
+
+### SonarCloud Badges
+
+#### Project Overview
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=alert_status)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=security_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 
-## Code Quality Metrics
+#### Code Quality Metrics
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=coverage)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=code_smells)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=bugs)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 
-## Performance and Maintenance
+#### Performance and Maintenance
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=ncloc)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+
+
+
+## License
+This project is licensed under the GNU General Public License v3.0.  
+You are free to use, modify, and distribute this software under the terms of the GPL license.
