@@ -22,17 +22,17 @@ Budgeting App is a personal finance management application that helps users trac
 # SonarCloud Badges
 
 ## Project Overview
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=alert_status)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=security_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=alert_status)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=security_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 
 ## Code Quality Metrics
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=coverage)](https://sonarcloud.io/dashboard?id=<project_key)
-[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=code_smells)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=bugs)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=coverage)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=code_smells)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=bugs)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 
 ## Performance and Maintenance
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=ncloc)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=ncloc)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
