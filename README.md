@@ -25,7 +25,7 @@ Budgeting App is a personal finance management application that helps users trac
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=alert_status)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=security_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=<project_key>&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
 
 ## Code Quality Metrics
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Gryshchenko_finance_app&metric=coverage)](https://sonarcloud.io/dashboard?id=Gryshchenko_finance_app)
