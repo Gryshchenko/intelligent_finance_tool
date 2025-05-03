@@ -14,6 +14,7 @@ import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnect
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IAccountService } from 'interfaces/IAccountService';
 import { IAccount } from 'interfaces/IAccount';
+import { IPatchTransaction } from 'interfaces/IPatchTransaction';
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
@@ -32,6 +33,21 @@ export default class TransactionService extends LoggerBase implements ITransacti
         // this._categoryService = categoryService;
         this._accountService = accountService;
         this._db = db;
+    }
+
+    async deleteTransaction(userId: number, transactionId: number): Promise<boolean> {
+
+        return new Promise((resolve) => resolve(true));
+
+    }
+
+    async patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
+
+        return new Promise((resolve) => resolve(1));
+    }
+    async putTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
+
+        return new Promise((resolve) => resolve(1));
     }
 
     async createTransaction(transaction: ICreateTransaction): Promise<number | null> {
@@ -200,4 +216,5 @@ export default class TransactionService extends LoggerBase implements ITransacti
             });
         }
     }
+
 }

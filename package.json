@@ -8,7 +8,7 @@
     "scripts": {
         "build-translation": "node scripts/translations.js",
         "dev": "npm run build-translation && nodemon --exec ts-node --files src/app.ts",
-        "redis": "redis-server",
+        "redis": "sudo service redis-server start",
         "type-check": "tsc -v && tsc -p tsconfig.json",
         "precheck": "pnpm run prettier:check && pnpm run eslint:check && pnpm run type-check",
         "jest-test": "jest --verbose false ./tests --config ./jest.config.js --no-cache ",

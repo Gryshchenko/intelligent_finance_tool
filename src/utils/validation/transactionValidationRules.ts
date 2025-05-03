@@ -33,7 +33,6 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
     };
 
     const validation = validationMap[transactionTypeId as TransactionType];
-    console.log(22222, req.body, validation.notExpectFields);
 
     if (!validation) {
         throw new ValidationError({
@@ -91,6 +90,28 @@ const createTransactionValidationRules = [
     }),
 ];
 
+const putTransactionValidationRules = [
+    body('transactionTypeId').custom(atLeastOneFieldRequired).bail(),
+    ...createSignupValidationRules('currencyId', 'number'),
+    ...createSignupValidationRules('transactionTypeId', 'number', {}),
+    ...createSignupValidationRules('amount', 'number', {}),
+    ...createSignupValidationRules('description', 'string'),
+    ...createSignupValidationRules('accountId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('incomeId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('targetAccountId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('categoryId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('createAt', 'date', {
+    }),
+];
+
 export const transactionConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
     switch (path) {
         case 'targetAccountId': {
@@ -126,4 +147,7 @@ export const transactionConvertValidationMessageToErrorCode = (path: string): Er
     }
 };
 
-export default createTransactionValidationRules;
+export {
+    createTransactionValidationRules,
+    putTransactionValidationRules
+};

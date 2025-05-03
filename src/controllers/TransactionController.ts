@@ -7,9 +7,125 @@ import { HttpCode } from 'types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
+import Utils from 'src/utils/Utils';
 
 export class TransactionController {
     private static readonly logger = Logger.Of('TransactionController');
+
+    public static async delete(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            await TransactionServiceBuilder.build().deleteTransaction(req.session.user?.userId as number,
+                Number(req.params.transactionId)
+            );
+            res.status(HttpCode.OK).json(
+                responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build(),
+            );
+        } catch (e: unknown) {
+            TransactionController.logger.error(`Delete transaction failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
+    public static async get(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const transaction = await TransactionServiceBuilder.build().getTransaction(req.session.user?.userId as number, Number(req.params.transactionId));
+            if (Utils.isNull(transaction) || Utils.isObjectEmpty(transaction as unknown as {})) {
+                res.status(HttpCode.NO_CONTENT).json(
+                    responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build(),
+                );
+            } else {
+                res.status(HttpCode.OK).json(
+                    responseBuilder.setStatus(ResponseStatusType.OK).setData({
+                        transactionId: transaction?.transactionId,
+                        accountId: transaction?.accountId,
+                        targetAccountId: transaction?.targetAccountId,
+                        incomeId: transaction?.incomeId,
+                        categoryId: transaction?.categoryId,
+                        currencyId: transaction?.currencyId,
+                        transactionTypeId: transaction?.transactionTypeId,
+                        amount: transaction?.amount,
+                        description: transaction?.description,
+                        userId: transaction?.userId,
+                        createAt: transaction?.createAt,
+                    }).build(),
+                );
+            }
+        } catch (e: unknown) {
+            TransactionController.logger.error(`Get transaction failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
+
+
+    public static async getAll(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const transactions = await TransactionServiceBuilder.build().getTransactions(req.session.user?.userId as number);
+            if (Utils.isNull(transactions) && Utils.isArrayEmpty(transactions!)) {
+                res.status(HttpCode.NO_CONTENT).json(
+                    responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build(),
+                );
+            } else {
+                const response = {
+                    transactions: transactions?.map((transaction) => ({
+                        transactionId: transaction?.transactionId,
+                        accountId: transaction?.accountId,
+                        targetAccountId: transaction?.targetAccountId,
+                        incomeId: transaction?.incomeId,
+                        categoryId: transaction?.categoryId,
+                        currencyId: transaction?.currencyId,
+                        transactionTypeId: transaction?.transactionTypeId,
+                        amount: transaction?.amount,
+                        description: transaction?.description,
+                        userId: transaction?.userId,
+                        createAt: transaction?.createAt,
+                    }))
+                }
+                res.status(HttpCode.OK).json(
+                    responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build(),
+                );
+            }
+        } catch (e: unknown) {
+            TransactionController.logger.error(`Get transactions failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
+
+    public static async put(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const {
+                accountId,
+                incomeId,
+                categoryId,
+                currencyId,
+                amount,
+                description,
+                createAt,
+                targetAccountId,
+            } = req.body;
+            const transactionId = await TransactionServiceBuilder.build().putTransaction(
+                req.session.user?.userId as number
+                , {
+                    transactionId: Number(req.query.transactionId),
+                    accountId,
+                    incomeId,
+                    categoryId,
+                    currencyId,
+                    amount,
+                    description,
+                    createAt,
+                    targetAccountId,
+                });
+            res.status(HttpCode.OK).json(
+                responseBuilder.setStatus(ResponseStatusType.OK).setData({ transactionId }).build(),
+            );
+        } catch (e: unknown) {
+            TransactionController.logger.error(`Put transaction failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
     public static async create(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
@@ -41,6 +157,41 @@ export class TransactionController {
             );
         } catch (e: unknown) {
             TransactionController.logger.error(`Create transaction failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
+
+    public static async patch(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const {
+                accountId,
+                incomeId,
+                categoryId,
+                currencyId,
+                amount,
+                description,
+                createAt,
+                targetAccountId,
+            } = req.body;
+            const transactionId = await TransactionServiceBuilder.build().patchTransaction(
+                req.session.user?.userId as number
+                , {
+                    transactionId: Number(req.query.transactionId),
+                    accountId,
+                    incomeId,
+                    categoryId,
+                    currencyId,
+                    amount,
+                    description,
+                    createAt,
+                    targetAccountId,
+                });
+            res.status(HttpCode.OK).json(
+                responseBuilder.setStatus(ResponseStatusType.OK).setData({ transactionId }).build(),
+            );
+        } catch (e: unknown) {
+            TransactionController.logger.error(`Patch transaction failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
         }
     }
