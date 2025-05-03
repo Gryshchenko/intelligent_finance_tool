@@ -108,8 +108,7 @@ const putTransactionValidationRules = [
     ...createSignupValidationRules('categoryId', 'number', {
         optional: true,
     }),
-    ...createSignupValidationRules('createAt', 'date', {
-    }),
+    ...createSignupValidationRules('createAt', 'date', {}),
 ];
 
 export const transactionConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
@@ -147,7 +146,4 @@ export const transactionConvertValidationMessageToErrorCode = (path: string): Er
     }
 };
 
-export {
-    createTransactionValidationRules,
-    putTransactionValidationRules
-};
+export { createTransactionValidationRules, putTransactionValidationRules };

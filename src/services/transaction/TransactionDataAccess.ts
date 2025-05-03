@@ -94,7 +94,12 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         }
     }
 
-    async patchTransaction(userId: number, transactionId: number, properties: Partial<ITransaction>, trx?: IDBTransaction): Promise<number> {
+    async patchTransaction(
+        userId: number,
+        transactionId: number,
+        properties: Partial<ITransaction>,
+        trx?: IDBTransaction,
+    ): Promise<number> {
         try {
             this._logger.info(`Patch transactionId: ${transactionId} for userId: ${userId}`);
             const query = trx || this._db.engine();
@@ -123,18 +128,17 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             this._logger.info(`Delete transactionId: ${transactionId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await query('transactions')
-                .delete()
-                .where({ userId, transactionId });
+            const data = await query('transactions').delete().where({ userId, transactionId });
             if (!data) {
                 this._logger.warn(`Transaction with transactionId: ${transactionId} not found for userId: ${userId}`);
                 return false;
             }
             this._logger.info(`Transaction transactionId: ${transactionId} for userId: ${userId} delete successful`);
             return true;
-
         } catch (e) {
-            this._logger.error(`Failed transaction deleting with transactionId: ${transactionId} for userId: ${userId}. Error: ${(e as { message: string }).message}`)
+            this._logger.error(
+                `Failed transaction deleting with transactionId: ${transactionId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
             throw new DBError({
                 message: `Delete transaction failed due to a database error: ${(e as { message: string }).message}`,
             });

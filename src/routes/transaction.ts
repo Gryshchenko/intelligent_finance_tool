@@ -3,7 +3,7 @@ import express from 'express';
 import {
     transactionConvertValidationMessageToErrorCode,
     createTransactionValidationRules,
-    putTransactionValidationRules
+    putTransactionValidationRules,
 } from 'src/utils/validation/transactionValidationRules';
 import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
@@ -233,7 +233,8 @@ transactionRouter.delete('/:transactionId', sanitizeRequestQuery([]), Transactio
  *       400:
  *         $ref: '#/components/responses/ErrorResponse'
  */
-transactionRouter.patch('/:transactionId',
+transactionRouter.patch(
+    '/:transactionId',
     sanitizeRequestBody([
         'accountId',
         'incomeId',
@@ -246,7 +247,7 @@ transactionRouter.patch('/:transactionId',
     ]),
     routesInputValidation(putTransactionValidationRules, transactionConvertValidationMessageToErrorCode),
     sanitizeRequestQuery([]),
-    TransactionController.patch
+    TransactionController.patch,
 );
 
 /**
@@ -320,7 +321,8 @@ transactionRouter.patch('/:transactionId',
  *       400:
  *         $ref: '#/components/responses/ErrorResponse'
  */
-transactionRouter.put('/:transactionId',
+transactionRouter.put(
+    '/:transactionId',
     sanitizeRequestBody([
         'accountId',
         'incomeId',
@@ -333,7 +335,7 @@ transactionRouter.put('/:transactionId',
     ]),
     routesInputValidation(putTransactionValidationRules, transactionConvertValidationMessageToErrorCode),
     sanitizeRequestQuery([]),
-    TransactionController.put
+    TransactionController.put,
 );
 
 export default transactionRouter;

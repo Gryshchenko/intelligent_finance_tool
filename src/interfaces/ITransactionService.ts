@@ -7,5 +7,5 @@ export interface ITransactionService {
     getTransactions(userId: number): Promise<ITransaction[] | undefined>;
     getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined>;
     deleteTransaction(userId: number, transactionId: number): Promise<boolean>;
-    patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number|null>;
+    patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null>;
 }

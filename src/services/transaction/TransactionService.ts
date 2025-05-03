@@ -34,19 +34,16 @@ export default class TransactionService extends LoggerBase implements ITransacti
         this._accountService = accountService;
         this._db = db;
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async deleteTransaction(userId: number, transactionId: number): Promise<boolean> {
-
         return new Promise((resolve) => resolve(true));
-
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
-
         return new Promise((resolve) => resolve(1));
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async putTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
-
         return new Promise((resolve) => resolve(1));
     }
 
@@ -216,5 +213,4 @@ export default class TransactionService extends LoggerBase implements ITransacti
             });
         }
     }
-
 }
