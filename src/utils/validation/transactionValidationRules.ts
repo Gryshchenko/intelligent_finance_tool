@@ -41,27 +41,22 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
         });
     }
 
-    const missingField = (validation.expectFields.keys() as unknown as string[]).find((key) =>
-        Utils.isNull(validation.expectFields.get(key)),
-    );
-
-    console.log(missingField);
-    if (missingField) {
-        throw new ValidationError({
-            message: `Validation failed at '${path}': Missing required field '${missingField}'.`,
-            errorCode: validation.errorCode,
-        });
+    for (const field of validation.expectFields.keys()) {
+        if (Utils.isNull(validation.expectFields.get(field as string))) {
+            throw new ValidationError({
+                message: `Validation failed at '${path}': Missing required field '${field}'.`,
+                errorCode: validation.errorCode,
+            });
+        }
     }
 
-    const forbiddenField = (validation.notExpectFields.keys() as unknown as string[]).find((key) =>
-        Utils.isNotNull(validation.notExpectFields.get(key)),
-    );
-    console.log(forbiddenField);
-    if (forbiddenField) {
-        throw new ValidationError({
-            message: `Validation failed at '${path}': Field '${forbiddenField}' should not be present.`,
-            errorCode: ErrorCode.UNEXPECTED_PROPERTY,
-        });
+    for (const field of validation.notExpectFields.keys()) {
+        if (Utils.isNotNull(validation.notExpectFields.get(field as string))) {
+            throw new ValidationError({
+                message: `Validation failed at '${path}': Field '${field}' should not be present.`,
+                errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+            });
+        }
     }
 
     return true;
@@ -72,7 +67,7 @@ const createTransactionValidationRules = [
     ...createSignupValidationRules('currencyId', 'number', { optional: true }),
     ...createSignupValidationRules('transactionTypeId', 'number', {}),
     ...createSignupValidationRules('amount', 'number', {}),
-    ...createSignupValidationRules('description', 'string', { max: 200, optional: true }),
+    ...createSignupValidationRules('description', 'string', { max: 200, min: 3, optional: true }),
     ...createSignupValidationRules('accountId', 'number', {
         optional: true,
     }),
@@ -90,12 +85,21 @@ const createTransactionValidationRules = [
     }),
 ];
 
-const putTransactionValidationRules = [
-    body('transactionTypeId').custom(atLeastOneFieldRequired).bail(),
-    ...createSignupValidationRules('currencyId', 'number'),
-    ...createSignupValidationRules('transactionTypeId', 'number', {}),
-    ...createSignupValidationRules('amount', 'number', {}),
-    ...createSignupValidationRules('description', 'string'),
+const patchTransactionValidationRules = [
+    ...createSignupValidationRules('transactionTypeId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('currencyId', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('amount', 'number', {
+        optional: true,
+    }),
+    ...createSignupValidationRules('description', 'string', {
+        optional: true,
+        max: 200,
+        min: 3,
+    }),
     ...createSignupValidationRules('accountId', 'number', {
         optional: true,
     }),
@@ -108,7 +112,9 @@ const putTransactionValidationRules = [
     ...createSignupValidationRules('categoryId', 'number', {
         optional: true,
     }),
-    ...createSignupValidationRules('createAt', 'date', {}),
+    ...createSignupValidationRules('createAt', 'date', {
+        optional: true,
+    }),
 ];
 
 export const transactionConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
@@ -146,4 +152,4 @@ export const transactionConvertValidationMessageToErrorCode = (path: string): Er
     }
 };
 
-export { createTransactionValidationRules, putTransactionValidationRules };
+export { createTransactionValidationRules, patchTransactionValidationRules };

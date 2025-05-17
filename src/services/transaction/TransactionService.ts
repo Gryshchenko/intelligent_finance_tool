@@ -4,7 +4,6 @@ import { ITransactionDataAccess } from 'interfaces/ITransactionDataAccess';
 import { ITransaction } from 'interfaces/ITransaction';
 import { TransactionType } from 'types/TransactionType';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
-// import { ICategoryService } from 'interfaces/ICategoryService';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { ErrorCode } from 'types/ErrorCode';
 import Utils from 'src/utils/Utils';
@@ -18,33 +17,14 @@ import { IPatchTransaction } from 'interfaces/IPatchTransaction';
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
-    // private readonly _categoryService: ICategoryService;
     private readonly _accountService: IAccountService;
     private readonly _db: IDatabaseConnection;
 
-    public constructor(
-        transactionDataAccess: ITransactionDataAccess,
-        // categoryService: ICategoryService,
-        accountService: IAccountService,
-        db: IDatabaseConnection,
-    ) {
+    public constructor(transactionDataAccess: ITransactionDataAccess, accountService: IAccountService, db: IDatabaseConnection) {
         super();
         this._transactionDataAccess = transactionDataAccess;
-        // this._categoryService = categoryService;
         this._accountService = accountService;
         this._db = db;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async deleteTransaction(userId: number, transactionId: number): Promise<boolean> {
-        return new Promise((resolve) => resolve(true));
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
-        return new Promise((resolve) => resolve(1));
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async putTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
-        return new Promise((resolve) => resolve(1));
     }
 
     async createTransaction(transaction: ICreateTransaction): Promise<number | null> {
@@ -64,6 +44,12 @@ export default class TransactionService extends LoggerBase implements ITransacti
         }
     }
 
+    async deleteTransaction(userId: number, transactionId: number): Promise<boolean> {
+        return await this._transactionDataAccess.deleteTransaction(userId, transactionId);
+    }
+    async patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
+        return await this._transactionDataAccess.patchTransaction(userId, transaction);
+    }
     async getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined> {
         return await this._transactionDataAccess.getTransaction(userId, transactionId);
     }

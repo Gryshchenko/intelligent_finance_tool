@@ -83,13 +83,10 @@ export default function routesInputValidation(
         if (errors.isEmpty()) {
             return next();
         }
-
         const responseBuilder = new ResponseBuilder().setStatus(ResponseStatusType.INTERNAL).setErrors(
             errors.array().map((value) => {
                 const field = (value as unknown as { path: string }).path;
-                console.log(value);
                 Logger.Of('routesInputValidation').error(`field: ${field} msg: ${value.msg}`);
-                console.log(value);
                 return {
                     errorCode: converter(field),
                 };

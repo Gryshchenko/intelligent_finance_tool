@@ -5,6 +5,9 @@ import { ITransaction } from 'interfaces/ITransaction';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { DBError } from 'src/utils/errors/DBError';
 import Utils from 'src/utils/Utils';
+import { NotFoundError } from 'src/utils/errors/NotFoundError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { isBaseError } from 'src/utils/errors/isBaseError';
 
 export default class TransactionDataAccess extends LoggerBase implements ITransactionDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -55,7 +58,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                 .where({ userId });
 
             if (!data.length) {
-                this._logger.warn(`No transactions found for userId: ${userId}`);
+                this._logger.info(`No transactions found for userId: ${userId}`);
             } else {
                 this._logger.info(`Fetched ${data.length} transactions for userId: ${userId}`);
             }
@@ -75,10 +78,15 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         try {
             this._logger.info(`Fetching transaction with transactionId: ${transactionId} for userId: ${userId}`);
 
-            const data = await this.getTransactionBaseQuery().where({ userId, transactionId }).first();
+            const data = await this.getTransactionBaseQuery()
+                .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
+                .where({ userId, transactionId })
+                .first();
 
             if (!data) {
-                this._logger.warn(`Transaction with transactionId: ${transactionId} not found for userId: ${userId}`);
+                throw new NotFoundError({
+                    message: `Transaction with transactionId: ${transactionId} not found for userId: ${userId}`,
+                });
             } else {
                 this._logger.info(`Fetched transaction with transactionId: ${transactionId} for userId: ${userId}`);
             }
@@ -90,25 +98,25 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             );
             throw new DBError({
                 message: `Fetching transaction failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
 
-    async patchTransaction(
-        userId: number,
-        transactionId: number,
-        properties: Partial<ITransaction>,
-        trx?: IDBTransaction,
-    ): Promise<number> {
+    async patchTransaction(userId: unknown, properties: Partial<ITransaction>, trx?: IDBTransaction): Promise<number> {
+        const { transactionId } = properties;
         try {
             this._logger.info(`Patch transactionId: ${transactionId} for userId: ${userId}`);
             const query = trx || this._db.engine();
+            console.log(properties);
             const data = await query('transactions')
                 .update(this.sanitizePatchTransactionPropeties(properties))
                 .where({ userId, transactionId });
 
             if (!data) {
-                this._logger.warn(`Transaction with transactionId: ${transactionId} not found for userId: ${userId}`);
+                throw new NotFoundError({
+                    message: `Transaction with transactionId: ${transactionId} not found for userId: ${userId}`,
+                });
             } else {
                 this._logger.info(`Transaction transactionId: ${transactionId} for userId: ${userId} patched successful`);
             }
@@ -119,6 +127,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             );
             throw new DBError({
                 message: `Patch transaction failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -130,8 +139,9 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             const query = trx || this._db.engine();
             const data = await query('transactions').delete().where({ userId, transactionId });
             if (!data) {
-                this._logger.warn(`Transaction with transactionId: ${transactionId} not found for userId: ${userId}`);
-                return false;
+                throw new NotFoundError({
+                    message: `Transaction with transactionId: ${transactionId} not found for userId: ${userId}`,
+                });
             }
             this._logger.info(`Transaction transactionId: ${transactionId} for userId: ${userId} delete successful`);
             return true;
@@ -148,15 +158,16 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
     protected sanitizePatchTransactionPropeties(properties: Partial<ITransaction>): Partial<ITransaction> {
         const allowedProperties = Object.entries({
             accountId: properties.accountId,
-            targetAccountId: properties.targetAccountId,
             incomeId: properties.incomeId,
             categoryId: properties.categoryId,
             amount: properties.amount,
             description: properties.description,
+            targetAccountId: properties.targetAccountId,
             createAt: properties.createAt,
+            updateAt: new Date().toISOString(),
         }).reduce(
             (acc, [key, value]) => {
-                if (!Utils.isNull(value)) {
+                if (key === 'description' || !Utils.isNull(value)) {
                     acc[key] = value;
                 }
                 return acc;
@@ -175,11 +186,16 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             .engine()('transactions')
             .select(
                 'transactions.transactionId',
-                'transactions.userId',
-                'transactions.amount',
-                'transactions.transactionName',
+                this._db.engine().raw('CAST(transactions.amount AS DECIMAL) as amount'),
+                'transactions.categoryId',
+                'transactions.accountId',
+                'transactions.incomeId',
+                'transactions.description',
+                'transactions.createAt',
+                'transactions.updateAt',
                 'transactions.currencyId',
                 'transactions.targetAccountId',
+                'transactions.transactionTypeId',
                 'currencies.currencyCode',
                 'currencies.currencyName',
                 'currencies.symbol',

@@ -28,18 +28,4 @@ userRouter.use('/:userId/transaction', userIdVerify, routesInputValidation([user
 
 userRouter.use('/:userId/account', userIdVerify, routesInputValidation([userIdValidator]), account);
 
-// router.post('/request-resend-confirmation', async (req: Request, res: Response) => {});
-// router.post(
-//     '/reset-password',
-//     routesInputValidation([body('password').isStrongPassword(), body('newPassword').isStrongPassword()]),
-// );
-// router.post(
-//     '/request-mail-change',
-//     routesInputValidation([body('email').isEmail()]),
-// );
-// router.post(
-//     '/request-mail-confirmation',
-//     routesInputValidation([body('email').isEmail(), body('code').isNumeric()]),
-// );
-
 export default userRouter;

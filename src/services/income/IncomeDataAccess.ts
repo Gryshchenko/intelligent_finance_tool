@@ -4,6 +4,9 @@ import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IIncome } from 'interfaces/IIncome';
 import { ICreateIncome } from 'interfaces/ICreateIncome';
 import { DBError } from 'src/utils/errors/DBError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { NotFoundError } from 'src/utils/errors/NotFoundError';
+import { isBaseError } from 'src/utils/errors/isBaseError';
 
 export default class IncomeDataAccess extends LoggerBase implements IIncomeDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -60,7 +63,9 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             if (data) {
                 this._logger.info(`Successfully fetched income with ID ${incomeId} for userId ${userId}`);
             } else {
-                this._logger.warn(`No income found with ID ${incomeId} for userId ${userId}`);
+                throw new NotFoundError({
+                    message: `No income found with ID ${incomeId} for userId ${userId}`,
+                });
             }
 
             return data;
@@ -70,6 +75,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             );
             throw new DBError({
                 message: `Fetching income failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }

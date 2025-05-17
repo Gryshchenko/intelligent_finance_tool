@@ -26,8 +26,8 @@ afterAll((done) => {
 });
 
 describe('POST /transaction/create - transfare', () => {
-    [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554].forEach(async (num) => {
-        await it(`should create new transaction num: ${num}`, async () => {
+    [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554].forEach((num) => {
+        it(`should create new transaction num: ${num}`, async () => {
             const agent = request.agent(app);
 
             const create_user = await agent

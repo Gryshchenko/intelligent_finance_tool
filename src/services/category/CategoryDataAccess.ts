@@ -4,6 +4,9 @@ import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
 import { ICategory } from 'interfaces/ICategory';
 import { DBError } from 'src/utils/errors/DBError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { NotFoundError } from 'src/utils/errors/NotFoundError';
+import { isBaseError } from 'src/utils/errors/isBaseError';
 
 export default class CategoryDataAccess extends LoggerBase implements ICategoryDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -59,6 +62,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             this._logger.error(`Failed to retrieve categories for user: ${userId}. Error: ${(e as { message: string }).message}`);
             throw new DBError({
                 message: `Failed to retrieve categories for user: ${userId}. Error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -72,7 +76,9 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             if (data) {
                 this._logger.info(`Category ID ${categoryId} retrieved successfully for user: ${userId}`);
             } else {
-                this._logger.warn(`Category ID ${categoryId} not found for user: ${userId}`);
+                throw new NotFoundError({
+                    message: `Category ID ${categoryId} not found for user: ${userId}`,
+                });
             }
 
             return data;
@@ -82,6 +88,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             );
             throw new DBError({
                 message: `Failed to retrieve category ID ${categoryId} for user: ${userId}. Error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }

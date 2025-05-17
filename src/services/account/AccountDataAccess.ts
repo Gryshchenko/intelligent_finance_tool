@@ -5,6 +5,9 @@ import { IAccount } from 'interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { DBError } from 'src/utils/errors/DBError';
 import Utils from 'src/utils/Utils';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { NotFoundError } from 'src/utils/errors/NotFoundError';
+import { isBaseError } from 'src/utils/errors/isBaseError';
 
 export default class AccountDataAccess extends LoggerBase implements IAccountDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -47,7 +50,9 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 .where({ userId });
 
             if (!data.length) {
-                this._logger.warn(`No accounts found for userId: ${userId}`);
+                throw new NotFoundError({
+                    message: `No accounts found for userId: ${userId}`,
+                });
             } else {
                 this._logger.info(`Fetched ${data.length} accounts for userId: ${userId}`);
             }
@@ -57,6 +62,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             this._logger.error(`Failed to fetch accounts for userId: ${userId}. Error: ${(e as { message: string }).message}`);
             throw new DBError({
                 message: `Fetching accounts failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -71,7 +77,9 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 .first();
 
             if (!data) {
-                this._logger.warn(`Account with accountId: ${accountId} not found for userId: ${userId}`);
+                throw new NotFoundError({
+                    message: `Account with accountId: ${accountId} not found for userId: ${userId}`,
+                });
             } else {
                 this._logger.info(`Fetched account with accountId: ${accountId} for userId: ${userId}`);
             }
@@ -83,6 +91,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             );
             throw new DBError({
                 message: `Fetching account failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -97,7 +106,9 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 .where({ userId, accountId });
 
             if (!data) {
-                this._logger.warn(`Account with accountId: ${accountId} not found for userId: ${userId}`);
+                throw new NotFoundError({
+                    message: `Account with accountId: ${accountId} not found for userId: ${userId}`,
+                });
             } else {
                 this._logger.info(`Account accountId: ${accountId} for userId: ${userId} patched successful`);
             }
@@ -109,6 +120,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             );
             throw new DBError({
                 message: `Patch account failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }

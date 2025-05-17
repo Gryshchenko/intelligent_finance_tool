@@ -21,7 +21,7 @@ export default class DatabaseConnection implements IDatabaseConnection {
         return DatabaseConnection._inspect || (DatabaseConnection._inspect = new DatabaseConnection(config));
     }
 
-    public constructor({ host, port, database, user, password, cert }: IDatabaseConnectionConstructor) {
+    public constructor({ host, port, database, user, password }: IDatabaseConnectionConstructor) {
         this._db = knex({
             client: 'pg',
             connection: {
@@ -31,7 +31,7 @@ export default class DatabaseConnection implements IDatabaseConnection {
                 user,
                 password,
                 ssl: {
-                    ca: cert,
+                    rejectUnauthorized: false,
                 },
                 pool: {
                     min: 1,

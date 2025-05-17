@@ -3,6 +3,9 @@ import { IDatabaseConnection } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICurrency } from 'interfaces/ICurrency';
 import { DBError } from 'src/utils/errors/DBError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { NotFoundError } from 'src/utils/errors/NotFoundError';
+import { isBaseError } from 'src/utils/errors/isBaseError';
 
 export default class CurrencyDataAccess extends LoggerBase implements ICurrencyDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -39,8 +42,9 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
                 this._logger.info(`Currency with ID ${currencyId} fetched successfully`);
                 return data;
             } else {
-                this._logger.warn(`Currency with ID ${currencyId} not found`);
-                return undefined;
+                throw new NotFoundError({
+                    message: `Currency with ID ${currencyId} not found`,
+                });
             }
         } catch (e) {
             this._logger.error(`Error fetching currency with ID ${currencyId}: ${(e as { message: string }).message}`);
@@ -64,13 +68,15 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
                 this._logger.info(`Currency with code ${currencyCode} fetched successfully`);
                 return data;
             } else {
-                this._logger.warn(`Currency with code ${currencyCode} not found`);
-                return undefined;
+                throw new NotFoundError({
+                    message: `Currency with code ${currencyCode} not found`,
+                });
             }
         } catch (e) {
             this._logger.error(`Error fetching currency with code ${currencyCode}: ${(e as { message: string }).message}`);
             throw new DBError({
                 message: `Error fetching currency with code ${currencyCode}: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }

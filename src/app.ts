@@ -19,6 +19,7 @@ import Logger from 'src/helper/logger/Logger';
 import { swaggerInit } from 'src/swagger/swagger';
 import { checkOriginReferer } from 'middleware/checkOriginReferer';
 import { checkCors } from 'middleware/checkCors';
+import { getLocalIP } from 'src/utils/getLocalIP';
 
 const passport = require('passport');
 
@@ -72,7 +73,8 @@ const httpsServer = https.createServer(credentials, app);
 
 if (process.env.NODE_ENV !== 'test') {
     httpsServer.listen(port, async () => {
-        Logger.Of('App').info(`Server running at port: ${port}`);
+        const ip = getLocalIP();
+        Logger.Of('App').info(`Server running at: ${ip}:${port}`);
     });
 }
 

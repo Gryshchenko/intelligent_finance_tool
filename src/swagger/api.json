@@ -1,0 +1,521 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "User API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/{userId}/overview": {
+            "get": {
+                "tags": ["Overview"],
+                "description": "Retrieves the overview of a specific user by their ID.",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        },
+                        "description": "ID of the user."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful authentication, returns user data",
+                        "headers": {
+                            "Set-Cookie": { "$ref": "#/components/headers/Set-Cookie" }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        { "$ref": "#/components/schemas/StandardResponse" },
+                                        { "$ref": "#/components/schemas/Overview" }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        },
+        "/{userId}/profile": {
+            "get": {
+                "tags": ["User"],
+                "description": "Get user profile.",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        },
+                        "description": "ID of the user."
+                    }
+                ],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/200" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "Log out the user",
+                "description": "The POST `/auth/logout` endpoint is used to log out the user.",
+                "responses": {
+                    "204": { "$ref": "#/components/responses/200" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": ["Authentication"],
+                "description": "Handles user authentication and returns a JWT token.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "minimum": 5,
+                                        "maximum": 50,
+                                        "description": "The user's email address"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "minimum": 5,
+                                        "maximum": 50,
+                                        "description": "The user's password"
+                                    }
+                                },
+                                "required": ["email", "password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        },
+        "/{userId}/transaction/{transactionId}": {
+            "delete": {
+                "tags": ["Transaction"],
+                "description": "This endpoint allows the active user to delete an existing transaction.",
+                "responses": {
+                    "204": { "$ref": "#/components/responses/204" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            },
+            "patch": {
+                "tags": ["Transaction"],
+                "description": "This endpoint allows the active user to patch an existing transaction.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [{ "$ref": "#/components/schemas/TransactionRequestBase" }]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": { "$ref": "#/components/responses/204" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            },
+            "get": {
+                "tags": ["Transaction"],
+                "description": "This endpoint allows to get a user transaction by transaction ID.",
+                "responses": {
+                    "200": {
+                        "description": "Successful authentication, returns transaction data",
+                        "headers": {
+                            "Set-Cookie": { "$ref": "#/components/headers/Set-Cookie" }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        { "$ref": "#/components/schemas/StandardResponse" },
+                                        { "$ref": "#/components/schemas/Transaction" }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "204": { "$ref": "#/components/responses/204" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Endpoints related to user authentication"
+        },
+        {
+            "name": "User",
+            "description": "Endpoints related to user data and profiles"
+        },
+        {
+            "name": "Transaction",
+            "description": "Endpoints related to user transactions"
+        },
+        {
+            "name": "Overview",
+            "description": "Endpoints related to user overview (base information about accounts, income, outcome)"
+        }
+    ],
+    "components": {
+        "headers": {
+            "Set-Cookie": {
+                "description": "Secure cookie with JWT token.",
+                "schema": {
+                    "type": "string",
+                    "example": "JWT=token; Path=/; HttpOnly; Secure; SameSite=None"
+                }
+            }
+        },
+        "schemas": {
+            "Overview": {
+                "type": "object",
+                "properties": {
+                    "accounts": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Account" },
+                        "description": "List of user accounts."
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Category" },
+                        "description": "List of transaction categories."
+                    },
+                    "incomes": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Income" },
+                        "description": "List of income sources."
+                    }
+                }
+            },
+            "Account": {
+                "type": "object",
+                "properties": {
+                    "accountId": {
+                        "type": "integer",
+                        "description": "Unique identifier for the account.",
+                        "example": 1
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "description": "ID of the user who owns the account.",
+                        "example": 42
+                    },
+                    "accountName": {
+                        "type": "string",
+                        "description": "Name of the account.",
+                        "example": "Main Savings Account"
+                    },
+                    "amount": {
+                        "type": "number",
+                        "description": "Account balance.",
+                        "example": 1500.75
+                    },
+                    "currencyId": {
+                        "type": "integer",
+                        "description": "Unique identifier for the currency.",
+                        "example": 840
+                    },
+                    "currencyCode": {
+                        "type": "string",
+                        "description": "Currency code (e.g., USD, EUR).",
+                        "example": "USD"
+                    },
+                    "currencySymbol": {
+                        "type": "string",
+                        "description": "Currency symbol.",
+                        "example": "$"
+                    }
+                }
+            },
+            "Category": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "type": "string",
+                        "description": "Category name.",
+                        "example": "Groceries"
+                    }
+                }
+            },
+            "Income": {
+                "type": "object",
+                "properties": {
+                    "incomeId": {
+                        "type": "integer",
+                        "description": "Unique identifier for the income.",
+                        "example": 10
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "description": "ID of the user associated with the income.",
+                        "example": 42
+                    },
+                    "incomeName": {
+                        "type": "string",
+                        "description": "Name of the income source.",
+                        "example": "Salary"
+                    },
+                    "currencyId": {
+                        "type": "integer",
+                        "description": "Unique identifier for the currency.",
+                        "example": 840
+                    }
+                }
+            },
+            "Currency": {
+                "type": "object",
+                "description": "Details of a currency associated with a user or transaction.",
+                "properties": {
+                    "currencyCode": { "type": "string", "example": "USD", "description": "Currency code, e.g., USD, EUR." },
+                    "currencyName": {
+                        "type": "string",
+                        "example": "United States Dollar",
+                        "description": "Full name of the currency."
+                    },
+                    "symbol": { "type": "string", "example": "$", "description": "Symbol of the currency." }
+                }
+            },
+            "Profile": {
+                "type": "object",
+                "description": "User profile details, including locale, currency, and account settings.",
+                "required": ["profileId", "userId", "userName", "currencyId", "locale", "mailConfirmed"],
+                "properties": {
+                    "profileId": { "type": "integer", "example": 123 },
+                    "userId": { "type": "integer", "example": 42 },
+                    "userName": { "type": "string", "example": "John Doe" },
+                    "currencyId": { "type": "integer", "example": 840 },
+                    "locale": { "type": "string", "enum": ["en-US", "fr-FR", "es-ES"], "example": "en-US" },
+                    "mailConfirmed": { "type": "boolean", "example": true }
+                }
+            },
+            "UserClient": {
+                "type": "object",
+                "description": "Represents a user within the client-side application.",
+                "required": ["userId", "email", "status", "profile"],
+                "properties": {
+                    "userId": { "type": "integer", "format": "int64" },
+                    "email": { "type": "string", "format": "email" },
+                    "status": { "$ref": "#/components/schemas/UserStatus" },
+                    "currency": { "$ref": "#/components/schemas/Currency" },
+                    "profile": { "$ref": "#/components/schemas/Profile" }
+                }
+            },
+            "UserStatus": {
+                "type": "string",
+                "enum": ["Active", "Inactive", "Pending"],
+                "description": "Possible status values for a user."
+            },
+            "Transaction": {
+                "type": "object",
+                "description": "Transaction object.",
+                "properties": {
+                    "transactionId": {
+                        "type": "number",
+                        "description": "Unique ID of the transaction."
+                    },
+                    "accountId": {
+                        "type": "number",
+                        "description": "ID of the transaction account."
+                    },
+                    "targetAccountId": {
+                        "type": "number",
+                        "description": "ID of the target account in transfers."
+                    },
+                    "incomeId": {
+                        "type": "number",
+                        "description": "ID of the associated income."
+                    },
+                    "categoryId": {
+                        "type": "number",
+                        "description": "ID of the transaction category."
+                    },
+                    "currencyId": {
+                        "type": "number",
+                        "description": "ID of the currency for the transaction."
+                    },
+                    "currencyName": {
+                        "type": "string",
+                        "description": "Name of the currency for the transaction."
+                    },
+                    "currencyCode": {
+                        "type": "string",
+                        "description": "Code of the currency for the transaction."
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "Symbol of the currency for the transaction."
+                    },
+                    "transactionTypeId": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "Transaction type (1-Income, 2-Expense, 3-Transfer)."
+                    },
+                    "amount": {
+                        "type": "number",
+                        "description": "Transaction amount."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A description for the transaction."
+                    },
+                    "createAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation date of the transaction."
+                    }
+                }
+            },
+            "TransactionRequestBase": {
+                "type": "object",
+                "description": "Base transaction request structure used for multiple endpoints.",
+                "properties": {
+                    "incomeId": { "type": "number", "description": "ID of the associated income." },
+                    "accountId": { "type": "number", "description": "ID of the transaction account." },
+                    "targetAccountId": { "type": "number", "description": "ID of the target account in transfers." },
+                    "currencyId": { "type": "number", "description": "ID of the currency for the transaction." },
+                    "transactionTypeId": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "Transaction type (1-Income, 2-Expense, 3-Transfer)."
+                    },
+                    "amount": { "type": "number", "description": "Transaction amount." },
+                    "description": { "type": "string", "description": "A description for the transaction." },
+                    "createAt": { "type": "string", "format": "date-time", "description": "Creation date of the transaction." }
+                }
+            },
+            "StandardResponse": {
+                "type": "object",
+                "description": "Generic response format for API calls.",
+                "properties": {
+                    "_response": {
+                        "type": "object",
+                        "properties": {
+                            "status": { "type": "integer", "description": "Status code (1-OK, 2-INTERNAL, 3-EXTERNAL)." },
+                            "data": { "type": "object", "description": "Container for response data." },
+                            "errors": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "errorCode": { "type": "integer", "description": "Error code identifier." }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "SuccessfulResponse": {
+                "description": "Standard response for successful API calls.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "description": "Standard error response for failed API calls.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "200": {
+                "description": "Request successful.",
+                "headers": {
+                    "Set-Cookie": { "$ref": "#/components/headers/Set-Cookie" }
+                },
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "204": {
+                "headers": {
+                    "Set-Cookie": { "$ref": "#/components/headers/Set-Cookie" }
+                },
+                "description": "Request successful, no content returned."
+            },
+            "400": {
+                "description": "Bad Request - Invalid input or missing required parameters.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "401": {
+                "description": "Unauthorized - Invalid or missing authentication token.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "403": {
+                "description": "Forbidden - User authenticated but lacks permissions.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "404": {
+                "description": "Not Found - The requested resource does not exist.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            },
+            "500": {
+                "description": "Internal Server Error - An unexpected error occurred.",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/StandardResponse" }
+                    }
+                }
+            }
+        }
+    }
+}
