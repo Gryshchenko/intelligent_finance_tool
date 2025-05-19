@@ -26,6 +26,8 @@ userRouter.use('/:userId/overview', userIdVerify, routesInputValidation([userIdV
 
 userRouter.use('/:userId/transaction', userIdVerify, routesInputValidation([userIdValidator]), transaction);
 
+userRouter.use('/:userId/transactions', userIdVerify, routesInputValidation([userIdValidator]), transaction);
+
 userRouter.use('/:userId/account', userIdVerify, routesInputValidation([userIdValidator]), account);
 
 export default userRouter;

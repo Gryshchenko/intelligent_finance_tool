@@ -8,6 +8,7 @@ import Utils from 'src/utils/Utils';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
+import { IPagination } from 'interfaces/IPagination';
 
 export default class TransactionDataAccess extends LoggerBase implements ITransactionDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -49,13 +50,29 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         }
     }
 
-    async getTransactions(userId: number): Promise<ITransaction[] | undefined> {
+    async getTransactions({
+        userId,
+        limit = 20,
+        cursor,
+    }: {
+        userId: number;
+        limit: number;
+        cursor: number;
+    }): Promise<IPagination<ITransaction | null>> {
         try {
             this._logger.info(`Fetching all transactions for userId: ${userId}`);
 
-            const data = await this.getTransactionBaseQuery()
+            const query = this.getTransactionBaseQuery()
                 .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
                 .where({ userId });
+
+            if (cursor) {
+                query.andWhere('transactions.transactionId', '>', cursor);
+            }
+
+            query.limit(limit);
+
+            const data = await query;
 
             if (!data.length) {
                 this._logger.info(`No transactions found for userId: ${userId}`);
@@ -63,7 +80,11 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                 this._logger.info(`Fetched ${data.length} transactions for userId: ${userId}`);
             }
 
-            return data;
+            return {
+                data: Utils.greaterThen0(data?.length) ? data : [],
+                cursor,
+                limit,
+            };
         } catch (e) {
             this._logger.error(
                 `Failed to fetch transactions for userId: ${userId}. Error: ${(e as { message: string }).message}`,
@@ -108,7 +129,6 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         try {
             this._logger.info(`Patch transactionId: ${transactionId} for userId: ${userId}`);
             const query = trx || this._db.engine();
-            console.log(properties);
             const data = await query('transactions')
                 .update(this.sanitizePatchTransactionPropeties(properties))
                 .where({ userId, transactionId });
@@ -186,7 +206,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             .engine()('transactions')
             .select(
                 'transactions.transactionId',
-                this._db.engine().raw('CAST(transactions.amount AS DECIMAL) as amount'),
+                'transactions.amount',
                 'transactions.categoryId',
                 'transactions.accountId',
                 'transactions.incomeId',

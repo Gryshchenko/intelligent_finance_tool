@@ -7,13 +7,13 @@ import {
 } from 'src/utils/validation/transactionValidationRules';
 import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
-import { sanitizeRequestQuery } from 'src/utils/validation/sanitizeRequestQuery';
+import { validateQuery } from 'src/utils/validation/validateQuery';
 
 const transactionRouter = express.Router({ mergeParams: true });
 
 transactionRouter.post(
     '/',
-    sanitizeRequestQuery([]),
+    validateQuery({}),
     sanitizeRequestBody([
         'accountId',
         'incomeId',
@@ -29,12 +29,15 @@ transactionRouter.post(
     TransactionController.create,
 );
 
-transactionRouter.get('/:transactionId', sanitizeRequestQuery([]), TransactionController.get);
+transactionRouter.get('/', validateQuery({ cursor: 'string?', limit: 'number?' }), TransactionController.getAll);
 
-transactionRouter.delete('/:transactionId', sanitizeRequestQuery([]), TransactionController.delete);
+transactionRouter.get('/:transactionId', validateQuery({}), TransactionController.get);
+
+transactionRouter.delete('/:transactionId', validateQuery({}), TransactionController.delete);
 
 transactionRouter.patch(
     '/:transactionId',
+    validateQuery({}),
     sanitizeRequestBody([
         'accountId',
         'incomeId',
@@ -46,7 +49,6 @@ transactionRouter.patch(
         'targetAccountId',
     ]),
     routesInputValidation(patchTransactionValidationRules, transactionConvertValidationMessageToErrorCode),
-    sanitizeRequestQuery([]),
     TransactionController.patch,
 );
 

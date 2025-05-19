@@ -1,13 +1,13 @@
 import { AccountController } from 'controllers/AccountController';
 import express from 'express';
-import { sanitizeRequestQuery } from 'src/utils/validation/sanitizeRequestQuery';
+import { validateQuery } from 'src/utils/validation/validateQuery';
 
 const accountRouter = express.Router({ mergeParams: true });
 
-accountRouter.get('/:accountId', sanitizeRequestQuery([]), AccountController.get);
+accountRouter.get('/:accountId', validateQuery({}), AccountController.get);
 
-accountRouter.delete('/:accountId', sanitizeRequestQuery([]));
+accountRouter.delete('/:accountId', validateQuery({}));
 
-accountRouter.patch('/:accountId', sanitizeRequestQuery([]));
+accountRouter.patch('/:accountId', validateQuery({}));
 
 export default accountRouter;

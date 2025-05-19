@@ -115,4 +115,67 @@ describe('PATCH /transaction/patch - amount', () => {
             .set('authorization', create_user.header['authorization'])
             .expect(404);
     });
+    it(`pagination`, async () => {
+        const agent = request.agent(app);
+
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        const {
+            body: {
+                data: { accounts },
+            },
+        } = await agent
+            .get(`/user/${create_user.body.data.userId}/overview/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({})
+            .expect(200);
+
+        const accountId = accounts[0].accountId;
+        const currencyId = accounts[0].currencyId;
+        const targetAccountId = accounts[1].accountId;
+        const transactionIds = [];
+        for (const num of Array(10).fill(100)) {
+            const {
+                body: {
+                    data: { transactionId },
+                },
+            } = await agent
+                .post(`/user/${create_user.body.data.userId}/transaction/`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    accountId,
+                    currencyId,
+                    transactionTypeId: 3,
+                    targetAccountId,
+                    amount: num,
+                    description: 'Test',
+                })
+                .expect(201);
+            transactionIds.push(transactionId);
+        }
+        console.log(transactionIds);
+        let shift = 0;
+        for (const num of transactionIds) {
+            const {
+                body: {
+                    data: { limit, cursor, data },
+                },
+            } = await agent
+                .get(`/user/${create_user.body.data.userId}/transactions/?limit=10&cursor=${num}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(200);
+            console.log(data);
+            expect(limit).toStrictEqual(10);
+            expect(cursor).toStrictEqual(num);
+            expect(data.length).toStrictEqual(10);
+            for (let i = shift; i < transactionIds.length && i < 10; i += 1) {
+                expect(num).toStrictEqual(data[i].transactionId);
+            }
+            shift += 1;
+        }
+    });
 });

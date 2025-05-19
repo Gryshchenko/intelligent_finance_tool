@@ -14,6 +14,7 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IAccountService } from 'interfaces/IAccountService';
 import { IAccount } from 'interfaces/IAccount';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
+import { IPagination } from 'interfaces/IPagination';
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
@@ -53,8 +54,16 @@ export default class TransactionService extends LoggerBase implements ITransacti
     async getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined> {
         return await this._transactionDataAccess.getTransaction(userId, transactionId);
     }
-    async getTransactions(userId: number): Promise<ITransaction[] | undefined> {
-        return await this._transactionDataAccess.getTransactions(userId);
+    async getTransactions({
+        userId,
+        limit,
+        cursor,
+    }: {
+        userId: number;
+        limit: number;
+        cursor: number;
+    }): Promise<IPagination<ITransaction | null>> {
+        return await this._transactionDataAccess.getTransactions({ userId, limit, cursor });
     }
     private async createIncomeTransaction(transaction: ICreateTransaction): Promise<number> {
         return this.processTransaction(

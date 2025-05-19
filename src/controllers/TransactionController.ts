@@ -8,6 +8,7 @@ import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
 import Utils from 'src/utils/Utils';
+import { ITransaction } from 'interfaces/ITransaction';
 
 export class TransactionController {
     private static readonly logger = Logger.Of('TransactionController');
@@ -65,13 +66,19 @@ export class TransactionController {
     public static async getAll(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const transactions = await TransactionServiceBuilder.build().getTransactions(req.session.user?.userId as number);
-            const transactionCount = transactions?.length ?? 0;
-            if (Utils.isNull(transactions) || !Utils.greaterThen0(transactionCount)) {
+            const { data, limit, cursor } = await TransactionServiceBuilder.build().getTransactions({
+                userId: req.session.user?.userId as number,
+                limit: Number(req.query.limit),
+                cursor: Number(req.query.cursor),
+            });
+            const transactionCount = data?.length ?? 0;
+            if (Utils.isNull(data) || !Utils.greaterThen0(transactionCount)) {
                 res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
             } else {
                 const response = {
-                    transactions: transactions?.map((transaction) => ({
+                    limit,
+                    cursor,
+                    data: data.map((transaction: ITransaction | null) => ({
                         transactionId: transaction?.transactionId,
                         accountId: transaction?.accountId,
                         targetAccountId: transaction?.targetAccountId,
