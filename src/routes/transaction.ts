@@ -29,7 +29,7 @@ transactionRouter.post(
     TransactionController.create,
 );
 
-transactionRouter.get('/', validateQuery({ cursor: 'string?', limit: 'number?' }), TransactionController.getAll);
+transactionRouter.get('/', validateQuery({ cursor: 'number?', limit: 'number?' }), TransactionController.getAll);
 
 transactionRouter.get('/:transactionId', validateQuery({}), TransactionController.get);
 

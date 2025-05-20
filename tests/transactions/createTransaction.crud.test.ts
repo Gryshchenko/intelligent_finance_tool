@@ -138,7 +138,7 @@ describe('PATCH /transaction/patch - amount', () => {
         const currencyId = accounts[0].currencyId;
         const targetAccountId = accounts[1].accountId;
         const transactionIds = [];
-        for (const num of Array(10).fill(100)) {
+        for (const num of Array(4).fill(100)) {
             const {
                 body: {
                     data: { transactionId },
@@ -157,25 +157,36 @@ describe('PATCH /transaction/patch - amount', () => {
                 .expect(201);
             transactionIds.push(transactionId);
         }
-        console.log(transactionIds);
-        let shift = 0;
-        for (const num of transactionIds) {
-            const {
-                body: {
-                    data: { limit, cursor, data },
-                },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/transactions/?limit=10&cursor=${num}`)
-                .set('authorization', create_user.header['authorization'])
-                .expect(200);
-            console.log(data);
-            expect(limit).toStrictEqual(10);
-            expect(cursor).toStrictEqual(num);
-            expect(data.length).toStrictEqual(10);
-            for (let i = shift; i < transactionIds.length && i < 10; i += 1) {
-                expect(num).toStrictEqual(data[i].transactionId);
-            }
-            shift += 1;
+        const {
+            body: {
+                data: { limit, cursor, data },
+            },
+        } = await agent
+            .get(`/user/${create_user.body.data.userId}/transactions/?limit=3&cursor=${transactionIds[0]}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(200);
+        expect(limit).toStrictEqual(3);
+        expect(cursor).toStrictEqual(transactionIds[0]);
+        expect(data.length).toStrictEqual(3);
+
+        for (let i = 1; i < transactionIds.length; i += 1) {
+            expect(transactionIds[i]).toStrictEqual(data[i - 1].transactionId);
         }
+
+        const {
+            body: {
+                data: { data: remainingData },
+            },
+        } = await agent
+            .get(`/user/${create_user.body.data.userId}/transactions/?limit=3&cursor=${transactionIds[3]}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(200);
+        expect(remainingData.length).toBeLessThanOrEqual(3);
+        expect(remainingData.map((t) => t.transactionId)).toStrictEqual([]);
+
+        await agent
+            .get(`/user/${create_user.body.data.userId}/transactions/?limit=3&cursor=invalid_cursor`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
     });
 });

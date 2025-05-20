@@ -73,7 +73,16 @@ export class TransactionController {
             });
             const transactionCount = data?.length ?? 0;
             if (Utils.isNull(data) || !Utils.greaterThen0(transactionCount)) {
-                res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
+                res.status(HttpCode.OK).json(
+                    responseBuilder
+                        .setStatus(ResponseStatusType.OK)
+                        .setData({
+                            limit,
+                            cursor,
+                            data: [],
+                        })
+                        .build(),
+                );
             } else {
                 const response = {
                     limit,

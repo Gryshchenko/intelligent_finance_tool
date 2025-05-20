@@ -14,15 +14,14 @@ const validateQuery = (schema: Record<string, string>) => {
         });
 
         Object.keys(schema).forEach((key) => {
-            const expectedType = schema[key];
-            const isOptional = expectedType.includes('?');
+            const expectedType = schema[key].replace('?', '');
+            const isOptional = schema[key].includes('?');
             const value = req.query[key];
 
             if (value === undefined && !isOptional) {
                 errors.push(`Missing query parameter: ${key}`);
                 return;
             }
-
             if (expectedType === 'number') {
                 const numValue = Number(value);
                 if (isNaN(numValue) || numValue < Number.MIN_SAFE_INTEGER || numValue > Number.MAX_SAFE_INTEGER) {
