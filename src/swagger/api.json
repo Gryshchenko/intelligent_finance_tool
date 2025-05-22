@@ -72,7 +72,7 @@
                 "summary": "Log out the user",
                 "description": "The POST `/auth/logout` endpoint is used to log out the user.",
                 "responses": {
-                    "204": { "$ref": "#/components/responses/200" },
+                    "200": { "$ref": "#/components/responses/200" },
                     "400": { "$ref": "#/components/responses/400" },
                     "401": { "$ref": "#/components/responses/401" },
                     "500": { "$ref": "#/components/responses/500" }
@@ -109,6 +109,34 @@
                     }
                 },
                 "responses": {
+                    "200": { "$ref": "#/components/responses/200" },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "500": { "$ref": "#/components/responses/500" }
+                }
+            }
+        },
+        "/{userId}/transactions/": {
+            "get": {
+                "tags": ["Transaction"],
+                "description": "This endpoint allows to get a user transactions",
+                "responses": {
+                    "200": {
+                        "description": "Successful authentication, returns transaction data",
+                        "headers": {
+                            "Set-Cookie": { "$ref": "#/components/headers/Set-Cookie" }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        { "$ref": "#/components/schemas/StandardResponse" },
+                                        { "$ref": "#/components/schemas/Transactions" }
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "400": { "$ref": "#/components/responses/400" },
                     "401": { "$ref": "#/components/responses/401" },
                     "500": { "$ref": "#/components/responses/500" }
@@ -340,6 +368,23 @@
                 "type": "string",
                 "enum": ["Active", "Inactive", "Pending"],
                 "description": "Possible status values for a user."
+            },
+            "Transactions": {
+                "type": "object",
+                "description": "Transactions object.",
+                "properties": {
+                    "limit": {
+                        "type": "number",
+                        "description": "Limit of transactions in response"
+                    },
+                    "cursor": {
+                        "type": "number",
+                        "description": "ID of transaction from what start collect transactions"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Transaction"
+                    }
+                }
             },
             "Transaction": {
                 "type": "object",

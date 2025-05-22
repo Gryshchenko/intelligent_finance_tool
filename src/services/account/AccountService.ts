@@ -6,6 +6,7 @@ import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import Utils from 'src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 
 export default class AccountService extends LoggerBase implements IAccountService {
     private readonly _accountDataAccess: IAccountDataAccess;
@@ -16,9 +17,21 @@ export default class AccountService extends LoggerBase implements IAccountServic
     }
 
     async createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]> {
+        for (const account of accounts) {
+            validateAllowedProperties(account as unknown as Record<string, string | number>, [
+                'accountName',
+                'amount',
+                'currencyId',
+            ]);
+        }
         return await this._accountDataAccess.createAccounts(userId, accounts, trx);
     }
     async patchAccount(userId: number, accountId: number, properties: Partial<IAccount>, trx?: IDBTransaction): Promise<number> {
+        const allowedProperties = {
+            accountName: properties.accountName,
+            amount: properties.amount,
+        };
+        validateAllowedProperties(allowedProperties, ['accountName', 'amount']);
         return await this._accountDataAccess.patchAccount(userId, accountId, properties, trx);
     }
     async getAccount(userId: number, accountId: number): Promise<IAccount | undefined> {
@@ -30,7 +43,6 @@ export default class AccountService extends LoggerBase implements IAccountServic
                 throw new ValidationError({ message: 'userId cant be null' });
             }
             const account = await this._accountDataAccess.getAccount(userId, accountId);
-            if (!account) return undefined;
             return {
                 ...account,
                 amount: Utils.roundNumber(account?.amount),
@@ -42,5 +54,8 @@ export default class AccountService extends LoggerBase implements IAccountServic
     }
     async getAccounts(userId: number): Promise<IAccount[] | undefined> {
         return await this._accountDataAccess.getAccounts(userId);
+    }
+    async deleteAccount(userId: number, accountId: number): Promise<boolean> {
+        return await this._accountDataAccess.deleteAccount(userId, accountId);
     }
 }

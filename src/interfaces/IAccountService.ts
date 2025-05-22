@@ -6,5 +6,6 @@ export interface IAccountService {
     createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]>;
     getAccounts(userId: number): Promise<IAccount[] | undefined>;
     getAccount(userId: number, accountId: number): Promise<IAccount | undefined>;
+    deleteAccount(userId: number, accountId: number): Promise<boolean>;
     patchAccount(userId: number, accountId: number, properties: Partial<IAccount>, trx?: IDBTransaction): Promise<number>;
 }

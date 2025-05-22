@@ -17,7 +17,51 @@ export class AccountController {
             const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number, accountId);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
         } catch (e: unknown) {
+            AccountController.logger.error(`Get account failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
+        }
+    }
+    public static async gets(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            // const accountId = Number(req.params?.accountId);
+            // const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number);
+            // res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
+        } catch (e: unknown) {
+            AccountController.logger.error(`Create accounts failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
+        }
+    }
+    public static async post(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            // const accountId = Number(req.params?.accountId);
+            // const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number, accountId);
+            // res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
+        } catch (e: unknown) {
             AccountController.logger.error(`Create account failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
+        }
+    }
+    public static async delete(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            // const accountId = Number(req.params?.accountId);
+            // const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number, accountId);
+            // res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
+        } catch (e: unknown) {
+            AccountController.logger.error(`Delete account failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+        }
+    }
+    public static async patch(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            // const accountId = Number(req.params?.accountId);
+            // const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number, accountId);
+            // res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
+        } catch (e: unknown) {
+            AccountController.logger.error(`Patch account failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
         }
     }

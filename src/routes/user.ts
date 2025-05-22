@@ -30,4 +30,6 @@ userRouter.use('/:userId/transactions', userIdVerify, routesInputValidation([use
 
 userRouter.use('/:userId/account', userIdVerify, routesInputValidation([userIdValidator]), account);
 
+userRouter.use('/:userId/accounts', userIdVerify, routesInputValidation([userIdValidator]), account);
+
 export default userRouter;

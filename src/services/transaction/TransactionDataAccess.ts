@@ -9,6 +9,7 @@ import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { IPagination } from 'interfaces/IPagination';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 
 export default class TransactionDataAccess extends LoggerBase implements ITransactionDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -176,7 +177,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
     }
 
     protected sanitizePatchTransactionPropeties(properties: Partial<ITransaction>): Partial<ITransaction> {
-        const allowedProperties = Object.entries({
+        const allowedProperties = {
             accountId: properties.accountId,
             incomeId: properties.incomeId,
             categoryId: properties.categoryId,
@@ -185,19 +186,17 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             targetAccountId: properties.targetAccountId,
             createAt: properties.createAt,
             updateAt: new Date().toISOString(),
-        }).reduce(
-            (acc, [key, value]) => {
-                if (key === 'description' || !Utils.isNull(value)) {
-                    acc[key] = value;
-                }
-                return acc;
-            },
-            {} as Record<string, unknown>,
-        );
-        if (Object.keys(allowedProperties).length === 0) {
-            throw new Error('No valid properties provided for update.');
-        }
-
+        };
+        validateAllowedProperties(allowedProperties, [
+            'accountId',
+            'incomeId',
+            'categoryId',
+            'amount',
+            'description',
+            'targetAccountId',
+            'createAt',
+            'updateAt',
+        ]);
         return allowedProperties;
     }
 

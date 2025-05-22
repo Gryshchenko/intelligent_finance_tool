@@ -50,14 +50,12 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 .where({ userId });
 
             if (!data.length) {
-                throw new NotFoundError({
-                    message: `No accounts found for userId: ${userId}`,
-                });
+                this._logger.info(`No accounts found for userId: ${userId}`);
             } else {
                 this._logger.info(`Fetched ${data.length} accounts for userId: ${userId}`);
             }
 
-            return data;
+            return Utils.greaterThen0(data?.length) ? data : [];
         } catch (e) {
             this._logger.error(`Failed to fetch accounts for userId: ${userId}. Error: ${(e as { message: string }).message}`);
             throw new DBError({
@@ -67,7 +65,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
         }
     }
 
-    async getAccount(userId: number, accountId: number): Promise<IAccount | undefined> {
+    async getAccount(userId: number, accountId: number): Promise<IAccount> {
         try {
             this._logger.info(`Fetching account with accountId: ${accountId} for userId: ${userId}`);
 
@@ -121,6 +119,28 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             throw new DBError({
                 message: `Patch account failed due to a database error: ${(e as { message: string }).message}`,
                 statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
+    }
+    async deleteAccount(userId: number, accountId: number): Promise<boolean> {
+        try {
+            this._logger.info(`Delete accountID: ${accountId} for userId: ${userId}`);
+
+            const query = this._db.engine();
+            const data = await query('accounts').delete().where({ userId, accountId });
+            if (!data) {
+                throw new NotFoundError({
+                    message: `Account with accountId: ${accountId} not found for userId: ${userId}`,
+                });
+            }
+            this._logger.info(`Account accountId: ${accountId} for userId: ${userId} delete successful`);
+            return true;
+        } catch (e) {
+            this._logger.error(
+                `Failed account deleting with accountId: ${accountId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Delete account failed due to a database error: ${(e as { message: string }).message}`,
             });
         }
     }
