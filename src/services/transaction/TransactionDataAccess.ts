@@ -175,6 +175,30 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             });
         }
     }
+    public async deleteTransactionsForAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {
+        try {
+            this._logger.info(`Delete transactions for accountId ${accountId} for userId: ${userId}`);
+
+            const query = trx || this._db.engine();
+            const deletedCount = await query('transactions').delete().where({ userId, accountId });
+            if (deletedCount === 0) {
+                this._logger.info(`Transactions for accountId ${accountId} for userId: ${userId} not found`);
+                return false;
+            } else {
+                this._logger.info(
+                    `Transaction transactions count: ${deletedCount} for accountId ${accountId} for userId: ${userId} delete successful`,
+                );
+                return true;
+            }
+        } catch (e) {
+            this._logger.error(
+                `Failed transactions deleting for accountId ${accountId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Delete transactions for accountId failed due to a database error: ${(e as { message: string }).message}`,
+            });
+        }
+    }
 
     protected sanitizePatchTransactionPropeties(properties: Partial<ITransaction>): Partial<ITransaction> {
         const allowedProperties = {

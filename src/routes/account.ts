@@ -21,7 +21,7 @@ accountRouter.post(
 
 accountRouter.get('/:accountId', validateQuery({}), AccountController.get);
 
-accountRouter.delete('/:accountId', validateQuery({}), AccountController.delete);
+accountRouter.delete('/:accountId', validateQuery({ accountStatusType: 'number' }), AccountController.delete);
 
 accountRouter.patch(
     '/:accountId',

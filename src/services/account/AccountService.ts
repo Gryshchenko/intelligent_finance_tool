@@ -16,22 +16,15 @@ export default class AccountService extends LoggerBase implements IAccountServic
         this._accountDataAccess = accountDataAccess;
     }
 
+    async createAccount(userId: number, account: ICreateAccount, trx?: IDBTransaction): Promise<IAccount> {
+        validateAllowedProperties(account as unknown as Record<string, string | number>, ['accountName', 'amount', 'currencyId']);
+        const accounts = await this._accountDataAccess.createAccounts(userId, [account], trx);
+        return accounts[0];
+    }
     async createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]> {
-        for (const account of accounts) {
-            validateAllowedProperties(account as unknown as Record<string, string | number>, [
-                'accountName',
-                'amount',
-                'currencyId',
-            ]);
-        }
         return await this._accountDataAccess.createAccounts(userId, accounts, trx);
     }
     async patchAccount(userId: number, accountId: number, properties: Partial<IAccount>, trx?: IDBTransaction): Promise<number> {
-        const allowedProperties = {
-            accountName: properties.accountName,
-            amount: properties.amount,
-        };
-        validateAllowedProperties(allowedProperties, ['accountName', 'amount']);
         return await this._accountDataAccess.patchAccount(userId, accountId, properties, trx);
     }
     async getAccount(userId: number, accountId: number): Promise<IAccount | undefined> {
@@ -55,7 +48,7 @@ export default class AccountService extends LoggerBase implements IAccountServic
     async getAccounts(userId: number): Promise<IAccount[] | undefined> {
         return await this._accountDataAccess.getAccounts(userId);
     }
-    async deleteAccount(userId: number, accountId: number): Promise<boolean> {
-        return await this._accountDataAccess.deleteAccount(userId, accountId);
+    async deleteAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {
+        return await this._accountDataAccess.deleteAccount(userId, accountId, trx!);
     }
 }

@@ -1,3 +1,5 @@
+import { AccountStatusType } from 'types/AccountStatusType';
+
 export interface IAccount {
     accountId: number;
     userId: number;
@@ -6,4 +8,5 @@ export interface IAccount {
     currencyId: number;
     currencyCode: string;
     currencySymbol: string;
+    status: AccountStatusType;
 }

@@ -8,6 +8,8 @@ import Utils from 'src/utils/Utils';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { AccountStatusType } from 'types/AccountStatusType';
 
 export default class AccountDataAccess extends LoggerBase implements IAccountDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -19,13 +21,20 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
     async createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]> {
         try {
             this._logger.info(`Starting account creation for userId: ${userId}`);
-
+            for (const account of accounts) {
+                validateAllowedProperties(account as unknown as Record<string, string | number>, [
+                    'accountName',
+                    'amount',
+                    'currencyId',
+                ]);
+            }
             const query = trx || this._db.engine();
             const data = await query('accounts').insert(
                 accounts.map(({ accountName, currencyId, amount }) => ({
                     userId,
                     accountName,
                     currencyId,
+                    status: AccountStatusType.Enable,
                     amount: Number(amount.toFixed(2)),
                 })),
                 ['accountId', 'userId', 'accountName', 'currencyId', 'amount'],
@@ -47,7 +56,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
 
             const data = await this.getAccountBaseQuery()
                 .innerJoin('currencies', 'accounts.currencyId', 'currencies.currencyId')
-                .where({ userId });
+                .where({ userId, status: AccountStatusType.Enable });
 
             if (!data.length) {
                 this._logger.info(`No accounts found for userId: ${userId}`);
@@ -71,7 +80,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
 
             const data = await this.getAccountBaseQuery()
                 .innerJoin('currencies', 'accounts.currencyId', 'currencies.currencyId')
-                .where({ userId, accountId })
+                .where({ userId, accountId, status: AccountStatusType.Enable })
                 .first();
 
             if (!data) {
@@ -97,11 +106,14 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
     async patchAccount(userId: number, accountId: number, properties: Partial<IAccount>, trx?: IDBTransaction): Promise<number> {
         try {
             this._logger.info(`Patch accountId: ${accountId} for userId: ${userId}`);
-
+            const allowedProperties = {
+                accountName: properties.accountName,
+                amount: properties.amount,
+                updateAt: new Date().toISOString(),
+            };
+            validateAllowedProperties(allowedProperties, ['accountName', 'amount', 'updateAt', 'status']);
             const query = trx || this._db.engine();
-            const data = await query('accounts')
-                .update(this.sanitizePatchAccountPropeties(properties))
-                .where({ userId, accountId });
+            const data = await query('accounts').update(properties).where({ userId, accountId });
 
             if (!data) {
                 throw new NotFoundError({
@@ -122,11 +134,11 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             });
         }
     }
-    async deleteAccount(userId: number, accountId: number): Promise<boolean> {
+    async deleteAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {
         try {
             this._logger.info(`Delete accountID: ${accountId} for userId: ${userId}`);
 
-            const query = this._db.engine();
+            const query = trx || this._db.engine();
             const data = await query('accounts').delete().where({ userId, accountId });
             if (!data) {
                 throw new NotFoundError({
@@ -143,29 +155,6 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 message: `Delete account failed due to a database error: ${(e as { message: string }).message}`,
             });
         }
-    }
-
-    protected sanitizePatchAccountPropeties(properties: Partial<IAccount>): Partial<IAccount> {
-        const allowedProperties = Object.entries({
-            accountName: properties.accountName,
-            amount: Utils.isNotNull(properties.amount) ? Utils.roundNumber(properties.amount as number) : null,
-            currencyId: properties.currencyId,
-            currencyCode: properties.currencyCode,
-            currencySymbol: properties.currencySymbol,
-        }).reduce(
-            (acc, [key, value]) => {
-                if (!Utils.isNull(value)) {
-                    acc[key] = value;
-                }
-                return acc;
-            },
-            {} as Record<string, unknown>,
-        );
-        if (Object.keys(allowedProperties).length === 0) {
-            throw new Error('No valid properties provided for update.');
-        }
-
-        return allowedProperties;
     }
 
     protected getAccountBaseQuery() {

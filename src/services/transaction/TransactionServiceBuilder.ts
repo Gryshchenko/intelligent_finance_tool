@@ -2,10 +2,15 @@ import AccountServiceBuilder from 'services/account/AccountServiceBuilder';
 import TransactionDataAccess from 'services/transaction/TransactionDataAccess';
 import TransactionService from 'services/transaction/TransactionService';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
+import { IDatabaseConnection } from 'interfaces/IDatabaseConnection';
 
 export default class TransactionServiceBuilder {
-    public static build() {
-        const db = DatabaseConnectionBuilder.build();
-        return new TransactionService(new TransactionDataAccess(db), AccountServiceBuilder.build(db), db);
+    public static build(db?: IDatabaseConnection): TransactionService {
+        const databaseConnection = db ?? DatabaseConnectionBuilder.build();
+        return new TransactionService(
+            new TransactionDataAccess(databaseConnection),
+            AccountServiceBuilder.build(databaseConnection),
+            databaseConnection,
+        );
     }
 }

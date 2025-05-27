@@ -17,4 +17,5 @@ export interface ITransactionDataAccess {
     getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined>;
     patchTransaction(userId: number, properties: Partial<ITransaction>, trx?: IDBTransaction): Promise<number>;
     deleteTransaction(userId: number, transactionId: number, trx?: IDBTransaction): Promise<boolean>;
+    deleteTransactionsForAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean>;
 }

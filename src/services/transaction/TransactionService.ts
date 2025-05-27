@@ -208,4 +208,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
             });
         }
     }
+    public async deleteTransactionsForAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {
+        return await this._transactionDataAccess.deleteTransactionsForAccount(userId, accountId, trx);
+    }
 }
