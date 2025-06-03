@@ -5,9 +5,9 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { ErrorCode } from 'types/ErrorCode';
 import Logger from 'helper/logger/Logger';
 
-const argon2 = require('argon2');
+import argon2 from 'argon2';
 
-const cryptoModule = require('crypto');
+import cryptoModule from 'crypto';
 
 const _logger = Logger.Of('UserServiceUtils');
 

@@ -1,7 +1,7 @@
 import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
 import Utils from 'src/utils/Utils';
 import Logger from 'src/helper/logger/Logger';
-const uap = require('ua-parser-js');
+import uap from 'ua-parser-js';
 
 export class UserAgentService {
     public static getUserAgent(userAgent: string | undefined): IUserAgentInfo | undefined {

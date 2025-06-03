@@ -15,7 +15,7 @@ import { getConfig } from 'src/config/config';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 
-const { randomBytes } = require('crypto');
+import { randomBytes } from 'crypto';
 
 const CONFIRMATION_MAIL_EXPIRED_TIME = [0, 15, 0];
 

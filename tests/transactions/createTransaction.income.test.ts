@@ -32,15 +32,14 @@ afterAll((done) => {
 });
 
 describe('POST /transaction/create - income', () => {
-    [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554].forEach(async (num) => {
-        await it(`should create new transaction num: ${num}`, async () => {
+    for (const num of [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554]) {
+        it(`should create new transaction num: ${num}`, async () => {
             const agent = request.agent(app);
 
             const create_user = await agent
                 .post('/register/signup')
                 .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
                 .expect(200);
-            // @ts-ignore
             userIds.push(create_user.body.data.userId);
             const overview = await agent
                 .get(`/user/${create_user.body.data.userId}/overview/`)
@@ -49,7 +48,7 @@ describe('POST /transaction/create - income', () => {
                 .expect(200);
             const {
                 body: {
-                    data: { accounts, categories, incomes },
+                    data: { accounts, incomes },
                 },
             } = overview;
 
@@ -93,7 +92,7 @@ describe('POST /transaction/create - income', () => {
                 status: 1,
             });
         });
-    });
+    }
     it('should not create new transaction - miss incomeId', async () => {
         const agent = request.agent(app);
 
@@ -101,7 +100,6 @@ describe('POST /transaction/create - income', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -128,7 +126,6 @@ describe('POST /transaction/create - income', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -155,7 +152,6 @@ describe('POST /transaction/create - income', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -181,7 +177,6 @@ describe('POST /transaction/create - income', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)

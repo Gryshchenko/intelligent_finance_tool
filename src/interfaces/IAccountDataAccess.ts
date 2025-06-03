@@ -1,7 +1,6 @@
 import { IAccount } from 'interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { AccountStatusType } from 'types/AccountStatusType';
 
 export interface IAccountDataAccess {
     createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]>;

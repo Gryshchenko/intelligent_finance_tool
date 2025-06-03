@@ -21,7 +21,7 @@ import { checkOriginReferer } from 'middleware/checkOriginReferer';
 import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
-const passport = require('passport');
+import passport from 'passport';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;

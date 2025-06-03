@@ -8,6 +8,7 @@ import {
     createAccountValidationRules,
     patchAccountValidationRules,
 } from 'src/utils/validation/accountValidationRules';
+import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 
 const accountRouter = express.Router({ mergeParams: true });
 
@@ -19,15 +20,26 @@ accountRouter.post(
     AccountController.post,
 );
 
-accountRouter.get('/:accountId', validateQuery({}), AccountController.get);
+accountRouter.get(
+    '/:accountId',
+    validateQuery({}),
+    routesInputValidation([validatePathQueryProperty('accountId')]),
+    AccountController.get,
+);
 
-accountRouter.delete('/:accountId', validateQuery({ accountStatusType: 'number' }), AccountController.delete);
+accountRouter.delete(
+    '/:accountId',
+    validateQuery({}),
+    routesInputValidation([validatePathQueryProperty('accountId')]),
+    AccountController.delete,
+);
 
 accountRouter.patch(
     '/:accountId',
     validateQuery({}),
-    sanitizeRequestBody(['accountName', 'amount']),
+    sanitizeRequestBody(['accountName', 'amount', 'status']),
     routesInputValidation(patchAccountValidationRules, accountConvertValidationMessageToErrorCode),
+    routesInputValidation([validatePathQueryProperty('accountId')]),
     AccountController.patch,
 );
 

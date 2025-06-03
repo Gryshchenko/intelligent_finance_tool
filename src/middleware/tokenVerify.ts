@@ -4,6 +4,7 @@ import Logger from 'src/helper/logger/Logger';
 import SessionService from '../services/session/SessionService';
 import { getConfig } from 'src/config/config';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
+
 const crypto = require('crypto');
 
 const jwt = require('jsonwebtoken');

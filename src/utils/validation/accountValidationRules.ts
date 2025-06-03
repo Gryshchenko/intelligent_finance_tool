@@ -3,6 +3,9 @@ import { ErrorCode } from 'types/ErrorCode';
 
 const accountConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
     switch (path) {
+        case 'status': {
+            return ErrorCode.ACCOUNT_STATUS_ERROR;
+        }
         case 'currencyId': {
             return ErrorCode.CURRENCY_ID_ERROR;
         }
@@ -42,6 +45,11 @@ const patchAccountValidationRules = [
         optional: true,
         min: Number.MIN_SAFE_INTEGER,
         max: Number.MAX_SAFE_INTEGER,
+    }),
+    ...createSignupValidationRules('status', 'number', {
+        optional: true,
+        min: 2,
+        max: 3,
     }),
 ];
 

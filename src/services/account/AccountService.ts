@@ -49,6 +49,6 @@ export default class AccountService extends LoggerBase implements IAccountServic
         return await this._accountDataAccess.getAccounts(userId);
     }
     async deleteAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {
-        return await this._accountDataAccess.deleteAccount(userId, accountId, trx!);
+        return await this._accountDataAccess.deleteAccount(userId, accountId, trx);
     }
 }

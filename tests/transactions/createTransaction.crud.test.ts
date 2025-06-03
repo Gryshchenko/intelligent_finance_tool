@@ -104,7 +104,7 @@ describe('PATCH /transaction/patch - amount', () => {
         await agent
             .get(`/user/${create_user.body.data.userId}/transaction/-100`)
             .set('authorization', create_user.header['authorization'])
-            .expect(404);
+            .expect(400);
 
         await agent
             .delete(`/user/${create_user.body.data.userId}/transaction/${response.body.data.transactionId}`)

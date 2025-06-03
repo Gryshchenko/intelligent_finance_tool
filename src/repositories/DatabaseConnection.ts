@@ -1,7 +1,7 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { Knex } from 'knex';
 
-const knex = require('knex');
+import knex from 'knex';
 
 interface IDatabaseConnectionConstructor {
     host: string | undefined;

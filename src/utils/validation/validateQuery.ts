@@ -14,6 +14,9 @@ const validateQuery = (schema: Record<string, string>) => {
         });
 
         Object.keys(schema).forEach((key) => {
+            if (!Object.prototype.hasOwnProperty.call(schema, key)) {
+                return;
+            }
             const expectedType = schema[key].replace('?', '');
             const isOptional = schema[key].includes('?');
             const value = req.query[key];

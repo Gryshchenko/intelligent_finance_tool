@@ -8,6 +8,7 @@ import {
 import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
 import { validateQuery } from 'src/utils/validation/validateQuery';
+import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 
 const transactionRouter = express.Router({ mergeParams: true });
 
@@ -31,13 +32,24 @@ transactionRouter.post(
 
 transactionRouter.get('/', validateQuery({ cursor: 'number?', limit: 'number?' }), TransactionController.getAll);
 
-transactionRouter.get('/:transactionId', validateQuery({}), TransactionController.get);
+transactionRouter.get(
+    '/:transactionId',
+    validateQuery({}),
+    routesInputValidation([validatePathQueryProperty('transactionId')]),
+    TransactionController.get,
+);
 
-transactionRouter.delete('/:transactionId', validateQuery({}), TransactionController.delete);
+transactionRouter.delete(
+    '/:transactionId',
+    validateQuery({}),
+    routesInputValidation([validatePathQueryProperty('transactionId')]),
+    TransactionController.delete,
+);
 
 transactionRouter.patch(
     '/:transactionId',
     validateQuery({}),
+    routesInputValidation([validatePathQueryProperty('transactionId')]),
     sanitizeRequestBody([
         'accountId',
         'incomeId',

@@ -110,6 +110,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 accountName: properties.accountName,
                 amount: properties.amount,
                 updateAt: new Date().toISOString(),
+                status: properties.status,
             };
             validateAllowedProperties(allowedProperties, ['accountName', 'amount', 'updateAt', 'status']);
             const query = trx || this._db.engine();

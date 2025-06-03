@@ -10,7 +10,7 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'types/HttpCode';
 
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 export default class AuthService extends LoggerBase implements IAuthService {
     protected userService: IUserService;

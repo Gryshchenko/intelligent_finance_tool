@@ -1,7 +1,9 @@
 import { readFileSync } from 'fs';
 import * as process from 'process';
 
-require('dotenv').config();
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const caCert = readFileSync('./cert.pem').toString();
 

@@ -5,7 +5,7 @@ import { Strategy as JwtStrategy, StrategyOptionsWithRequest } from 'passport-jw
 import UserServiceBuilder from 'src/services/user/UserServiceBuilder';
 import { IUser } from 'interfaces/IUser';
 
-const { ExtractJwt } = require('passport-jwt');
+import { ExtractJwt } from 'passport-jwt';
 
 const options: StrategyOptionsWithRequest = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
