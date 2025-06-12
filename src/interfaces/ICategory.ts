@@ -1,3 +1,11 @@
+import { AccountStatusType } from 'types/AccountStatusType';
+
 export interface ICategory {
-    value: string;
+    categoryName: string;
+    categoryId: number;
+    userId: number;
+    currencyId: number;
+    status: AccountStatusType;
+    createAt: Date;
+    updateAt: Date;
 }

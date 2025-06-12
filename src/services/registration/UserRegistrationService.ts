@@ -200,7 +200,7 @@ export default class UserRegistrationService extends LoggerBase {
             const translatedDefaultData = this.getTranslatedDefaultData(profile?.locale);
             await Promise.all([
                 await this.groupService.createGroup(userId, translatedDefaultData.group, trx),
-                await this.incomeService.createIncomes(
+                await this.incomeService.creates(
                     userId,
                     translatedDefaultData.income.map((incomeName) => ({
                         incomeName,
@@ -217,7 +217,7 @@ export default class UserRegistrationService extends LoggerBase {
                     })),
                     trx,
                 ),
-                await this.categoryService.createCategories(
+                await this.categoryService.creates(
                     userId,
                     translatedDefaultData.categories.map((categoryName: string) => ({
                         categoryName,

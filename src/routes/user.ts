@@ -8,6 +8,8 @@ import transaction from 'src/routes/transaction';
 import account from 'src/routes/account';
 import userIdVerify from 'middleware/userIdVerify';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
+import income from 'routes/income';
+import category from 'routes/category';
 
 const userRouter = express.Router({ mergeParams: true });
 
@@ -24,5 +26,13 @@ userRouter.use('/:userId/transactions', userIdVerify, routesInputValidation([val
 userRouter.use('/:userId/account', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), account);
 
 userRouter.use('/:userId/accounts', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), account);
+
+userRouter.use('/:userId/income', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), income);
+
+userRouter.use('/:userId/incomes', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), income);
+
+userRouter.use('/:userId/category', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), category);
+
+userRouter.use('/:userId/categories', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), category);
 
 export default userRouter;

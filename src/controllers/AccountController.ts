@@ -78,7 +78,7 @@ export class AccountController {
         } catch (e: unknown) {
             await uow.rollback();
             AccountController.logger.error(`Delete account failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
         }
     }
     public static async patch(req: Request, res: Response) {
@@ -97,7 +97,7 @@ export class AccountController {
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
         } catch (e: unknown) {
             AccountController.logger.error(`Patch account failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TRANSACTION_ERROR);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
         }
     }
 }

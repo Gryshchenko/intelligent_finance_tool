@@ -1,0 +1,304 @@
+// @ts-nocheck
+import { deleteUserAfterTest, generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+import DatabaseConnection from '../../src/repositories/DatabaseConnection';
+import config from '../../src/config/dbConfig';
+import { TransactionType } from '../../src/types/TransactionType';
+import { AccountStatusType } from '../../src/types/AccountStatusType';
+
+const request = require('supertest');
+require('dotenv').config();
+const app = require('../../src/app');
+
+let server;
+
+let userIds = [];
+
+beforeAll(() => {
+    const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
+
+    server = app.listen(port);
+});
+
+afterAll((done) => {
+    userIds.forEach((id) => {
+        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    });
+    userIds = [];
+    server.close(done);
+});
+
+describe('Category', () => {
+    it(`POST - create category`, async () => {
+        const agent = request.agent(app);
+
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        for (const { name } of [{ name: 'Test 1' }, { name: 'Test 2' }, { name: 'Test 3' }]) {
+            const {
+                body: {
+                    data: { categoryId, categoryName },
+                },
+            } = await agent
+                .post(`/user/${create_user.body.data.userId}/category/`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    currencyId: 1,
+                    categoryName: name,
+                })
+                .expect(200);
+            expect(categoryId).toBeTruthy();
+            expect(categoryName).toStrictEqual(name);
+        }
+        for (const data of [
+            {
+                categoryName: 'Test 1',
+            },
+            {
+                currencyId: 1,
+            },
+            {},
+            {
+                currencyId: '23',
+                categoryName: 123123,
+            },
+            {
+                currencyId: 1,
+                categoryName:
+                    'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
+            },
+        ]) {
+            await agent
+                .post(`/user/${create_user.body.data.userId}/category/`)
+                .set('authorization', create_user.header['authorization'])
+                .send(data)
+                .expect(400);
+        }
+    });
+    it(`PATCH - update category`, async () => {
+        const agent = request.agent(app);
+
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        const obj = [
+            { name: 'Test 1', id: null },
+            { name: 'Test 2', id: null },
+            { name: 'Test 3', id: null },
+        ];
+        let i = 0;
+        for (const { name } of obj) {
+            const {
+                body: {
+                    data: { categoryId, categoryName },
+                },
+            } = await agent
+                .post(`/user/${create_user.body.data.userId}/category/`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    currencyId: 1,
+                    categoryName: name,
+                })
+                .expect(200);
+            expect(categoryId).toBeTruthy();
+            expect(categoryName).toStrictEqual(name);
+            obj[i]['id'] = categoryId;
+            i += 1;
+        }
+
+        for (const { name, id } of obj) {
+            await agent
+                .patch(`/user/${create_user.body.data.userId}/category/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    categoryName: `${name}${id}`,
+                })
+                .expect(204);
+            const {
+                body: {
+                    data: { categoryId, categoryName },
+                },
+            } = await agent
+                .get(`/user/${create_user.body.data.userId}/category/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(200);
+
+            expect(categoryId).toStrictEqual(id);
+            expect(categoryName).toStrictEqual(`${name}${id}`);
+        }
+        for (const id of [999999999, 23129831, 238231]) {
+            await agent
+                .patch(`/user/${create_user.body.data.userId}/category/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    categoryName: `any`,
+                })
+                .expect(404);
+        }
+        for (const id of ['sdsd', null, undefined, -1]) {
+            await agent
+                .patch(`/user/${create_user.body.data.userId}/category/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    categoryName: `any`,
+                })
+                .expect(400);
+        }
+        await agent
+            .patch(`/user/${create_user.body.data.userId}/category/${obj[0].id}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
+    });
+    it(`unknown properties`, async () => {
+        const agent = request.agent(app);
+
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        await agent
+            .post(`/user/${create_user.body.data.userId}/category/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                currencyId: 1,
+                categoryName: 'Test',
+                something: 200,
+            })
+            .expect(400);
+        await agent
+            .post(`/user/${create_user.body.data.userId}/category/`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
+        await agent
+            .post(`/user/${create_user.body.data.userId}/category/?something=200`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
+        await agent
+            .get(`/user/${create_user.body.data.userId}/category/${21}`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                something: 200,
+            })
+            .expect(404);
+        await agent
+            .get(`/user/${create_user.body.data.userId}/category/${21}?something=200`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
+    });
+    it(`DELETE - delete category`, async () => {
+        const agent = request.agent(app);
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        const {
+            body: {
+                data: { accounts },
+            },
+        } = await agent
+            .get(`/user/${create_user.body.data.userId}/overview/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({})
+            .expect(200);
+
+        const {
+            body: {
+                data: { categoryId },
+            },
+        } = await agent
+            .post(`/user/${create_user.body.data.userId}/category/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                currencyId: 1,
+                categoryName: 'Test 1',
+            })
+            .expect(200);
+        const transactions = [
+            {
+                transactionTypeId: TransactionType.Expense,
+                categoryId,
+                amount: 1000,
+                accountId: accounts[0].accountId,
+            },
+            {
+                transactionTypeId: TransactionType.Expense,
+                categoryId,
+                amount: 1000,
+                accountId: accounts[0].accountId,
+            },
+            {
+                transactionTypeId: TransactionType.Expense,
+                categoryId,
+                amount: 1000,
+                accountId: accounts[0].accountId,
+            },
+        ];
+
+        const ids = [];
+
+        for (const transaction of transactions) {
+            const {
+                body: {
+                    data: { transactionId },
+                },
+            } = await agent
+                .post(`/user/${create_user.body.data.userId}/transaction/`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    categoryId,
+                    currencyId: 1,
+                    description: 'Test',
+                    ...transaction,
+                })
+                .expect(201);
+            ids.push(transactionId);
+        }
+        await agent
+            .get(`/user/${create_user.body.data.userId}/category/${categoryId}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(200);
+        await agent
+            .patch(`/user/${create_user.body.data.userId}/category/${categoryId}`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                status: AccountStatusType.Disable,
+            })
+            .expect(204);
+        for (const id of ids) {
+            await agent
+                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(200);
+        }
+        for (const id of ids) {
+            await agent
+                .delete(`/user/${create_user.body.data.userId}/transaction/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(204);
+        }
+        await agent
+            .delete(`/user/${create_user.body.data.userId}/category/${categoryId}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(204);
+        for (const id of ids) {
+            await agent
+                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(404);
+        }
+        await agent
+            .delete(`/user/${create_user.body.data.userId}/category/99999999}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(400);
+    });
+});

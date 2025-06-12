@@ -53,8 +53,8 @@ export default class OverviewService extends LoggerBase {
             const validUserId = userId as number;
             const [accounts, categories, incomes] = await Promise.all([
                 this.accountService.getAccounts(validUserId),
-                this.categoryService.getCategories(validUserId),
-                this.incomeService.getIncomes(validUserId),
+                this.categoryService.gets(validUserId),
+                this.incomeService.gets(validUserId),
             ]);
 
             return OverviewService.buildOverviewResponse({ accounts, categories, incomes });

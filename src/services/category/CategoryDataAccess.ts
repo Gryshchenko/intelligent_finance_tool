@@ -7,6 +7,7 @@ import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 
 export default class CategoryDataAccess extends LoggerBase implements ICategoryDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -16,7 +17,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         this._db = db;
     }
 
-    async createCategories(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]> {
+    async create(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]> {
         this._logger.info(`Creating categories for user: ${userId}`);
         const query = trx || this._db.engine();
 
@@ -44,7 +45,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         }
     }
 
-    async getCategories(userId: number): Promise<ICategory[] | undefined> {
+    async gets(userId: number): Promise<ICategory[] | undefined> {
         this._logger.info(`Retrieving categories for user: ${userId}`);
 
         try {
@@ -67,11 +68,14 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         }
     }
 
-    async getCategory(userId: number, categoryId: number): Promise<ICategory | undefined> {
+    async get(userId: number, categoryId: number): Promise<ICategory | undefined> {
         this._logger.info(`Retrieving category ID ${categoryId} for user: ${userId}`);
 
         try {
-            const data = await this.getCategoryBaseQuery().where({ userId, categoryId }).first();
+            const data = await this.getCategoryBaseQuery()
+                .innerJoin('currencies', 'categories.currencyId', 'currencies.currencyId')
+                .where({ userId, categoryId })
+                .first();
 
             if (data) {
                 this._logger.info(`Category ID ${categoryId} retrieved successfully for user: ${userId}`);
@@ -93,16 +97,70 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         }
     }
 
+    async patch(userId: number, categoryId: number, properties: Partial<ICategory>, trx?: IDBTransaction): Promise<number> {
+        try {
+            this._logger.info(`Patch categoryId: ${categoryId} for userId: ${userId}`);
+            const allowedProperties = {
+                categoryName: properties.categoryName,
+                updateAt: new Date().toISOString(),
+                status: properties.status,
+            };
+            validateAllowedProperties(allowedProperties, ['categoryName', 'updateAt', 'status']);
+            const query = trx || this._db.engine();
+            const data = await query('categories').update(properties).where({ userId, categoryId });
+
+            if (!data) {
+                throw new NotFoundError({
+                    message: `Category with categoryId: ${categoryId} not found for userId: ${userId}`,
+                });
+            } else {
+                this._logger.info(`Category categoryId: ${categoryId} for userId: ${userId} patched successful`);
+            }
+
+            return data;
+        } catch (e) {
+            this._logger.error(
+                `Failed to fetch category with categoryId: ${categoryId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Patch category failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
+    }
+    async delete(userId: number, categoryId: number, trx?: IDBTransaction): Promise<boolean> {
+        try {
+            this._logger.info(`Delete categoryID: ${categoryId} for userId: ${userId}`);
+
+            const query = trx || this._db.engine();
+            const data = await query('categories').delete().where({ userId, categoryId });
+            if (!data) {
+                throw new NotFoundError({
+                    message: `Category with categoryId: ${categoryId} not found for userId: ${userId}`,
+                });
+            }
+            this._logger.info(`Category categoryId: ${categoryId} for userId: ${userId} delete successful`);
+            return true;
+        } catch (e) {
+            this._logger.error(
+                `Failed category deleting with categoryId: ${categoryId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Delete category failed due to a database error: ${(e as { message: string }).message}`,
+            });
+        }
+    }
     protected getCategoryBaseQuery() {
-        return this._db.engine()('categories').select(
-            'categories.categoryId',
-            'categories.userId',
-            // 'categories.amount',
-            'categories.categoryName',
-            'categories.currencyId',
-            'currencies.currencyCode',
-            'currencies.currencyName',
-            'currencies.symbol',
-        );
+        return this._db
+            .engine()('categories')
+            .select(
+                'categories.categoryId',
+                'categories.userId',
+                'categories.categoryName',
+                'categories.currencyId',
+                'currencies.currencyCode',
+                'currencies.currencyName',
+                'currencies.symbol',
+            );
     }
 }

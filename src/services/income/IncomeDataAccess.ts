@@ -7,6 +7,8 @@ import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { AccountStatusType } from 'types/AccountStatusType';
 
 export default class IncomeDataAccess extends LoggerBase implements IIncomeDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -16,13 +18,18 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         this._db = db;
     }
 
-    public async createIncomes(userId: number, incomes: ICreateIncome[], trx?: IDBTransaction): Promise<IIncome[]> {
+    public async create(userId: number, incomes: ICreateIncome[], trx?: IDBTransaction): Promise<IIncome[]> {
         this._logger.info(`Starting creation of incomes for userId ${userId}`);
 
         try {
             const query = trx || this._db.engine();
             const data = await query('incomes').insert(
-                incomes.map(({ incomeName, currencyId }) => ({ userId, incomeName, currencyId })),
+                incomes.map(({ incomeName, currencyId }) => ({
+                    userId,
+                    incomeName,
+                    currencyId,
+                    status: AccountStatusType.Enable,
+                })),
                 ['incomeId', 'userId', 'incomeName', 'currencyId'],
             );
 
@@ -36,13 +43,13 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         }
     }
 
-    public async getIncomes(userId: number): Promise<IIncome[] | undefined> {
+    public async gets(userId: number): Promise<IIncome[] | undefined> {
         this._logger.info(`Fetching incomes for userId ${userId}`);
 
         try {
             const data = await this.getIncomeBaseQuery()
                 .innerJoin('currencies', 'incomes.currencyId', 'currencies.currencyId')
-                .where({ userId });
+                .where({ userId, status: AccountStatusType.Enable });
 
             this._logger.info(`Successfully fetched incomes for userId ${userId}`);
             return data;
@@ -54,11 +61,14 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         }
     }
 
-    public async getIncome(userId: number, incomeId: number): Promise<IIncome | undefined> {
+    public async get(userId: number, incomeId: number): Promise<IIncome | undefined> {
         this._logger.info(`Fetching income with ID ${incomeId} for userId ${userId}`);
 
         try {
-            const data = await this.getIncomeBaseQuery().where({ userId, incomeId }).first();
+            const data = await this.getIncomeBaseQuery()
+                .innerJoin('currencies', 'incomes.currencyId', 'currencies.currencyId')
+                .where({ userId, incomeId, status: AccountStatusType.Enable })
+                .first();
 
             if (data) {
                 this._logger.info(`Successfully fetched income with ID ${incomeId} for userId ${userId}`);
@@ -81,15 +91,69 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
     }
 
     protected getIncomeBaseQuery() {
-        return this._db.engine()('incomes').select(
-            'incomes.incomeId',
-            'incomes.userId',
-            // 'incomes.amount',
-            'incomes.incomeName',
-            'incomes.currencyId',
-            'currencies.currencyCode',
-            'currencies.currencyName',
-            'currencies.symbol',
-        );
+        return this._db
+            .engine()('incomes')
+            .select(
+                'incomes.incomeId',
+                'incomes.userId',
+                'incomes.incomeName',
+                'incomes.currencyId',
+                'currencies.currencyCode',
+                'currencies.currencyName',
+                'currencies.symbol',
+            );
+    }
+    async patch(userId: number, incomeId: number, properties: Partial<IIncome>, trx?: IDBTransaction): Promise<number> {
+        try {
+            this._logger.info(`Patch incomeId: ${incomeId} for userId: ${userId}`);
+            const allowedProperties = {
+                incomeName: properties.incomeName,
+                updateAt: new Date().toISOString(),
+                status: properties.status,
+            };
+            validateAllowedProperties(allowedProperties, ['incomeName', 'updateAt', 'status']);
+            const query = trx || this._db.engine();
+            const data = await query('incomes').update(properties).where({ userId, incomeId });
+
+            if (!data) {
+                throw new NotFoundError({
+                    message: `Income with incomeId: ${incomeId} not found for userId: ${userId}`,
+                });
+            } else {
+                this._logger.info(`Income incomeId: ${incomeId} for userId: ${userId} patched successful`);
+            }
+
+            return data;
+        } catch (e) {
+            this._logger.error(
+                `Failed to fetch income with incomeId: ${incomeId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Patch income failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
+    }
+    async delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean> {
+        try {
+            this._logger.info(`Delete incomeID: ${incomeId} for userId: ${userId}`);
+
+            const query = trx || this._db.engine();
+            const data = await query('incomes').delete().where({ userId, incomeId });
+            if (!data) {
+                throw new NotFoundError({
+                    message: `Income with incomeId: ${incomeId} not found for userId: ${userId}`,
+                });
+            }
+            this._logger.info(`Income incomeId: ${incomeId} for userId: ${userId} delete successful`);
+            return true;
+        } catch (e) {
+            this._logger.error(
+                `Failed income deleting with incomeId: ${incomeId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Delete income failed due to a database error: ${(e as { message: string }).message}`,
+            });
+        }
     }
 }
