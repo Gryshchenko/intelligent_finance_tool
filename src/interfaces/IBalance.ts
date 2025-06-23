@@ -1,8 +1,6 @@
 export interface IBalance {
+    balanceId: string;
     balance: string;
     updateAt: Date;
     createAt: Date;
-    currencyCode: string;
-    currencySymbol: string;
-    currencyName: string;
 }

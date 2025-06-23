@@ -21,15 +21,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
 
             const data = await this._db
                 .engine()('balance')
-                .select(
-                    'balance',
-                    'updateAt',
-                    'createAt',
-                    'currencies.currencyCode',
-                    'currencies.currencyName',
-                    'currencies.symbol',
-                )
-                .innerJoin('currencies', 'accounts.currencyId', 'currencies.currencyId')
+                .select('balanceId', 'balance', 'updateAt', 'createAt')
                 .where({ userId })
                 .first();
 
@@ -59,7 +51,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
             };
             validateAllowedProperties(allowedProperties, ['updateAt', 'balance']);
             const query = trx || this._db.engine();
-            const data = await query('accounts').update(properties).where({ userId });
+            const data = await query('balance').update(properties).where({ userId, balanceId: properties.balanceId });
 
             if (!data) {
                 throw new NotFoundError({
