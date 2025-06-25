@@ -22,6 +22,7 @@ import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
 import passport from 'passport';
+import CurrencyServiceBuilder from 'services/currency/CurrencyServiceBuilder';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;
@@ -74,6 +75,11 @@ const httpsServer = https.createServer(credentials, app);
 if (process.env.NODE_ENV !== 'test') {
     httpsServer.listen(port, async () => {
         const ip = getLocalIP();
+        CurrencyServiceBuilder.build()
+            .updateCurrencyRates()
+            .catch((e) => {
+                Logger.Of('App').info(`Update currency failed due reason: ${(e as { message: string }).message}`);
+            });
         Logger.Of('App').info(`Server running at: ${ip}:${port}`);
     });
 }

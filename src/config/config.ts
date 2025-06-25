@@ -25,6 +25,8 @@ interface IConfig {
     redisPort: string;
     mailNotReply: string;
     trustedOrigin: string;
+    rateProviderAPI: string;
+    rateProviderUrl: string;
 }
 
 export function getConfig(): IConfig {
@@ -45,6 +47,8 @@ export function getConfig(): IConfig {
         jwtAudience: (process.env.TEST_JWT_AUDIENCE ?? process.env.JWT_AUDIENCE) as string,
         redisHost: (process.env.TEST_REDIS_HOST ?? process.env.REDIS_HOST) as string,
         redisPort: (process.env.TEST_REDIS_PORT ?? process.env.REDIS_PORT) as string,
+        rateProviderAPI: (process.env.TEST_RATE_PROVIDER_API ?? process.env.RATE_PROVIDER_API) as string,
+        rateProviderUrl: (process.env.TEST_RATE_PROVIDER_URL ?? process.env.RATE_PROVIDER_URL) as string,
         mailNotReply: 'test',
     };
 }
