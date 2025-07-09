@@ -44,4 +44,5 @@ export enum ErrorCode {
     INCOME_NAME = 7015,
     CATEGORY_ERROR = 7016,
     CATEGORY_NAME_ERROR = 7017,
+    CURRENCY_ERROR = 7018,
 }

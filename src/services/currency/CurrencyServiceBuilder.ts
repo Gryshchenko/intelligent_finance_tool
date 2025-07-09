@@ -3,7 +3,7 @@ import CurrencyService from 'services/currency/CurrencyService';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
 
 export default class CurrencyServiceBuilder {
-    public static build() {
-        return new CurrencyService(new CurrencyDataAccess(DatabaseConnectionBuilder.build()));
+    public static build(db = DatabaseConnectionBuilder.build()) {
+        return new CurrencyService(new CurrencyDataAccess(db));
     }
 }

@@ -7,6 +7,7 @@ import { DBError } from 'src/utils/errors/DBError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import Utils from 'src/utils/Utils';
 
 export default class BalanceDataAccess extends LoggerBase implements IBalanceDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -42,18 +43,27 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
             });
         }
     }
-    async patch(userId: number, properties: Partial<IBalance>, trx?: IDBTransaction): Promise<number> {
+    async patch(userId: number, properties: { amount: number }, trx?: IDBTransaction): Promise<number> {
         try {
             this._logger.info(`Patch balance for userId: ${userId}`);
             const allowedProperties = {
-                balance: properties.balance,
+                balance: properties.amount,
                 updateAt: new Date().toISOString(),
             };
             validateAllowedProperties(allowedProperties, ['updateAt', 'balance']);
             const query = trx || this._db.engine();
-            const data = await query('balance').update(properties).where({ userId, balanceId: properties.balanceId });
 
-            if (!data) {
+            const data = await query.transaction(async (trx) => {
+                await trx('balance')
+                    .where('id', userId)
+                    .update({
+                        balance: trx.raw('balance + ?', [allowedProperties.balance]),
+                        updatedAt: trx.fn.now(),
+                    })
+                    .returning('balance');
+            });
+
+            if (Utils.isNull(data)) {
                 throw new NotFoundError({
                     message: `Balance not found for userId: ${userId}`,
                 });
@@ -61,7 +71,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
                 this._logger.info(`Balance for userId: ${userId} patched successful`);
             }
 
-            return data;
+            return Number(data);
         } catch (e) {
             this._logger.error(`Failed to fetch balance for userId: ${userId}. Error: ${(e as { message: string }).message}`);
             throw new DBError({

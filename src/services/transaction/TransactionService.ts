@@ -15,16 +15,24 @@ import { IAccountService } from 'interfaces/IAccountService';
 import { IAccount } from 'interfaces/IAccount';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
 import { IPagination } from 'interfaces/IPagination';
+import { IBalanceService } from 'interfaces/IBalanceService';
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
     private readonly _accountService: IAccountService;
+    private readonly _balanceService: IBalanceService;
     private readonly _db: IDatabaseConnection;
 
-    public constructor(transactionDataAccess: ITransactionDataAccess, accountService: IAccountService, db: IDatabaseConnection) {
+    public constructor(
+        transactionDataAccess: ITransactionDataAccess,
+        accountService: IAccountService,
+        balanceService: IBalanceService,
+        db: IDatabaseConnection,
+    ) {
         super();
         this._transactionDataAccess = transactionDataAccess;
         this._accountService = accountService;
+        this._balanceService = balanceService;
         this._db = db;
     }
 
@@ -75,6 +83,11 @@ export default class TransactionService extends LoggerBase implements ITransacti
 
                 const currentAmount = (accountInWork as IAccount).amount;
                 const newAmount = Utils.roundNumber(currentAmount) + Utils.roundNumber(transactionAmount);
+                await this._balanceService.patch(
+                    userId,
+                    { amount: newAmount, currencyCode: accountInWork?.currencyCode as string },
+                    trx,
+                );
 
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
             },
@@ -92,6 +105,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
 
                 const currentAmount = (accountInWork as IAccount).amount;
                 const newAmount = Utils.roundNumber(currentAmount) - Utils.roundNumber(transactionAmount);
+
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
             },
             'expense',

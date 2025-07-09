@@ -23,6 +23,7 @@ import { getLocalIP } from 'src/utils/getLocalIP';
 
 import passport from 'passport';
 import CurrencyServiceBuilder from 'services/currency/CurrencyServiceBuilder';
+import currencyRouter from 'routes/currency';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;
@@ -65,6 +66,7 @@ app.use(SessionService.setup());
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/register', registerRouter);
+app.use('/currency', currencyRouter);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');

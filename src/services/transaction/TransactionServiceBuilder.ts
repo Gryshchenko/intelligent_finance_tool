@@ -3,6 +3,7 @@ import TransactionDataAccess from 'services/transaction/TransactionDataAccess';
 import TransactionService from 'services/transaction/TransactionService';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
 import { IDatabaseConnection } from 'interfaces/IDatabaseConnection';
+import BalanceServiceBuilder from 'services/balance/BalanceServiceBuilder';
 
 export default class TransactionServiceBuilder {
     public static build(db?: IDatabaseConnection): TransactionService {
@@ -10,6 +11,7 @@ export default class TransactionServiceBuilder {
         return new TransactionService(
             new TransactionDataAccess(databaseConnection),
             AccountServiceBuilder.build(databaseConnection),
+            BalanceServiceBuilder.build(databaseConnection),
             databaseConnection,
         );
     }

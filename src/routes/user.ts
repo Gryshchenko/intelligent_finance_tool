@@ -10,6 +10,7 @@ import userIdVerify from 'middleware/userIdVerify';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 import income from 'routes/income';
 import category from 'routes/category';
+import balance from 'routes/balance';
 
 const userRouter = express.Router({ mergeParams: true });
 
@@ -34,5 +35,7 @@ userRouter.use('/:userId/incomes', userIdVerify, routesInputValidation([validate
 userRouter.use('/:userId/category', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), category);
 
 userRouter.use('/:userId/categories', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), category);
+
+userRouter.use('/:userId/balance', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), balance);
 
 export default userRouter;

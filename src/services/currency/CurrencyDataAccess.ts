@@ -36,7 +36,10 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             this._logger.info(
                 `Insert list of currencies rates for currency: ${baseCurrency} failed due reason: ${(e as { message: string }).message}`,
             );
-            return false;
+            throw new DBError({
+                message: `Insert list of currencies rates for currency: ${baseCurrency} failed due reason: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
         }
     }
 
@@ -49,15 +52,12 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             if (keys.length === 0) {
                 throw new Error('target currencies empty');
             }
-            // CASE WHEN ? THEN ? WHEN ? THEN ? ...
             const cases = keys.map(() => 'WHEN ? THEN ?').join(' ');
 
-            // Target currencies as list: ?, ?, ...
             const inPlaceholders = keys.map(() => '?').join(', ');
 
             const bindings: string[] = [];
 
-            // Add keys and rates
             for (const key of keys) {
                 bindings.push(key, String(targetCurrencies[key]));
             }
@@ -78,7 +78,10 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             this._logger.info(
                 `Updating list of currencies rates for currency: ${baseCurrency} failed due reason: ${(e as { message: string }).message}`,
             );
-            return false;
+            throw new DBError({
+                message: `Updating list of currencies rates for currency: ${baseCurrency} failed due reason: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
         }
     }
     public async getRate(baseCurrency: string, targetCurrency: string): Promise<IRate | undefined> {
@@ -90,9 +93,10 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
                 .where({
                     baseCurrency,
                     targetCurrency,
-                });
+                })
+                .first();
             if (data) {
-                this._logger.info(`Rate for code ${baseCurrency} fetched successfully`);
+                this._logger.info(`Rate for code ${baseCurrency} fetched successfully - ${JSON.stringify(data)}`);
                 return data;
             } else {
                 throw new NotFoundError({
@@ -101,6 +105,10 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             }
         } catch (e) {
             this._logger.error(`Fetch failed due reason: ${(e as { message: string }).message}`);
+            throw new DBError({
+                message: `Fetch failed due reason: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
         }
     }
     public async getRates(baseCurrency: string): Promise<IRate[] | undefined> {
@@ -122,6 +130,10 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             }
         } catch (e) {
             this._logger.error(`Fetch failed due reason: ${(e as { message: string }).message}`);
+            throw new DBError({
+                message: `Fetch failed due reason: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
         }
     }
 
