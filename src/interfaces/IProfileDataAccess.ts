@@ -4,6 +4,6 @@ import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 
 export interface IProfileDataAccess {
     createProfile(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined>;
-    getProfile(userId: number): Promise<IProfile | undefined>;
+    getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined>;
     confirmationUserMail(userId: number): Promise<boolean | undefined>;
 }

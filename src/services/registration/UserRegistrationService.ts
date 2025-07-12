@@ -27,6 +27,7 @@ import currency_initial from 'src/config/currency_initial';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'types/HttpCode';
+import { IBalanceService } from 'interfaces/IBalanceService';
 
 interface IDefaultData {
     group: string;
@@ -57,6 +58,9 @@ export default class UserRegistrationService extends LoggerBase {
     protected userRoleService: IUserRoleService;
 
     protected currencyService: ICurrencyService;
+
+    protected balanceService: IBalanceService;
+
     protected db: IDatabaseConnection;
 
     constructor(services: {
@@ -71,6 +75,7 @@ export default class UserRegistrationService extends LoggerBase {
         profileService: IProfileService;
         userRoleService: IUserRoleService;
         currencyService: ICurrencyService;
+        balanceService: IBalanceService;
         db: IDatabaseConnection;
     }) {
         super();
@@ -85,6 +90,7 @@ export default class UserRegistrationService extends LoggerBase {
         this.profileService = services.profileService;
         this.userRoleService = services.userRoleService;
         this.currencyService = services.currencyService;
+        this.balanceService = services.balanceService;
         this.db = services.db;
     }
 
@@ -153,6 +159,7 @@ export default class UserRegistrationService extends LoggerBase {
                         errorCode: ErrorCode.SIGNUP_PROFILE_NOT_CREATED,
                     });
                 }
+                await this.balanceService.post(user.userId, { amount: 0, currencyCode: currencyCode }, trx);
                 const profile = response[1] as IProfile;
                 await this.createInitialDataForNewUser(user.userId, profile, trx);
                 await uow.commit();

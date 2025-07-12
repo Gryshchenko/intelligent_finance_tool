@@ -31,12 +31,11 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
         }
     }
 
-    async getProfile(userId: number): Promise<IProfile | undefined> {
+    async getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
         try {
             this._logger.info('Request to retrieve profile');
-
-            const data = await this._db
-                .engine()<IProfile>('profiles')
+            const query = trx || this._db.engine();
+            const data = query<IProfile>('profiles')
                 .select<IProfile>(
                     'profiles.profileId',
                     'profiles.userId',

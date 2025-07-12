@@ -54,10 +54,79 @@ export default class TransactionService extends LoggerBase implements ITransacti
     }
 
     async deleteTransaction(userId: number, transactionId: number): Promise<boolean> {
-        return await this._transactionDataAccess.deleteTransaction(userId, transactionId);
+        const uow = new UnitOfWork(this._db);
+        try {
+            await uow.start();
+            const trxInProcess = uow.getTransaction();
+
+            this.validateTrx(trxInProcess);
+
+            const trx = trxInProcess as IDBTransaction;
+
+            const transaction = await this._transactionDataAccess.getTransaction(userId, transactionId, trx);
+            const result = await this._transactionDataAccess.deleteTransaction(userId, transactionId, trx);
+            if (!transaction) {
+                throw new ValidationError({
+                    message: 'Transaction could not be deleted',
+                });
+            }
+            await this._balanceService.patch(
+                userId,
+                {
+                    amount: transaction?.amount * -1,
+                    currencyCode: transaction.currencyCode,
+                },
+                trx,
+            );
+            await uow.commit();
+            return result;
+        } catch (e) {
+            this._logger.error(
+                `Delete transaction failed for userId=${userId}, transactionId=${transactionId}: ${(e as { message: string }).message}`,
+                e,
+            );
+            await uow.rollback();
+            throw e;
+        }
     }
     async patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null> {
-        return await this._transactionDataAccess.patchTransaction(userId, transaction);
+        const uow = new UnitOfWork(this._db);
+        try {
+            await uow.start();
+            const trxInProcess = uow.getTransaction();
+
+            this.validateTrx(trxInProcess);
+
+            const trx = trxInProcess as IDBTransaction;
+
+            const trs = await this._transactionDataAccess.getTransaction(userId, transaction?.transactionId, trx);
+            const result = await this._transactionDataAccess.patchTransaction(userId, transaction, trx);
+            if (!trs) {
+                throw new ValidationError({
+                    message: 'Transaction could not be deleted',
+                });
+            }
+            if (Utils.isNotNull(transaction.amount)) {
+                const delta = transaction.amount - trs.amount;
+                await this._balanceService.patch(
+                    userId,
+                    {
+                        amount: delta,
+                        currencyCode: trs.currencyCode,
+                    },
+                    trx,
+                );
+            }
+            await uow.commit();
+            return result;
+        } catch (e) {
+            this._logger.error(
+                `Patch transaction failed for userId=${userId}, transactionId=${transaction.transactionId}: ${(e as { message: string }).message}`,
+                e,
+            );
+            await uow.rollback();
+            throw e;
+        }
     }
     async getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined> {
         return await this._transactionDataAccess.getTransaction(userId, transactionId);
@@ -85,7 +154,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 const newAmount = Utils.roundNumber(currentAmount) + Utils.roundNumber(transactionAmount);
                 await this._balanceService.patch(
                     userId,
-                    { amount: newAmount, currencyCode: accountInWork?.currencyCode as string },
+                    { amount: transactionAmount, currencyCode: accountInWork?.currencyCode as string },
                     trx,
                 );
 
@@ -105,6 +174,11 @@ export default class TransactionService extends LoggerBase implements ITransacti
 
                 const currentAmount = (accountInWork as IAccount).amount;
                 const newAmount = Utils.roundNumber(currentAmount) - Utils.roundNumber(transactionAmount);
+                await this._balanceService.patch(
+                    userId,
+                    { amount: transactionAmount * -1, currencyCode: accountInWork?.currencyCode as string },
+                    trx,
+                );
 
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
             },

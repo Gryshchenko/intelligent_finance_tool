@@ -17,8 +17,8 @@ export default class ProfileService extends LoggerBase implements IProfileServic
         return await this._profileDataAccess.createProfile(data, trx);
     }
 
-    public async getProfile(userId: number): Promise<IProfile | undefined> {
-        return await this._profileDataAccess.getProfile(userId);
+    public async getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
+        return await this._profileDataAccess.getProfile(userId, trx);
     }
 
     public async confirmationUserMail(userId: number): Promise<boolean | undefined> {

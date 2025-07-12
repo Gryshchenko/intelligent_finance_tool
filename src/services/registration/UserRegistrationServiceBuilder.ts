@@ -13,6 +13,7 @@ import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilde
 import MailService from 'services/mail/MailService';
 import MailTemplateService from 'services/mailTamplate/MailTemplateService';
 import EmailConfirmationService from 'services/emailConfirmation/EmailConfirmationService';
+import BalanceServiceBuilder from 'services/balance/BalanceServiceBuilder';
 
 export default class UserRegistrationServiceBuilder {
     public static build() {
@@ -28,6 +29,7 @@ export default class UserRegistrationServiceBuilder {
             userRoleService: UserRoleServiceBuilder.build(),
             profileService: ProfileServiceBuilder.build(),
             currencyService: CurrencyServiceBuilder.build(),
+            balanceService: BalanceServiceBuilder.build(),
             emailConfirmationService: new EmailConfirmationService(
                 new EmailConfirmationDataAccess(databaseConnection),
                 new MailService(),

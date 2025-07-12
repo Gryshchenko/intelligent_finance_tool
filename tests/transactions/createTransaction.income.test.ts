@@ -1,11 +1,5 @@
 // @ts-nocheck
-import {
-    deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomPassword,
-    generateRandomString,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { deleteUserAfterTest, generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 
@@ -35,7 +29,6 @@ describe('POST /transaction/create - income', () => {
     for (const num of [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554]) {
         it(`should create new transaction num: ${num}`, async () => {
             const agent = request.agent(app);
-
             const create_user = await agent
                 .post('/register/signup')
                 .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
@@ -91,6 +84,17 @@ describe('POST /transaction/create - income', () => {
                 errors: [],
                 status: 1,
             });
+            const {
+                body: {
+                    data: { balanceId, balance },
+                },
+            } = await agent
+                .get(`/user/${create_user.body.data.userId}/balance`)
+                .set('authorization', create_user.header['authorization'])
+                .send({})
+                .expect(200);
+            expect(balanceId).toBeTruthy();
+            expect(balance).toBe(String(num));
         });
     }
     it('should not create new transaction - miss incomeId', async () => {

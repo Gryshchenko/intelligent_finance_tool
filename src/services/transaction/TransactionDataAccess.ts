@@ -96,11 +96,12 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         }
     }
 
-    async getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined> {
+    async getTransaction(userId: number, transactionId: number, trx?: IDBTransaction): Promise<ITransaction | undefined> {
         try {
             this._logger.info(`Fetching transaction with transactionId: ${transactionId} for userId: ${userId}`);
 
-            const data = await this.getTransactionBaseQuery()
+            const query = trx || this._db.engine();
+            const data = await this.getTransactionBaseQuery(query)
                 .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
                 .where({ userId, transactionId })
                 .first();
@@ -224,24 +225,22 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         return allowedProperties;
     }
 
-    protected getTransactionBaseQuery() {
-        return this._db
-            .engine()('transactions')
-            .select(
-                'transactions.transactionId',
-                'transactions.amount',
-                'transactions.categoryId',
-                'transactions.accountId',
-                'transactions.incomeId',
-                'transactions.description',
-                'transactions.createAt',
-                'transactions.updateAt',
-                'transactions.currencyId',
-                'transactions.targetAccountId',
-                'transactions.transactionTypeId',
-                'currencies.currencyCode',
-                'currencies.currencyName',
-                'currencies.symbol',
-            );
+    protected getTransactionBaseQuery(trx = this._db.engine()) {
+        return trx('transactions').select(
+            'transactions.transactionId',
+            'transactions.amount',
+            'transactions.categoryId',
+            'transactions.accountId',
+            'transactions.incomeId',
+            'transactions.description',
+            'transactions.createAt',
+            'transactions.updateAt',
+            'transactions.currencyId',
+            'transactions.targetAccountId',
+            'transactions.transactionTypeId',
+            'currencies.currencyCode',
+            'currencies.currencyName',
+            'currencies.symbol',
+        );
     }
 }

@@ -37,10 +37,14 @@ export default class BalanceService extends LoggerBase implements IBalanceServic
             errorCode: ErrorCode.PROFILE_ERROR,
         });
     }
+    async post(userId: number, properties: { amount: number; currencyCode: string }, trx?: IDBTransaction): Promise<number> {
+        return await this._balanceDataAccess.post(userId, properties, trx);
+    }
+
     async patch(userId: number, properties: { amount: number; currencyCode: string }, trx?: IDBTransaction): Promise<number> {
         try {
             this._logger.info(`Patch user balance to amount: ${properties.amount} currency: ${properties.currencyCode}`);
-            const profile = await this._profileService.getProfile(userId);
+            const profile = await this._profileService.getProfile(userId, trx);
             if (Utils.isNull(profile?.currencyCode)) {
                 throw this.error(`Patch user balance failed, profile currency null`);
             }

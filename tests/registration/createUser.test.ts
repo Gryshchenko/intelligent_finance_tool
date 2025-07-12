@@ -19,7 +19,7 @@ const app = require('../../src/app');
 
 let server;
 
-let userIds = [];
+const userIds = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
@@ -285,7 +285,11 @@ describe('POST /register/signup', () => {
             const accounts = await databaseConnection.engine()('accounts').select('*').where({ userId: user.userId });
             const categories = await databaseConnection.engine()('categories').select('*').where({ userId: user.userId });
             const incomes = await databaseConnection.engine()('incomes').select('*').where({ userId: user.userId });
+            const balance = await databaseConnection.engine()('balance').select('*').where({ userId: user.userId });
 
+            expect(balance.length).toBe(1);
+            expect(balance[0].userId).toBe(user.userId);
+            expect(balance[0].balance).toBe('0');
             userIds.push(user.userId);
             expect(confirmMail.length).toBe(1);
             expect(confirmMail[0].email).toEqual(mail);
