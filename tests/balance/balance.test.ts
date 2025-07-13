@@ -134,7 +134,7 @@ describe('POST /balance', () => {
         }
     });
 
-    it(`modify transaction and check balance`, async () => {
+    it(`updates balance after modifying transaction amount`, async () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
@@ -208,7 +208,42 @@ describe('POST /balance', () => {
                 .send()
                 .expect(200);
             expect(Utils.roundNumber(afterPatch.body.data.amount)).toBe(Utils.roundNumber(modify));
-            expect(Utils.roundNumber(await getBalance())).toBe(Utils.roundNumber(originalBalance - 600));
+            expect(Utils.roundNumber(await getBalance())).toBe(Utils.roundNumber(modify));
+            await agent
+                .delete(`/user/${create_user.body.data.userId}/transaction/${transactionId}`)
+                .set('authorization', create_user.header['authorization'])
+                .send()
+                .expect(204);
+            expect(Utils.roundNumber(await getBalance())).toBe(Utils.roundNumber(originalBalance));
         }
+    });
+    it(`updates balance after modifying transaction amount`, async () => {
+        const agent = request.agent(app);
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+        userIds.push(create_user.body.data.userId);
+        const {
+            // body: {
+            //     data: { accountId, amount, accountName },
+            // },
+        } = await agent.get(`/currencies/`).set('authorization', create_user.header['authorization']).expect(200);
+        const {
+            body: {
+                data: { accountId, amount, accountName },
+            },
+        } = await agent
+            .post(`/user/${create_user.body.data.userId}/account/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                currencyId: 1,
+                accountName: 'Test EURO',
+                amount: newAmount,
+            })
+            .expect(200);
+        expect(accountId).toBeTruthy();
+        expect(Number(amount)).toStrictEqual(newAmount);
+        expect(accountName).toStrictEqual(name);
     });
 });

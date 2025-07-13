@@ -8,7 +8,7 @@ export function generateSecureRandom() {
 
 export function generateRandomString(len = Math.floor(generateSecureRandom() * 10) + 5) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let userNameLength = len;
+    const userNameLength = len;
     let userName = 'test_';
 
     for (let i = 0; i < userNameLength; i++) {
@@ -31,7 +31,7 @@ export function generateRandomPassword(len = Math.floor(generateSecureRandom() *
     const numbers = '0123456789';
     const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
     const allChars = lowerChars + upperChars + numbers + specialChars;
-    let passwordLength = len;
+    const passwordLength = len;
     let password = '';
 
     password += lowerChars.charAt(Math.floor(generateSecureRandom() * lowerChars.length));
@@ -60,5 +60,6 @@ export async function deleteUserAfterTest(id: string, db: IDatabaseConnection) {
     await db.engine()('email_confirmations').delete().where({ userId: id });
     await db.engine()('usergroups').delete().where({ userId: id });
     await db.engine()('userroles').delete().where({ userId: id });
+    await db.engine()('balance').delete().where({ userId: id });
     await db.engine()('users').delete().where({ userId: id });
 }

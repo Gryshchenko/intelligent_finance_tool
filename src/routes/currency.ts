@@ -5,11 +5,6 @@ import { CurrencyController } from 'controllers/CurrencyController';
 
 const currencyRouter = express.Router({ mergeParams: true });
 
-currencyRouter.get(
-    '/',
-    validateQuery({ currency: 'string', targetCurrency: 'string' }),
-    routesInputValidation([]),
-    CurrencyController.get,
-);
+currencyRouter.get('/', validateQuery({ currency: 'string' }), routesInputValidation([]), CurrencyController.get);
 
 export default currencyRouter;

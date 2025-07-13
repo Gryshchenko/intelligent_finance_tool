@@ -22,8 +22,9 @@ import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
 import passport from 'passport';
-import CurrencyServiceBuilder from 'services/currency/CurrencyServiceBuilder';
 import currencyRouter from 'routes/currency';
+import exchangeRates from 'routes/exchangeRates';
+import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;
@@ -66,7 +67,8 @@ app.use(SessionService.setup());
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/register', registerRouter);
-app.use('/currency', currencyRouter);
+app.use('/currencies', currencyRouter);
+app.use('/exchange-rates', exchangeRates);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
@@ -77,7 +79,7 @@ const httpsServer = https.createServer(credentials, app);
 if (process.env.NODE_ENV !== 'test') {
     httpsServer.listen(port, async () => {
         const ip = getLocalIP();
-        CurrencyServiceBuilder.build()
+        ExchangeRateServiceBuilder.build()
             .updateCurrencyRates()
             .catch((e) => {
                 Logger.Of('App').info(`Update currency failed due reason: ${(e as { message: string }).message}`);

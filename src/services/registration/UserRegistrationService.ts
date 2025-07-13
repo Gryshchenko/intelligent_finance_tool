@@ -127,7 +127,7 @@ export default class UserRegistrationService extends LoggerBase {
             const user = await this.userService.createUser(email, password, trx);
             if (user) {
                 const currencyCode = (currency_initial[locale] ?? currency_initial[LanguageType.US]).currencyCode;
-                const currency = await this.currencyService.getCurrencyByCurrencyCode(currencyCode);
+                const currency = await this.currencyService.getByCurrencyCode(currencyCode);
                 if (!currency) {
                     throw new CustomError({
                         message: 'Unable to retrieve the user’s currency based on their locale.',

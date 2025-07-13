@@ -16,17 +16,16 @@ export class CurrencyController {
         const responseBuilder = new ResponseBuilder();
         try {
             const currency: string = String(req.query.currency) as string;
-            const targetCurrency: string = String(req.query.targetCurrency) as string;
-            if (Utils.isEmpty(currency) || Utils.isEmpty(targetCurrency)) {
+            if (Utils.isEmpty(currency)) {
                 throw new ValidationError({
-                    message: `Conversation failed currency: ${currency} or target currency should not be empty: ${targetCurrency}`,
+                    message: `Get currency failed currency should not be empty`,
                 });
             }
-            const rate = await CurrencyServiceBuilder.build().getRate(currency, targetCurrency);
-            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(rate).build());
+            const response = await CurrencyServiceBuilder.build().getByCurrencyCode(currency);
+            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build());
         } catch (e: unknown) {
-            CurrencyController.logger.error(`Convert failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.INCOME_ERROR);
+            CurrencyController.logger.error(`Get currency failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.CURRENCY_ERROR);
         }
     }
 }
