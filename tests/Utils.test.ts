@@ -267,4 +267,36 @@ describe('Utils', () => {
             expect(data).toBeUndefined();
         });
     });
+    it('should use crypto.randomUUID when available with mock', () => {
+        const mockUUID = '123e4567-e89b-12d3-a456-426614174000';
+        const call = jest.spyOn(Utils, 'uuid').mockReturnValue(mockUUID);
+
+        const result = Utils.uuid();
+        expect(result).toBe(mockUUID);
+        expect(call).toHaveBeenCalled();
+    });
+    it('should use crypto.randomUUID when available', () => {
+        const result = Utils.uuid();
+
+        const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        expect(result).toMatch(uuidV4Regex);
+    });
+
+    it('should generate a UUID manually if crypto.randomUUID is not available', () => {
+        const getRandomValuesMock = jest.fn((arr: Uint8Array) => {
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = i;
+            }
+            return arr;
+        });
+
+        (globalThis.crypto as unknown) = {
+            getRandomValues: getRandomValuesMock,
+        };
+
+        const result = Utils.uuid();
+
+        const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        expect(result).toMatch(uuidV4Regex);
+    });
 });

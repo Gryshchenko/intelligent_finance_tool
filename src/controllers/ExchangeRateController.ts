@@ -22,7 +22,7 @@ export class ExchangeRateController {
                     message: `Conversation failed currency: ${currency} or target currency should not be empty: ${targetCurrency}`,
                 });
             }
-            const rate = ExchangeRateServiceBuilder.build().get(currency, targetCurrency);
+            const rate = await ExchangeRateServiceBuilder.build().get(currency, targetCurrency);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(rate).build());
         } catch (e: unknown) {
             ExchangeRateController.logger.error(`Convert failed due reason: ${(e as { message: string }).message}`);

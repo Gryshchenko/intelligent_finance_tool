@@ -32,7 +32,7 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
     }
     protected async genericGet(
         obj: Partial<{
-            currencyId: string;
+            currencyId: number;
             symbol: string;
             currencyCode: string;
             currencyName: string;
@@ -57,7 +57,7 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
             const data = await this._db
                 .engine()<ICurrency>('currencies')
                 .where(obj)
-                .select<ICurrency>(['currencyId', 'currencyCode', 'currencyName'])
+                .select<ICurrency>(['currencyId', 'currencyCode', 'currencyName', 'symbol'])
                 .first();
 
             if (data) {
@@ -80,7 +80,7 @@ export default class CurrencyDataAccess extends LoggerBase implements ICurrencyD
     public async getByCurrencyCode(currencyCode: string): Promise<ICurrency | undefined> {
         return await this.genericGet({ currencyCode: currencyCode });
     }
-    public async getById(id: string): Promise<ICurrency | undefined> {
+    public async getById(id: number): Promise<ICurrency | undefined> {
         return await this.genericGet({ currencyId: id });
     }
     public async getBySymbol(symbol: string): Promise<ICurrency | undefined> {

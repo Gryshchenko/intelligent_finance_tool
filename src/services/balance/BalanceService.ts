@@ -3,7 +3,6 @@ import { IBalanceService } from 'interfaces/IBalanceService';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IBalance } from 'interfaces/IBalance';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { ICurrencyService } from 'interfaces/ICurrencyService';
 import { IProfileService } from 'interfaces/IProfileService';
 import Utils from 'src/utils/Utils';
 import { IRate } from 'interfaces/IRate';
@@ -14,19 +13,16 @@ import { IExchangeRateService } from 'interfaces/IExchangeRateService';
 
 export default class BalanceService extends LoggerBase implements IBalanceService {
     private readonly _balanceDataAccess: IBalanceDataAccess;
-    private readonly _currencyService: ICurrencyService;
     private readonly _profileService: IProfileService;
     private readonly _exchangeRateService: IExchangeRateService;
 
     public constructor(
         balanceDataAccess: IBalanceDataAccess,
-        currencyService: ICurrencyService,
         profileService: IProfileService,
         exchangeRateService: IExchangeRateService,
     ) {
         super();
         this._balanceDataAccess = balanceDataAccess;
-        this._currencyService = currencyService;
         this._profileService = profileService;
         this._exchangeRateService = exchangeRateService;
     }

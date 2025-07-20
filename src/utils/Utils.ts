@@ -176,4 +176,22 @@ export default class Utils {
                 return [err, undefined];
             });
     }
+    public static uuid(): string {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID();
+        }
+
+        const hex = [...crypto.getRandomValues(new Uint8Array(16))].map((b, i) => {
+            if (i === 6) {
+                b = (b & 0x0f) | 0x40; // version 4
+            } else if (i === 8) {
+                b = (b & 0x3f) | 0x80; // variant 10
+            }
+            return b.toString(16).padStart(2, '0');
+        });
+
+        return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex
+            .slice(8, 10)
+            .join('')}-${hex.slice(10).join('')}`;
+    }
 }

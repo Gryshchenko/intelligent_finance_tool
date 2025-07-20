@@ -7,6 +7,7 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import Utils from 'src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { DBError } from 'src/utils/errors/DBError';
 
 export default class AccountService extends LoggerBase implements IAccountService {
     private readonly _accountDataAccess: IAccountDataAccess;
@@ -19,7 +20,10 @@ export default class AccountService extends LoggerBase implements IAccountServic
     async createAccount(userId: number, account: ICreateAccount, trx?: IDBTransaction): Promise<IAccount> {
         validateAllowedProperties(account as unknown as Record<string, string | number>, ['accountName', 'amount', 'currencyId']);
         const accounts = await this._accountDataAccess.createAccounts(userId, [account], trx);
-        return accounts[0];
+        if (Utils.isArrayNotEmpty(accounts)) {
+            return accounts[0];
+        }
+        throw new DBError({ message: 'Account not created, result empty' });
     }
     async createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]> {
         return await this._accountDataAccess.createAccounts(userId, accounts, trx);

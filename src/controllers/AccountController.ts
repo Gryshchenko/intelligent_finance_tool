@@ -9,11 +9,7 @@ import AccountServiceBuilder from 'services/account/AccountServiceBuilder';
 import { ResponseStatusType } from 'types/ResponseStatusType';
 import Utils from 'src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
-import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
-import { UnitOfWork } from 'src/repositories/UnitOfWork';
-import { CustomError } from 'src/utils/errors/CustomError';
-import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
+import { AccountOrchestrationServiceBuilder } from 'services/account/AccountOrchestrationServiceBuilder';
 
 export class AccountController {
     private static readonly logger = Logger.Of('AccountController');
@@ -42,7 +38,7 @@ export class AccountController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { accountName, amount, currencyId } = req.body;
-            const account = await AccountServiceBuilder.build().createAccount(req.session.user?.userId as number, {
+            const account = AccountOrchestrationServiceBuilder.build().create(req.session.user?.userId as number, {
                 accountName,
                 amount,
                 currencyId,
@@ -55,28 +51,12 @@ export class AccountController {
     }
     public static async delete(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
-        const db: IDatabaseConnection = DatabaseConnectionBuilder.build();
-        const uow = new UnitOfWork(db);
         try {
             const userId = Number(req.session.user?.userId);
             const accountId = Number(req.params?.accountId);
-            const accountService = AccountServiceBuilder.build(db);
-            const transactionService = TransactionServiceBuilder.build(db);
-            await uow.start();
-            const trx = uow.getTransaction();
-            if (Utils.isNull(trx)) {
-                throw new CustomError({
-                    message: 'Transaction not initiated. User could not be created',
-                    errorCode: ErrorCode.ACCOUNT_ERROR,
-                    statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-                });
-            }
-            await transactionService.deleteTransactionsForAccount(userId, accountId, trx as unknown as IDBTransaction);
-            await accountService.deleteAccount(userId, accountId, trx as unknown as IDBTransaction);
-            await uow.commit();
+            await AccountOrchestrationServiceBuilder.build().delete(userId, accountId);
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
         } catch (e: unknown) {
-            await uow.rollback();
             AccountController.logger.error(`Delete account failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.ACCOUNT_ERROR);
         }
@@ -89,7 +69,7 @@ export class AccountController {
             if (Utils.isEmpty(accountName) && Utils.isNull(amount) && Utils.isNull(status)) {
                 throw new ValidationError({ message: 'Path account failed due reason: empty body' });
             }
-            await AccountServiceBuilder.build().patchAccount(req.session.user?.userId as number, accountId, {
+            await AccountOrchestrationServiceBuilder.build().patch(req.session.user?.userId as number, accountId, {
                 accountName,
                 amount,
                 status,

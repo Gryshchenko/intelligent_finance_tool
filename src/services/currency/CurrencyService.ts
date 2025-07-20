@@ -18,7 +18,7 @@ export default class CurrencyService extends LoggerBase implements ICurrencyServ
     public async getByCurrencyCode(currencyCode: string): Promise<ICurrency | undefined> {
         return await this._currencyDataAccess.getByCurrencyCode(currencyCode);
     }
-    public async getById(id: string): Promise<ICurrency | undefined> {
+    public async getById(id: number): Promise<ICurrency | undefined> {
         return await this._currencyDataAccess.getById(id);
     }
     public async getByName(symbol: string): Promise<ICurrency | undefined> {
