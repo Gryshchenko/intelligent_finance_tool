@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import Logger from 'src/helper/logger/Logger';
 
 import SessionService from '../services/session/SessionService';
 import { UserAgentService } from 'src/services/userAgentService/UserAgentService';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
+import Logger from 'helper/logger/Logger';
 
 const _logger = Logger.Of('SessionVerify');
 

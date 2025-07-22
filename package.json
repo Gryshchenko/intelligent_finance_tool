@@ -6,8 +6,9 @@
     "private": true,
     "copyright": "",
     "scripts": {
+        "build:dev": "tsc --project tsconfig.json",
         "build-translation": "node scripts/translations.js",
-        "dev": "npm run build-translation && nodemon --exec NODE_OPTIONS='--inspect' ts-node --files src/app.ts",
+        "start": "npm run build-translation && nodemon --exec NODE_OPTIONS='--inspect' ts-node --files src/app.ts",
         "redis": "sudo service redis-server start",
         "type-check": "tsc -v && tsc -p tsconfig.json",
         "precheck": "npm run prettier:check && npm run eslint:check && npm run type-check",
@@ -28,6 +29,8 @@
     },
     "license": "All rights reserved",
     "dependencies": {
+        "pino-pretty": "13.0.0",
+        "pino": "9.7.0",
         "argon2": "0.40.3",
         "axios": "^1.9.0",
         "connect-redis": "7.1.1",
@@ -55,6 +58,7 @@
         "ua-parser-js": "2.0.0-beta.3"
     },
     "devDependencies": {
+        "tscpaths": "^0.0.9",
         "@eslint/js": "9.4.0",
         "@types/eslint__js": "8.42.3",
         "@types/express": "4.17.21",

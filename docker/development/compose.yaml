@@ -1,0 +1,10 @@
+services:
+    sl-web-server-front-end:
+        build:
+            context: ../../
+            dockerfile: docker/development/Dockerfile
+            args:
+                ENV: dev
+        image: budget-service
+        ports:
+            - '3000:3000'

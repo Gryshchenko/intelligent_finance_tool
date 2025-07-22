@@ -3,11 +3,11 @@ import { ResponseStatusType } from 'types/ResponseStatusType';
 import { ErrorCode } from 'types/ErrorCode';
 import { IUser } from 'interfaces/IUser';
 import { IUserSession } from 'interfaces/IUserSession';
-import Logger from 'src/helper/logger/Logger';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
 import { getConfig } from 'src/config/config';
 import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
 import { UserAgentService } from 'src/services/userAgentService/UserAgentService';
+import Logger from 'helper/logger/Logger';
 
 const session = require('express-session');
 const redis = require('redis');

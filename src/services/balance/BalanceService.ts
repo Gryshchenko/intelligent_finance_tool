@@ -49,8 +49,9 @@ export default class BalanceService extends LoggerBase implements IBalanceServic
                 throw this.error(`Patch user balance failed, profile currency null`);
             }
             if (profile?.currencyCode && profile.currencyCode === properties.currencyCode) {
+                const result =  await this._balanceDataAccess.patch(userId, properties, trx);
                 this._logger.info(`Patch user balance success`);
-                return await this._balanceDataAccess.patch(userId, properties, trx);
+                return result;
             }
             const currency = profile?.currencyCode as unknown as string;
             const response = await this._exchangeRateService.get(currency, properties.currencyCode);
@@ -59,14 +60,15 @@ export default class BalanceService extends LoggerBase implements IBalanceServic
             }
             const { rate } = response as unknown as IRate;
             const { amount } = properties;
-            this._logger.info(`Patch user balance success`);
-            return await this._balanceDataAccess.patch(
+            const result = await this._balanceDataAccess.patch(
                 userId,
                 {
                     amount: Utils.roundNumber(amount * rate),
                 },
                 trx,
             );
+            this._logger.info(`Patch user balance success amount: ${Utils.roundNumber(amount * rate)}`);
+            return result;
         } catch (e) {
             this._logger.error(`Patch balance failed due reason: ${(e as { message: string }).message}`);
             throw e;

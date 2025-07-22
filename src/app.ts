@@ -15,7 +15,6 @@ import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
 import { ResponseStatusType } from 'types/ResponseStatusType';
 import { ErrorCode } from 'types/ErrorCode';
-import Logger from 'src/helper/logger/Logger';
 import { swaggerInit } from 'src/swagger/swagger';
 import { checkOriginReferer } from 'middleware/checkOriginReferer';
 import { checkCors } from 'middleware/checkCors';
@@ -25,6 +24,7 @@ import passport from 'passport';
 import currencyRouter from 'routes/currency';
 import exchangeRates from 'routes/exchangeRates';
 import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
+import Logger from 'helper/logger/Logger';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;

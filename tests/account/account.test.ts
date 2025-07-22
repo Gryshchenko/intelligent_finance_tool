@@ -214,7 +214,7 @@ describe('Account', () => {
             .set('authorization', create_user.header['authorization'])
             .expect(400);
     });
-    it(`DELETE - delete account`, async () => {
+    it(`DELETE - delete account - hide`, async () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
@@ -294,6 +294,90 @@ describe('Account', () => {
                 status: AccountStatusType.Disable,
             })
             .expect(204);
+        await agent
+            .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(404);
+        for (const id of ids) {
+            await agent
+                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
+                .set('authorization', create_user.header['authorization'])
+                .expect(200);
+        }
+    });
+    it(`DELETE - delete account - full`, async () => {
+        const agent = request.agent(app);
+        const create_user = await agent
+            .post('/register/signup')
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .expect(200);
+
+        userIds.push(create_user.body.data.userId);
+        const {
+            body: {
+                data: { incomes, categories, accounts },
+            },
+        } = await agent
+            .get(`/user/${create_user.body.data.userId}/overview/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({})
+            .expect(200);
+
+        const incomeId = incomes[0].incomeId;
+        const categoryId = categories[0].categoryId;
+        const targetAccountId = accounts[0].accountId;
+        const {
+            body: {
+                data: { accountId },
+            },
+        } = await agent
+            .post(`/user/${create_user.body.data.userId}/account/`)
+            .set('authorization', create_user.header['authorization'])
+            .send({
+                currencyId: 1,
+                accountName: 'Test 1',
+                amount: 20000,
+            })
+            .expect(200);
+        const transactions = [
+            {
+                transactionTypeId: TransactionType.Income,
+                incomeId,
+            },
+            {
+                transactionTypeId: TransactionType.Expense,
+                categoryId,
+            },
+            {
+                transactionTypeId: TransactionType.Transafer,
+                targetAccountId,
+            },
+        ];
+
+        const ids = [];
+
+        for (const transaction of transactions) {
+            const {
+                body: {
+                    data: { transactionId },
+                },
+            } = await agent
+                .post(`/user/${create_user.body.data.userId}/transaction/`)
+                .set('authorization', create_user.header['authorization'])
+                .send({
+                    accountId,
+                    currencyId: 1,
+                    amount: 1000,
+                    description: 'Test',
+                    ...transaction,
+                })
+                .expect(201);
+            ids.push(transactionId);
+        }
+        await agent
+            .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
+            .set('authorization', create_user.header['authorization'])
+            .expect(200);
         for (const id of ids) {
             await agent
                 .get(`/user/${create_user.body.data.userId}/transaction/${id}`)

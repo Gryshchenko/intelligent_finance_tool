@@ -3,7 +3,7 @@ import { body, ValidationChain, validationResult } from 'express-validator';
 import { ResponseStatusType } from 'types/ResponseStatusType';
 import { ErrorCode } from 'types/ErrorCode';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
-import Logger from 'src/helper/logger/Logger';
+import Logger from 'helper/logger/Logger';
 
 interface IOptions {
     max: number;

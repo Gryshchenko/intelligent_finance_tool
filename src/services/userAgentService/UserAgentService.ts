@@ -1,7 +1,7 @@
 import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
 import Utils from 'src/utils/Utils';
-import Logger from 'src/helper/logger/Logger';
 import uap from 'ua-parser-js';
+import Logger from 'helper/logger/Logger';
 
 export class UserAgentService {
     public static getUserAgent(userAgent: string | undefined): IUserAgentInfo | undefined {
@@ -45,8 +45,8 @@ export class UserAgentService {
                 aInWork.os.name === bInWork.os.name &&
                 aInWork.os.version === bInWork.os.version
             );
-        } catch (e) {
-            Logger.Of('UserAgentService').error(e);
+        } catch (e: unknown) {
+            Logger.Of('UserAgentService').error((e as {message: string}).message);
             return false;
         }
     }

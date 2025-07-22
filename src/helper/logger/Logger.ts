@@ -1,102 +1,48 @@
-import Utils from 'src/utils/Utils';
+import { baseLogger } from 'helper/logger/pino';
 
-export enum LogLevel {
-    DISABLED,
-    ERROR,
-    WARNING,
-    INFO,
-    DEBUG,
+export interface LogContext {
+    requestId?: string;
+    userId?: string;
+    [key: string]: unknown;
 }
-export const deserialize = (logLevel: string): LogLevel => {
-    switch (logLevel) {
-        case 'disabled':
-            return LogLevel.DISABLED;
-        case 'error':
-            return LogLevel.ERROR;
-        case 'warn':
-            return LogLevel.WARNING;
-        case 'info':
-            return LogLevel.INFO;
-        case 'debug':
-            return LogLevel.DEBUG;
-        default:
-            return LogLevel.DISABLED;
-    }
-};
 
 export default class Logger {
-    private static LOG_LEVEL: LogLevel = LogLevel.DEBUG;
+    private readonly _context: Record<string, unknown>;
+    private readonly _module: string;
 
-    private name: string;
-
-    private constructor(name: string) {
-        this.name = name;
+    constructor(moduleName: string, context?: LogContext) {
+        this._module = moduleName;
+        this._context = context || {};
     }
 
-    public static Of(name: string): Logger {
-        return new Logger(name);
+    static Of(moduleName: string, context?: LogContext) {
+        return new Logger(moduleName, context);
     }
 
-    public static setLogLevel(logLevel: string): void {
-        Logger.SetLogLevel(deserialize(logLevel));
+    private log(level: 'info' | 'warn' | 'error' | 'debug', message: string, data?: unknown) {
+        baseLogger[level](
+            {
+                module: this._module,
+                ...this._context,
+                ...(typeof data === 'object' ? { ...data } : {}),
+            },
+            message,
+        );
     }
 
-    public static SetLogLevel(logLevel: LogLevel): void {
-        if (Utils.isNotNull(logLevel)) {
-            Logger.LOG_LEVEL = logLevel;
-        }
+    info(message: string, data?: unknown) {
+        this.log('info', message, data);
     }
 
-    public debug(message: unknown, ...optionalParams: unknown[]): void {
-        if (Logger.LOG_LEVEL >= LogLevel.DEBUG) {
-            if (Utils.isArrayNotEmpty(optionalParams)) {
-                console.debug(this.format(' D '), message, JSON.stringify(optionalParams));
-            } else {
-                console.debug(this.format(' D '), message);
-            }
-        }
+    warn(message: string, data?: unknown) {
+        this.log('warn', message, data);
     }
 
-    public info(message: unknown, ...optionalParams: unknown[]): void {
-        if (Logger.LOG_LEVEL >= LogLevel.INFO) {
-            if (Utils.isArrayNotEmpty(optionalParams)) {
-                console.warn(this.format(' I '), message, JSON.stringify(optionalParams));
-            } else {
-                console.info(this.format(' I '), message);
-            }
-        }
+    error(message: string, data?: unknown) {
+        this.log('error', message, data);
     }
 
-    public warn(message: unknown, ...optionalParams: unknown[]): void {
-        if (Logger.LOG_LEVEL >= LogLevel.WARNING) {
-            if (Utils.isArrayNotEmpty(optionalParams)) {
-                console.warn(this.format(' W '), message, JSON.stringify(optionalParams));
-            } else {
-                console.warn(this.format(' W '), message);
-            }
-        }
-    }
-
-    public error(message: unknown, ...optionalParams: unknown[]): void {
-        if (Logger.LOG_LEVEL >= LogLevel.ERROR) {
-            if (Utils.isArrayNotEmpty(optionalParams)) {
-                console.error(this.format(' E '), message, JSON.stringify(optionalParams));
-            } else {
-                console.error(this.format(' E '), message);
-            }
-        }
-    }
-
-    private format(level: string): string {
-        return [Logger.formatDate(), level, '[', this.name, ']', ' '].join('');
-    }
-
-    private static formatDate(): string {
-        const date: Date = new Date();
-        return `${[Utils.pad(date.getDate()), Utils.pad(date.getMonth() + 1), date.getFullYear()].join('-')} ${[
-            Utils.pad(date.getHours()),
-            Utils.pad(date.getMinutes()),
-            Utils.pad(date.getSeconds()),
-        ].join(':')}.${date.getMilliseconds().toString()}`;
+    debug(message: string, data?: unknown) {
+        this.log('debug', message, data);
     }
 }

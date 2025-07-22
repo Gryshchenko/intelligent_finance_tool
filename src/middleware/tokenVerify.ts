@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { VerifyErrors } from 'jsonwebtoken';
-import Logger from 'src/helper/logger/Logger';
 import SessionService from '../services/session/SessionService';
 import { getConfig } from 'src/config/config';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
+import Logger from 'helper/logger/Logger';
 
 const crypto = require('crypto');
 

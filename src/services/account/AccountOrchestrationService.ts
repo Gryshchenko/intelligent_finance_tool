@@ -52,6 +52,7 @@ export class AccountOrchestrationService extends LoggerBase {
                     message: `Accounts creation failed due balance update amount should not be null amount: ${amount}`,
                 });
             }
+            const newAccount = await this._accountService.createAccount(userId, account, trx);
             await this._balanceService.patch(
                 userId,
                 {
@@ -60,12 +61,12 @@ export class AccountOrchestrationService extends LoggerBase {
                 },
                 trx,
             );
-            const accounts = await this._accountService.createAccounts(userId, [account], trx);
-            return accounts[0];
+            return newAccount;
         });
     }
     public async patch(userId: number, accountId: number, properties: Partial<IAccount>): Promise<number> {
         return await this.withTransaction(async (trx: IDBTransaction) => {
+            const result =  await this._accountService.patchAccount(userId, accountId, properties, trx);
             if (Utils.isNotNull(properties.amount)) {
                 const amount = properties.amount as unknown as number;
                 const account = await this._accountService.getAccount(userId, accountId);
@@ -77,13 +78,15 @@ export class AccountOrchestrationService extends LoggerBase {
                     });
                 }
             }
-            return await this._accountService.patchAccount(userId, accountId, properties, trx);
+            return result;
         });
     }
     public async delete(userId: number, accountId: number): Promise<boolean> {
         return this.withTransaction(async (trx: IDBTransaction) => {
             try {
                 const account = await this._accountService.getAccount(userId, accountId);
+                await this._transactionService.deleteTransactionsForAccount(userId, accountId, trx as unknown as IDBTransaction);
+                const result = await this._accountService.deleteAccount(userId, accountId, trx as unknown as IDBTransaction);
                 if (Utils.isNotNull(account) && Utils.isNotNull(account?.currencyCode) && !isNaN(account?.amount as number)) {
                     await this.updateBalance(
                         userId,
@@ -96,8 +99,7 @@ export class AccountOrchestrationService extends LoggerBase {
                         message: `Accounts patch failed due reason find currencyCode for accountId: ${accountId}`,
                     });
                 }
-                await this._transactionService.deleteTransactionsForAccount(userId, accountId, trx as unknown as IDBTransaction);
-                return await this._accountService.deleteAccount(userId, accountId, trx as unknown as IDBTransaction);
+                 return result;
             } catch (e: unknown) {
                 this._logger.error(`Delete account failed due reason: ${(e as { message: string }).message}`);
                 throw e;
@@ -127,7 +129,10 @@ export class AccountOrchestrationService extends LoggerBase {
                     statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }
-            return await processor(trx as unknown as IDBTransaction);
+
+            const response = await processor(trx as unknown as IDBTransaction);
+            await uow.commit();
+            return response;
         } catch (e: unknown) {
             await uow.rollback();
             throw e;

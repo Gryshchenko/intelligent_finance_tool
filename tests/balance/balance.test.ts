@@ -218,52 +218,102 @@ describe('POST /balance', () => {
             expect(Utils.roundNumber(await getBalance(create_user.body.data.userId))).toBe(Utils.roundNumber(originalBalance));
         }
     });
-    it(`updates balance after modifying transaction amount - with other currency`, async () => {
-        const newAmount = 1000;
+    it('updates balance after adding accounts in other currencies', async () => {
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
-            .expect(200);
-        const getBalance = async (id: string) => {
-            const {
-                body: {
-                    data: { balance },
-                },
-            } = await agent
-                .get(`/user/${id}/balance`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
-            return balance;
-        };
-        userIds.push(create_user.body.data.userId);
-        const {
-            body: { data: currencyData },
-        } = await agent.get(`/currencies/?currency=EUR`).set('authorization', create_user.header['authorization']).expect(200);
-        const {
-            body: { data: rateData },
-        } = await agent
-            .get(`/exchange-rates/?currency=EUR&targetCurrency=USD`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(200);
+        const newAmount = 1000;
 
-        const {
-            body: { data },
-        } = await agent
-            .post(`/user/${create_user.body.data.userId}/account/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({
-                accountName: 'Test EURO',
-                amount: newAmount,
-                currencyId: currencyData.currencyId,
-            })
-            .expect(200);
-        expect(data.accountId).toBeTruthy();
-        expect(Number(data.amount)).toStrictEqual(newAmount);
-        expect(data.accountName).toStrictEqual('Test EURO');
-        expect(Utils.roundNumber(await getBalance(create_user.body.data.userId))).toBe(
-            Utils.roundNumber(newAmount * Number(rateData.rate)),
-        );
+        const registerUser = async () => {
+            const res = await agent
+                .post('/register/signup')
+                .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+                .expect(200);
+            return { userId: res.body.data.userId, auth: res.header['authorization'] };
+        };
+
+        const getCurrencyData = async (currency: string, auth: string) => {
+            const res = await agent
+                .get(`/currencies/?currency=${currency}`)
+                .set('authorization', auth)
+                .expect(200);
+            return res.body.data;
+        };
+
+        const getExchangeRate = async (base: string, target: string, auth: string) => {
+            const res = await agent
+                .get(`/exchange-rates/?currency=${base}&targetCurrency=${target}`)
+                .set('authorization', auth)
+                .expect(200);
+            return Number(res.body.data.rate);
+        };
+
+
+        const getExchangeRateFailed = async (base: string, target: string, auth: string) => {
+            return await agent
+                .get(`/exchange-rates/?currency=${base}&targetCurrency=${target}`)
+                .set('authorization', auth)
+                .expect(404);
+        };
+
+        const getBalance = async (userId: string, auth: string) => {
+            const res = await agent
+                .get(`/user/${userId}/balance`)
+                .set('authorization', auth)
+                .expect(200);
+            return Number(res.body.data.balance);
+        };
+
+        const createAccount = async (userId: string, currencyId: string, currency: string, auth: string) => {
+            const res = await agent
+                .post(`/user/${userId}/account/`)
+                .set('authorization', auth)
+                .send({
+                    accountName: `Test EURO ${currency}`,
+                    amount: newAmount,
+                    currencyId,
+                })
+                .expect(200);
+            return res.body.data;
+        };
+        const createAccountFailed = async (userId: string, currencyId: string, currency: string, auth: string) => {
+            return await agent
+                .post(`/user/${userId}/account/`)
+                .set('authorization', auth)
+                .send({
+                    accountName: `Test EURO ${currency}`,
+                    amount: newAmount,
+                    currencyId,
+                })
+                .expect(404);
+        };
+
+        const { userId, auth } = await registerUser();
+        userIds.push(userId);
+
+        let expectedBalance = 0;
+        const currencies = ['EUR', 'GBP', 'CHF', 'DKK', 'NOK'];
+        const unsupportCurrency = ['BB', 'CCC', 111];
+
+        for (const currency of currencies) {
+            const currencyData = await getCurrencyData(currency, auth);
+            const rate = await getExchangeRate('USD', currency, auth);
+
+            const account = await createAccount(userId, currencyData.currencyId, currency, auth);
+
+            expectedBalance += Utils.roundNumber(newAmount * rate);
+
+            expect(account.accountId).toBeTruthy();
+            expect(Number(account.amount)).toBe(newAmount);
+            expect(account.accountName).toBe(`Test EURO ${currency}`);
+
+            const currentBalance = Utils.roundNumber(await getBalance(userId, auth));
+            expect(currentBalance).toBe(Utils.roundNumber(expectedBalance));
+        }
+        for (const currency of unsupportCurrency) {
+            const data = await getExchangeRateFailed('USD', currency, auth);
+            expect(data.body.errors.length).toBe(1);
+            const {body: {errors}} = await createAccountFailed(userId, '-999', currency, auth);
+            expect(errors.length).toBe(1);
+        }
+
     });
 });

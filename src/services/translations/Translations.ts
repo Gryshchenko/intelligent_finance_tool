@@ -1,4 +1,4 @@
-import Logger from 'src/helper/logger/Logger';
+import Logger from 'helper/logger/Logger';
 
 import Utils from 'src/utils/Utils';
 import Parameter from 'src/services/translations/Parameter';

@@ -38,7 +38,7 @@ export class AccountController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { accountName, amount, currencyId } = req.body;
-            const account = AccountOrchestrationServiceBuilder.build().create(req.session.user?.userId as number, {
+            const account = await AccountOrchestrationServiceBuilder.build().create(req.session.user?.userId as number, {
                 accountName,
                 amount,
                 currencyId,

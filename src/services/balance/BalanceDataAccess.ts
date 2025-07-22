@@ -1,5 +1,5 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { LoggerBase } from 'src/helper/logger/LoggerBase';
+import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IBalanceDataAccess } from 'interfaces/IBalanceDataAccess';
 import { IBalance } from 'interfaces/IBalance';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
