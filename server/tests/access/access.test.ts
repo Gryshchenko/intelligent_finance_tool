@@ -31,7 +31,7 @@ afterAll((done) => {
 });
 
 describe('Access control', () => {
-    it('denies access to another user\'s account, category, balance and transaction', async () => {
+    it("denies access to another user's account, category, balance and transaction", async () => {
         const agent = request.agent(app);
 
         const createUser = async () => {
@@ -92,24 +92,12 @@ describe('Access control', () => {
         const authB = userB.header['authorization'];
         userIds.push(userBId);
 
-        await agent
-            .get(`/user/${userBId}/accounts/${accountId}`)
-            .set('authorization', authB)
-            .expect(404);
+        await agent.get(`/user/${userBId}/accounts/${accountId}`).set('authorization', authB).expect(404);
 
-        await agent
-            .get(`/user/${userBId}/categories/${categoryId}`)
-            .set('authorization', authB)
-            .expect(404);
+        await agent.get(`/user/${userBId}/categories/${categoryId}`).set('authorization', authB).expect(404);
 
-        await agent
-            .get(`/user/${userAId}/balance`)
-            .set('authorization', authB)
-            .expect(403);
+        await agent.get(`/user/${userAId}/balance`).set('authorization', authB).expect(403);
 
-        await agent
-            .delete(`/user/${userBId}/transaction/${transactionId}`)
-            .set('authorization', authB)
-            .expect(404);
+        await agent.delete(`/user/${userBId}/transaction/${transactionId}`).set('authorization', authB).expect(404);
     });
 });

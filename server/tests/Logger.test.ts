@@ -29,7 +29,7 @@ describe('Logger', () => {
                 userId: '456',
                 custom: 'value',
             }),
-            'Info message'
+            'Info message',
         );
     });
 
@@ -43,7 +43,7 @@ describe('Logger', () => {
                 requestId: '123',
                 userId: '456',
             }),
-            'Warn message'
+            'Warn message',
         );
     });
 
@@ -57,7 +57,7 @@ describe('Logger', () => {
                 requestId: '123',
                 userId: '456',
             }),
-            'Error message'
+            'Error message',
         );
     });
 
@@ -69,7 +69,7 @@ describe('Logger', () => {
             expect.objectContaining({
                 module: moduleName,
             }),
-            'Debug message'
+            'Debug message',
         );
     });
 });

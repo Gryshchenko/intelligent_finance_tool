@@ -231,10 +231,7 @@ describe('POST /balance', () => {
         };
 
         const getCurrencyData = async (currency: string, auth: string) => {
-            const res = await agent
-                .get(`/currencies/?currency=${currency}`)
-                .set('authorization', auth)
-                .expect(200);
+            const res = await agent.get(`/currencies/?currency=${currency}`).set('authorization', auth).expect(200);
             return res.body.data;
         };
 
@@ -246,7 +243,6 @@ describe('POST /balance', () => {
             return Number(res.body.data.rate);
         };
 
-
         const getExchangeRateFailed = async (base: string, target: string, auth: string) => {
             return await agent
                 .get(`/exchange-rates/?currency=${base}&targetCurrency=${target}`)
@@ -255,10 +251,7 @@ describe('POST /balance', () => {
         };
 
         const getBalance = async (userId: string, auth: string) => {
-            const res = await agent
-                .get(`/user/${userId}/balance`)
-                .set('authorization', auth)
-                .expect(200);
+            const res = await agent.get(`/user/${userId}/balance`).set('authorization', auth).expect(200);
             return Number(res.body.data.balance);
         };
 
@@ -311,9 +304,10 @@ describe('POST /balance', () => {
         for (const currency of unsupportCurrency) {
             const data = await getExchangeRateFailed('USD', currency, auth);
             expect(data.body.errors.length).toBe(1);
-            const {body: {errors}} = await createAccountFailed(userId, '-999', currency, auth);
+            const {
+                body: { errors },
+            } = await createAccountFailed(userId, '-999', currency, auth);
             expect(errors.length).toBe(1);
         }
-
     });
 });

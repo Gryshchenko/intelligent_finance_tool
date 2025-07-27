@@ -46,7 +46,7 @@ export class UserAgentService {
                 aInWork.os.version === bInWork.os.version
             );
         } catch (e: unknown) {
-            Logger.Of('UserAgentService').error((e as {message: string}).message);
+            Logger.Of('UserAgentService').error((e as { message: string }).message);
             return false;
         }
     }

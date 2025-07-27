@@ -49,7 +49,7 @@ export default class BalanceService extends LoggerBase implements IBalanceServic
                 throw this.error(`Patch user balance failed, profile currency null`);
             }
             if (profile?.currencyCode && profile.currencyCode === properties.currencyCode) {
-                const result =  await this._balanceDataAccess.patch(userId, properties, trx);
+                const result = await this._balanceDataAccess.patch(userId, properties, trx);
                 this._logger.info(`Patch user balance success`);
                 return result;
             }

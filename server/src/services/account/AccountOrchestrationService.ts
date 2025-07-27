@@ -66,7 +66,7 @@ export class AccountOrchestrationService extends LoggerBase {
     }
     public async patch(userId: number, accountId: number, properties: Partial<IAccount>): Promise<number> {
         return await this.withTransaction(async (trx: IDBTransaction) => {
-            const result =  await this._accountService.patchAccount(userId, accountId, properties, trx);
+            const result = await this._accountService.patchAccount(userId, accountId, properties, trx);
             if (Utils.isNotNull(properties.amount)) {
                 const amount = properties.amount as unknown as number;
                 const account = await this._accountService.getAccount(userId, accountId);
@@ -99,7 +99,7 @@ export class AccountOrchestrationService extends LoggerBase {
                         message: `Accounts patch failed due reason find currencyCode for accountId: ${accountId}`,
                     });
                 }
-                 return result;
+                return result;
             } catch (e: unknown) {
                 this._logger.error(`Delete account failed due reason: ${(e as { message: string }).message}`);
                 throw e;
