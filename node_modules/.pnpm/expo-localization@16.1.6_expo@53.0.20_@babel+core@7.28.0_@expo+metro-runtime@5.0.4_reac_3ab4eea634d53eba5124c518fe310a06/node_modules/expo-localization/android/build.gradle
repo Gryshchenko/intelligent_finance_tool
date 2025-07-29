@@ -1,0 +1,19 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'host.exp.exponent'
+version = '16.1.6'
+
+android {
+  namespace "expo.modules.localization"
+  defaultConfig {
+    versionCode 22
+    versionName "16.1.6"
+  }
+}
+
+dependencies {
+  implementation "androidx.core:core-ktx:1.6.0"
+}

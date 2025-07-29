@@ -1,0 +1,13 @@
+import type { TurboModule } from "react-native";
+export interface Spec extends TurboModule {
+    readonly getConstants: () => {};
+    setInputMode(mode: number): void;
+    setDefaultMode(): void;
+    preload(): void;
+    dismiss(keepFocus: boolean): void;
+    setFocusTo(direction: string): void;
+    addListener: (eventName: string) => void;
+    removeListeners: (count: number) => void;
+}
+declare const _default: Spec | null;
+export default _default;

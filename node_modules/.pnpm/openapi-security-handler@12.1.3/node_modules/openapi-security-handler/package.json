@@ -1,0 +1,33 @@
+{
+  "name": "openapi-security-handler",
+  "version": "12.1.3",
+  "description": "A library to process OpenAPI security definitions in parallel.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "cover": "../../bin/nyc",
+    "prepare": "../../bin/tsc",
+    "test-watch": "../../bin/tsc && ../../bin/mocha --watch-extensions ts -w",
+    "test": "../../bin/mocha"
+  },
+  "repository": "https://github.com/kogosoftwarellc/open-api/tree/master/packages/openapi-security-handler",
+  "keywords": [
+    "openapi",
+    "security",
+    "handler",
+    "jsonschema"
+  ],
+  "author": "Joseph Spencer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kogosoftwarellc/open-api/issues"
+  },
+  "homepage": "https://github.com/kogosoftwarellc/open-api/tree/master/packages/openapi-security-handler#readme",
+  "dependencies": {
+    "openapi-types": "^12.1.3"
+  },
+  "gitHead": "09fed6d77536b3d7d1d38a2630a096041da773ee"
+}
