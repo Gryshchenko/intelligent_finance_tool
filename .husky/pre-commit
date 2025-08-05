@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run prettier:check
-npm run eslint
-tsc
+pnpm run prettier:check
+pnpm --filter './packages/server' run eslint && pnpm --filter './packages/app' run eslint

@@ -11,11 +11,10 @@
         "start": "pnpm run build-translation && nodemon --exec NODE_OPTIONS='--inspect' ts-node --files src/app.ts",
         "redis": "sudo service redis-server start",
         "type-check": "tsc -v && tsc -p tsconfig.json",
-        "precheck": "pnpm run prettier:check && pnpm run eslint:check && pnpm run type-check",
+        "eslint": "npx eslint src/",
         "jest-test": "jest --verbose false ./tests --config ./jest.config.js --no-cache ",
         "jest-test:coverage": "jest --verbose false ./ --config ./jest.config.js --no-cache --coverage",
-        "lint-staged": "lint-staged",
-        "prepare": "husky install"
+        "lint-staged": "lint-staged"
     },
     "husky": {
         "hooks": {

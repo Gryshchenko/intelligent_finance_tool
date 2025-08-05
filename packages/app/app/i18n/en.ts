@@ -1,6 +1,16 @@
 import demoEn from "./demo-en"
 
 const en = {
+  validation: {
+    required: "Field cannot be empty",
+    minLength: "Must be at least {{num}} characters",
+    email: "Invalid email format",
+    name: "Invalid name format must contain only numbers or alphabet characters.",
+    passwordUppercase: "Password must contain at least one uppercase letter",
+    passwordLowercase: "Password must contain at least one lowercase letter",
+    passwordNumber: "Password must contain at least one number",
+    passwordSpecial: "Password must contain at least one special character (e.g., !@#$%)",
+  },
   common: {
     ok: "OK!",
     cancel: "Cancel",
@@ -35,7 +45,6 @@ const en = {
       button: "Let's try this again",
     },
   },
-
   errors: {
     invalidEmail: "Invalid email address.",
   },

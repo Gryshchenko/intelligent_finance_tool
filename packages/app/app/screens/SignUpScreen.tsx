@@ -12,20 +12,33 @@ import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
+import { ValidationTypes } from "../../types/ValidationTypes"
+
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
 export const SignUpScreen: FC<SignUpScreenProps> = () => {
   const authPasswordInput = useRef<TextInput>(null)
 
-  const [authPassword, setAuthPassword] = useState<{ origin: string; repeat: string }>({
-    origin: "",
-    repeat: "",
-  })
+  const [authPassword, setAuthPassword] = useState<string>("")
   const [name, setName] = useState<string>("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
-  const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
+  const { authEmail, setAuthEmail, validationError } = useAuth()
+
+  const validationNameError = useMemo(() => {
+    if (!/^[a-zA-Z0-9]{3,10}$/.test(name)) return ValidationTypes.NAME
+    return ""
+  }, [name])
+  const validationPasswordError = useMemo(() => {
+    if (!authPassword || authPassword.length < 6) return ValidationTypes.MIN_LENGTH
+    if (!/[A-Z]/.test(authPassword)) return ValidationTypes.PASSWORD_UPPERCASE
+    if (!/[a-z]/.test(authPassword)) return ValidationTypes.PASSWORD_LOWERCASE
+    if (!/[0-9]/.test(authPassword)) return ValidationTypes.PASSWORD_NUMBER
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(authPassword)) return ValidationTypes.PASSWORD_SPECIAL
+
+    return ""
+  }, [authPassword])
 
   const {
     themed,
@@ -39,22 +52,23 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
     // setAuthPassword("ign1teIsAwes0m3")
   }, [setAuthEmail])
 
-  const error = isSubmitted ? validationError : ""
+  const errorEmail = isSubmitted ? validationError : ""
+  const errorPass = isSubmitted ? validationPasswordError : ""
+  const errorName = isSubmitted ? validationNameError : ""
 
   function signUp() {
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
-
-    if (validationError) return
+    if (validationError || validationPasswordError || validationPasswordError) return
 
     // Make a request to your server to get an authentication token.
     // If successful, reset the fields and set the token.
-    setIsSubmitted(false)
-    setAuthPassword({ repeat: "", origin: "" })
-    setAuthEmail("")
+    // setIsSubmitted(false)
+    // setAuthPassword("")
+    // setAuthEmail("")
 
     // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
+    // setAuthToken(String(Date.now()))
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -91,8 +105,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         keyboardType="default"
         labelTx="common:nameFieldLabel"
         placeholderTx="common:nameFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helper={errorName}
+        status={errorName ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
       <TextField
@@ -105,35 +119,24 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         keyboardType="email-address"
         labelTx="common:emailFieldLabel"
         placeholderTx="common:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helper={errorEmail}
+        status={errorEmail ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
 
       <TextField
         ref={authPasswordInput}
-        value={authPassword.origin}
-        onChangeText={(pass) => setAuthPassword((prev) => ({ ...prev, origin: pass }))}
+        value={authPassword}
+        onChangeText={setAuthPassword}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="password"
         autoCorrect={false}
+        helper={errorPass}
+        status={errorPass ? "error" : undefined}
         secureTextEntry={isAuthPasswordHidden}
         labelTx="common:passwordFieldLabel"
         placeholderTx="common:passwordFieldPlaceholder"
-        RightAccessory={PasswordRightAccessory}
-      />
-      <TextField
-        ref={authPasswordInput}
-        value={authPassword.repeat}
-        onChangeText={(pass) => setAuthPassword((prev) => ({ ...prev, repeat: pass }))}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
-        labelTx="signUpScreen:repeatPasswordFieldLabel"
-        placeholderTx="signUpScreen:repeatPasswordFieldPlaceholder"
         RightAccessory={PasswordRightAccessory}
       />
 

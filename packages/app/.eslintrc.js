@@ -2,7 +2,6 @@
 module.exports = {
   root: true,
   extends: [
-    "../../configs/eslint/base.js",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-native/all",

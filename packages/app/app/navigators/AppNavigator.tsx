@@ -82,9 +82,6 @@ const AppStack = () => {
           <Stack.Screen name="SignUp" component={SignUpScreen} />
         </>
       )}
-
-      {/** 🔥 Your screens go here */}
-      {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
     </Stack.Navigator>
   )
 }

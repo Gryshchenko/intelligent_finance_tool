@@ -1,0 +1,7 @@
+packages/**/*.d.ts
+node_modules
+dist
+jest-coverage
+playwright-report
+pnpm-lock.yaml
+.pnpm-store

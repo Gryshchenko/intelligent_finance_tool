@@ -1,6 +1,8 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
 import { useMMKVString } from "react-native-mmkv"
 
+import { ValidationTypes } from "../../types/ValidationTypes"
+
 export interface AuthContextType {
   isAuthenticated: boolean
   authToken?: string
@@ -25,9 +27,11 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   }, [setAuthEmail, setAuthToken])
 
   const validationError = useMemo(() => {
-    if (!authEmail || authEmail.length === 0) return "can't be blank"
-    if (authEmail.length < 6) return "must be at least 6 characters"
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return "must be a valid email address"
+    if (!authEmail || authEmail.length === 0) return ValidationTypes.REQUIRED
+
+    if (authEmail.length < 6) return ValidationTypes.MIN_LENGTH
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return ValidationTypes.EMAIL
+
     return ""
   }, [authEmail])
 

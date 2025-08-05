@@ -39,7 +39,7 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
   const error = isSubmitted ? validationError : ""
 
   function signUp() {
-    navigation.navigate("SignUp")
+    navigation.navigate({ name: "SignUp", params: undefined })
   }
 
   function login() {
