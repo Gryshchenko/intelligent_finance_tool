@@ -1,6 +1,8 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
 import { useMMKVString } from "react-native-mmkv"
 
+import { TxKeyPath } from "@/i18n"
+
 import { ValidationTypes } from "../../types/ValidationTypes"
 
 export interface AuthContextType {
@@ -10,7 +12,7 @@ export interface AuthContextType {
   setAuthToken: (token?: string) => void
   setAuthEmail: (email: string) => void
   logout: () => void
-  validationError: string
+  validationError: TxKeyPath
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
@@ -33,7 +35,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return ValidationTypes.EMAIL
 
     return ""
-  }, [authEmail])
+  }, [authEmail]) as TxKeyPath
 
   const value = {
     isAuthenticated: !!authToken,

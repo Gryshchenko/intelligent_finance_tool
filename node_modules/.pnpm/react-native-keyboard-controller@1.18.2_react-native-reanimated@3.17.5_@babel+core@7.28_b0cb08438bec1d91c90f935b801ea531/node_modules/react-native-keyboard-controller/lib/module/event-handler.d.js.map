@@ -1,1 +1,0 @@
-{"version":3,"names":[],"sources":["event-handler.d.ts"],"sourcesContent":["declare function registerEventHandler(\n  handler: (event: never) => void,\n  eventName: string,\n  viewTag: number,\n): number;\ndeclare function unregisterEventHandler(id: number): void;\n\nexport { registerEventHandler, unregisterEventHandler };\n"],"mappings":"","ignoreList":[]}

@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
+import http from 'http';
+// import fs from 'fs';
+// import path from 'path';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
@@ -32,10 +32,10 @@ const port = getConfig().appPort ?? 3000;
 passportSetup(passport);
 swaggerInit(app);
 
-const privateKey = fs.readFileSync(path.join(__dirname, 'localhost.key'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf8');
+// const privateKey = fs.readFileSync(path.join(__dirname, 'localhost.key'), 'utf8');
+// const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf8');
 
-const credentials = { key: privateKey, cert: certificate };
+// const credentials = { key: privateKey, cert: certificate };
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 min
@@ -74,10 +74,10 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
 });
 
-const httpsServer = https.createServer(credentials, app);
+const httpServer = http.createServer(app);
 
 if (process.env.NODE_ENV !== 'test') {
-    httpsServer.listen(port, async () => {
+    httpServer.listen(port, async () => {
         const ip = getLocalIP();
         ExchangeRateServiceBuilder.build()
             .updateCurrencyRates()
@@ -88,4 +88,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-module.exports = httpsServer;
+module.exports = httpServer;

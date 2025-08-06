@@ -8,7 +8,6 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 
 import Config from "@/config"
-import type { EpisodeItem } from "@/services/api/types"
 
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
 import type { ApiConfig, ApiFeedResponse } from "./types"
@@ -43,13 +42,16 @@ export class Api {
     })
   }
 
-  /**
-   * Gets a list of recent React Native Radio episodes.
-   */
-  async getEpisodes(): Promise<{ kind: "ok"; episodes: EpisodeItem[] } | GeneralApiProblem> {
+  async doSignUp(body: {
+    password: string
+    email: string
+    name: string
+    locale: string
+  }): Promise<{ kind: "ok"; data: unknown } | GeneralApiProblem> {
     // make the api call
-    const response: ApiResponse<ApiFeedResponse> = await this.apisauce.get(
-      `api.json?rss_url=https%3A%2F%2Ffeeds.simplecast.com%2FhEI_f9Dx`,
+    const response: ApiResponse<ApiFeedResponse> = await this.apisauce.post(
+      `/register/signup`,
+      body,
     )
 
     // the typical ways to die when calling an api
@@ -60,15 +62,8 @@ export class Api {
 
     // transform the data into the format we are expecting
     try {
-      const rawData = response.data
-
-      // This is where we transform the data into the shape we expect for our model.
-      const episodes: EpisodeItem[] =
-        rawData?.items.map((raw) => ({
-          ...raw,
-        })) ?? []
-
-      return { kind: "ok", episodes }
+      const data = response.data
+      return { kind: "ok", data }
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
