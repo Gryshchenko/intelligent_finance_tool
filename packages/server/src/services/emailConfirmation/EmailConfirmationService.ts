@@ -1,7 +1,7 @@
 import { IEmailConfirmationDataAccess } from 'interfaces/IEmailConfirmationDataAccess';
 import { IEmailConfirmationService } from 'interfaces/IEmailConfirmationService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { IMailService } from 'interfaces/IMailService';
 import { IMailTemplateService } from 'interfaces/IMailTemplateService';
 import { TranslationKey } from 'types/TranslationKey';
@@ -9,7 +9,6 @@ import { IUserService } from 'interfaces/IUserService';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
 import Translations from 'src/services/translations/Translations';
 import TimeManagerUTC from 'src/utils/TimeManagerUTC';
-import Utils from 'src/utils/Utils';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { getConfig } from 'src/config/config';
 import { CustomError } from 'src/utils/errors/CustomError';
@@ -82,40 +81,40 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
     public async createConfirmationMail(userId: number, email: string, trx?: IDBTransaction): Promise<IEmailConfirmationData> {
         try {
             const confirmationCode: number = this.createConfirmationKey();
-            const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmationWithCode(
-                userId,
-                confirmationCode,
+            // const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmation(
+            //     userId,
+            //     email,
+            // );
+            // if (
+            //     Utils.isNull(userConfirmationData) &&
+            //     !this.isConfirmationCodeAlreadySend(userConfirmationData as IEmailConfirmationData)
+            // ) {
+            const timeManager = new TimeManagerUTC();
+            timeManager.addTime(...CONFIRMATION_MAIL_EXPIRED_TIME);
+            const expiresAt = timeManager.getCurrentTime();
+            const result = await this.emailConfirmationDataAccess.createUserConfirmation(
+                {
+                    userId,
+                    email,
+                    confirmationCode,
+                    expiresAt,
+                },
+                trx,
             );
-            if (
-                Utils.isNull(userConfirmationData) &&
-                !this.isConfirmationCodeAlreadySend(userConfirmationData as IEmailConfirmationData)
-            ) {
-                const timeManager = new TimeManagerUTC();
-                timeManager.addTime(...CONFIRMATION_MAIL_EXPIRED_TIME);
-                const expiresAt = timeManager.getCurrentTime();
-                const result = await this.emailConfirmationDataAccess.createUserConfirmation(
-                    {
-                        userId,
-                        email,
-                        confirmationCode,
-                        expiresAt,
-                    },
-                    trx,
-                );
-                return result;
-            }
-            throw new ValidationError({
-                message: 'Sending confirmation mail failed, mail already send',
-                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SEND,
-            });
+            return result;
+            // }
+            // throw new ValidationError({
+            //     message: 'Sending confirmation mail failed, mail already send',
+            //     errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SEND,
+            // });
         } catch (e) {
-            this._logger.info(`Send confirmation mail to user failed due reason: ${(e as { message: string }).message}`);
+            this._logger.error(`Send confirmation mail to user failed due reason: ${(e as { message: string }).message}`);
             throw e;
         }
     }
 
-    public async sendConfirmationMailToUser(userId: number, email: string): Promise<IEmailConfirmationData> {
-        const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmationWithEmail(userId, email);
+    public async sendConfirmationMail(userId: number, email: string): Promise<IEmailConfirmationData> {
+        const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
         if (userConfirmationData?.confirmed) {
             throw new ValidationError({
                 message: 'Send confirmation failed due mail already confirmed',
@@ -127,11 +126,11 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         return userConfirmationDataInWork;
     }
 
-    public async deleteUserConfirmation(userId: number, code: number): Promise<boolean> {
-        return await this.emailConfirmationDataAccess.deleteUserConfirmation(userId, code);
+    public async deleteUserConfirmation(userId: number, email: string): Promise<boolean> {
+        return await this.emailConfirmationDataAccess.deleteUserConfirmation(userId, email);
     }
 
-    public async getUserConfirmation(userId: number, code: number): Promise<IEmailConfirmationData | undefined> {
-        return await this.emailConfirmationDataAccess.getUserConfirmationWithCode(userId, code);
+    public async getUserConfirmation(userId: number, email: string): Promise<IEmailConfirmationData | undefined> {
+        return await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
     }
 }

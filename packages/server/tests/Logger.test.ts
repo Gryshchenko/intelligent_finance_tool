@@ -1,5 +1,5 @@
-import { baseLogger } from 'helper/logger/pino';
 import Logger from '../src/helper/logger/Logger';
+import { baseLogger } from '../src/helper/logger/pino';
 
 jest.mock('helper/logger/pino', () => ({
     baseLogger: {

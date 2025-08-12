@@ -1,21 +1,30 @@
-// @ts-nocheck
-import { deleteUserAfterTest, generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+import {
+    deleteUserAfterTest,
+    generateRandomEmail,
+    generateRandomName,
+    generateRandomPassword,
+    generateSecureRandom,
+} from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
-import { AccountStatusType } from '../../src/types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config();
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../../src/app');
 
-let server;
+let server: never;
 
-let userIds = [];
+let userIds: string[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
 
+    // @ts-expect-error is necessary
     server = app.listen(port);
 });
 
@@ -24,6 +33,7 @@ afterAll((done) => {
         deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
+    // @ts-expect-error is necessary
     server.close(done);
 });
 
@@ -33,7 +43,7 @@ describe('Account', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         userIds.push(create_user.body.data.userId);
@@ -97,7 +107,7 @@ describe('Account', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         userIds.push(create_user.body.data.userId);
@@ -180,7 +190,7 @@ describe('Account', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         userIds.push(create_user.body.data.userId);
@@ -218,7 +228,7 @@ describe('Account', () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         userIds.push(create_user.body.data.userId);
@@ -309,7 +319,7 @@ describe('Account', () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         userIds.push(create_user.body.data.userId);

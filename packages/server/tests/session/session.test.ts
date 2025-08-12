@@ -1,28 +1,32 @@
-// @ts-nocheck
-import { generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
-const cookiejar = require('cookiejar');
+import { generateRandomEmail, generateRandomName, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config();
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../../src/app');
-const cookie = require('cookie');
 
-let server;
+let server: never;
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
 
+    // @ts-expect-error is necessary
     server = app.listen(port);
 });
 
 afterAll((done) => {
+    // @ts-expect-error is necessary
     server.close(done);
 });
 
 jest.mock('../../src/middleware/tokenVerify', () => ({
     __esModule: true,
+    // @ts-expect-error is necessary
     default: (req, res, next) => {
         next();
     },
+    // @ts-expect-error is necessary
     tokenVerifyLogout: (req, res, next) => {
         next();
     },
@@ -61,11 +65,11 @@ describe('Session Security Test', () => {
     //     expect(response.body).toStrictEqual({ data: {}, errors: [], status: 2 });
     // });
     it('should not allow access with non-existent session', async () => {
-        const agent1 = request.agent(app);
+        request.agent(app);
 
         const res1 = await request(app)
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
 
         const fakeSessionId = 's%3AAc4EsOmQCjfakeYtYtqUGfKndukyhy.v%2Bx9gufakeKB42GbwerZA;dsfsdf=sdffsd;dsfdsf=sdfsdf;';

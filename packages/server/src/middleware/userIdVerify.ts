@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import Logger from 'helper/logger/Logger';
 import { IUserSession } from 'interfaces/IUserSession';
-import { HttpCode } from 'types/HttpCode';
-import { ErrorCode } from 'types/ErrorCode';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 
 const _logger = Logger.Of('SessionVerify');

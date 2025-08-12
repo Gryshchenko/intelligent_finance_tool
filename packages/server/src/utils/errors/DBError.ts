@@ -1,7 +1,7 @@
 import { IError } from 'interfaces/IError';
-import { ErrorCode } from 'types/ErrorCode';
-import { HttpCode } from 'types/HttpCode';
 import { BaseError } from './BaseError';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
 export class DBError extends BaseError {
     constructor({ message, statusCode = HttpCode.INTERNAL_SERVER_ERROR, errorCode = ErrorCode.CANT_STORE_DATA }: IError) {

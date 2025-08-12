@@ -1,7 +1,7 @@
 import { ICategoryDataAccess } from 'interfaces/ICategoryDataAccess';
 import { ICategoryService } from 'interfaces/ICategoryService';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
-import { ICategory } from 'interfaces/ICategory';
+import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import { ValidationError } from 'src/utils/errors/ValidationError';

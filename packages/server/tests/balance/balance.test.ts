@@ -1,6 +1,12 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import { deleteUserAfterTest, generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+import {
+    deleteUserAfterTest,
+    generateRandomEmail,
+    generateRandomName,
+    generateRandomPassword,
+    generateSecureRandom,
+} from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import Utils from '../../src/utils/Utils';
@@ -36,7 +42,7 @@ describe('POST /balance', () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
         userIds.push(create_user.body.data.userId);
 
@@ -87,7 +93,7 @@ describe('POST /balance', () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
         userIds.push(create_user.body.data.userId);
         const overview = await agent
@@ -137,7 +143,7 @@ describe('POST /balance', () => {
         const agent = request.agent(app);
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
         userIds.push(create_user.body.data.userId);
         const getBalance = async (id: string) => {
@@ -225,7 +231,7 @@ describe('POST /balance', () => {
         const registerUser = async () => {
             const res = await agent
                 .post('/register/signup')
-                .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+                .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
                 .expect(200);
             return { userId: res.body.data.userId, auth: res.header['authorization'] };
         };

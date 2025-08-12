@@ -1,5 +1,5 @@
 import { IError } from 'interfaces/IError';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { BaseError } from './BaseError';
 
 export class ValidationError extends BaseError {

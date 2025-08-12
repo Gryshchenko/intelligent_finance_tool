@@ -4,6 +4,7 @@ import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilde
 import { IDatabaseConnection } from 'interfaces/IDatabaseConnection';
 import ProfileServiceBuilder from 'services/profile/ProfileServiceBuilder';
 import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
+import CurrencyServiceBuilder from 'services/currency/CurrencyServiceBuilder';
 
 export default class BalanceServiceBuilder {
     public static build(db?: IDatabaseConnection): BalanceService {
@@ -12,6 +13,7 @@ export default class BalanceServiceBuilder {
             new BalanceDataAccess(databaseConnection),
             ProfileServiceBuilder.build(databaseConnection),
             ExchangeRateServiceBuilder.build(databaseConnection),
+            CurrencyServiceBuilder.build(databaseConnection),
         );
     }
 }

@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
+// import https from 'https';
 import http from 'http';
 // import fs from 'fs';
 // import path from 'path';
@@ -13,8 +14,6 @@ import registerRouter from './routes/register';
 import userRouter from './routes/user';
 import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'types/ResponseStatusType';
-import { ErrorCode } from 'types/ErrorCode';
 import { swaggerInit } from 'src/swagger/swagger';
 import { checkOriginReferer } from 'middleware/checkOriginReferer';
 import { checkCors } from 'middleware/checkCors';
@@ -25,6 +24,8 @@ import currencyRouter from 'routes/currency';
 import exchangeRates from 'routes/exchangeRates';
 import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
 import Logger from 'helper/logger/Logger';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;
@@ -34,8 +35,8 @@ swaggerInit(app);
 
 // const privateKey = fs.readFileSync(path.join(__dirname, 'localhost.key'), 'utf8');
 // const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf8');
-
-// const credentials = { key: privateKey, cert: certificate };
+//
+// const credentials: {key: string, cert: string} = { key: privateKey, cert: certificate };
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 min
@@ -69,15 +70,14 @@ app.use('/user', userRouter);
 app.use('/register', registerRouter);
 app.use('/currencies', currencyRouter);
 app.use('/exchange-rates', exchangeRates);
-
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
 });
 
-const httpServer = http.createServer(app);
+const httpsServer = http.createServer(app);
 
 if (process.env.NODE_ENV !== 'test') {
-    httpServer.listen(port, async () => {
+    httpsServer.listen(port, async () => {
         const ip = getLocalIP();
         ExchangeRateServiceBuilder.build()
             .updateCurrencyRates()
@@ -88,4 +88,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-module.exports = httpServer;
+module.exports = httpsServer;

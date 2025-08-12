@@ -1,7 +1,7 @@
 import { IAccountDataAccess } from 'interfaces/IAccountDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IAccount } from 'interfaces/IAccount';
+import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { DBError } from 'src/utils/errors/DBError';
 import Utils from 'src/utils/Utils';
@@ -9,7 +9,7 @@ import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { AccountStatusType } from 'types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 
 export default class AccountDataAccess extends LoggerBase implements IAccountDataAccess {
     private readonly _db: IDatabaseConnection;

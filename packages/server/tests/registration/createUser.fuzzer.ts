@@ -1,15 +1,17 @@
 import { generateSecureRandom } from '../TestsUtils.';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const axios = require('axios');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require('fs');
-const https = require('https');
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const httpsAgent = new (require('https').Agent)({
-    rejectUnauthorized: false, // Отключает проверку SSL
+    rejectUnauthorized: false,
 });
 const url = 'https://localhost:3000/register/signup';
 
-function generateRandomString(length) {
+function generateRandomString(length: number) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
@@ -32,6 +34,7 @@ async function fuzzSignup() {
         });
         console.log('Response:', response.data);
     } catch (error) {
+        // @ts-expect-error is necessary
         console.error('Error:', error.response ? error.response.data : error.message);
         fs.appendFileSync('./fuzz_errors.log', JSON.stringify(testData) + '\n');
     }

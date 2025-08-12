@@ -1,14 +1,14 @@
 import { IIncomeDataAccess } from 'interfaces/IIncomeDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IIncome } from 'interfaces/IIncome';
+import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
 import { ICreateIncome } from 'interfaces/ICreateIncome';
 import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { AccountStatusType } from 'types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 
 export default class IncomeDataAccess extends LoggerBase implements IIncomeDataAccess {
     private readonly _db: IDatabaseConnection;

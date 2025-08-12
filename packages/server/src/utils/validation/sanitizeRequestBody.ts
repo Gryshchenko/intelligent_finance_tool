@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import Logger from 'helper/logger/Logger';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ErrorCode } from 'types/ErrorCode';
-import { HttpCode } from 'types/HttpCode';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 export const sanitizeRequestBody = (allowedFields: string[]) => (req: Request, res: Response, next: NextFunction) => {
     const extraFields = Object.keys(req.body).filter((key) => !allowedFields.includes(key));

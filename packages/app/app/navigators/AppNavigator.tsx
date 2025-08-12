@@ -12,6 +12,7 @@ import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { LoginScreen } from "@/screens/LoginScreen"
+import { SignUpConfirmationScreen } from "@/screens/SignUpConfirmationScreen"
 import { SignUpScreen } from "@/screens/SignUpScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
@@ -34,8 +35,14 @@ export interface AppStackParamList {
   Login: NavigatorScreenParams<{}>
   Demo: NavigatorScreenParams<DemoTabParamList>
   SignUp: NavigatorScreenParams<{}>
+  SignUpConfirmation: NavigatorScreenParams<{}>
   // 🔥 Your screens go here
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+}
+
+type ScreenConfig = {
+  name: keyof AppStackParamList
+  component: React.ComponentType<any>
 }
 
 /**
@@ -53,35 +60,47 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStack
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = () => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isUserConfirmed } = useAuth()
 
   const {
     theme: { colors },
   } = useAppTheme()
+
+  const getInitialRoute = () => {
+    if (!isAuthenticated) return "Login"
+    return isUserConfirmed ? "Welcome" : "SignUpConfirmation"
+  }
+
+  const getScreens = (): ScreenConfig[] => {
+    if (!isAuthenticated) {
+      return [
+        { name: "Login", component: LoginScreen },
+        { name: "SignUp", component: SignUpScreen },
+      ]
+    }
+
+    if (!isUserConfirmed) {
+      return [{ name: "SignUpConfirmation", component: SignUpConfirmationScreen }]
+    }
+
+    return [
+      { name: "Welcome", component: WelcomeScreen },
+      { name: "Demo", component: DemoNavigator },
+    ]
+  }
 
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
         navigationBarColor: colors.background,
-        contentStyle: {
-          backgroundColor: colors.background,
-        },
+        contentStyle: { backgroundColor: colors.background },
       }}
-      initialRouteName={isAuthenticated ? "Welcome" : "Login"}
+      initialRouteName={getInitialRoute()}
     >
-      {isAuthenticated ? (
-        <>
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-
-          <Stack.Screen name="Demo" component={DemoNavigator} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-        </>
-      )}
+      {getScreens().map(({ name, component }) => (
+        <Stack.Screen key={name} name={name} component={component} />
+      ))}
     </Stack.Navigator>
   )
 }

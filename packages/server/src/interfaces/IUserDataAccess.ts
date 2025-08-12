@@ -8,5 +8,5 @@ export interface IUserDataAccess {
     getUser(userId: number): Promise<IUserServer>;
     getUserEmail(userId: number): Promise<{ email: string } | undefined>;
     createUser(email: string, password: string, salt: string, trx?: IDBTransaction): Promise<ICreateUserServer>;
-    updateUserEmail(userId: number, email: string): Promise<IUserServer>;
+    updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<IUserServer>;
 }

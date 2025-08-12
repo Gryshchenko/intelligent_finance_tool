@@ -1,6 +1,6 @@
 import { createSignupValidationRules } from 'src/utils/validation/routesInputValidation';
 import { body, CustomValidator } from 'express-validator';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ValidationError } from '../errors/ValidationError';
 import { TransactionType } from 'types/TransactionType';
 import Utils from '../Utils';

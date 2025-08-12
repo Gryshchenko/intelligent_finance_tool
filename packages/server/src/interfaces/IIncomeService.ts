@@ -1,6 +1,6 @@
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { ICreateIncome } from 'interfaces/ICreateIncome';
-import { IIncome } from 'interfaces/IIncome';
+import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
 
 export interface IIncomeService {
     creates(userId: number, incomes: ICreateIncome[], trx?: IDBTransaction): Promise<IIncome[]>;

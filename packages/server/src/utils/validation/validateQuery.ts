@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'types/ResponseStatusType';
-import { ErrorCode } from 'types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
 const validateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {

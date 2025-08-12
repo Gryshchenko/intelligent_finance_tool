@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "baseUrl": ".",
+        "strict": true,
+        "paths": {
+            "tenpercent/shared": ["packages/shared/src"]
+        }
+    }
+}

@@ -1,5 +1,5 @@
 {
-    "name": "my-monorepo",
+    "name": "tenpercen",
     "private": true,
     "workspaces": [
         "packages/*"

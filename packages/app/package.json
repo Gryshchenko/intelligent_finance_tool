@@ -56,11 +56,13 @@
     "react-native-edge-to-edge": "1.6.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-keyboard-controller": "^1.12.7",
+    "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^3.2.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "tenpercent/shared": "workspace:*"
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.2.0",

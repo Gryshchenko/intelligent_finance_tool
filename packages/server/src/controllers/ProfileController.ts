@@ -3,22 +3,22 @@ import Logger from 'helper/logger/Logger';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import { IUserSession } from 'interfaces/IUserSession';
 import ProfileServiceBuilder from 'services/profile/ProfileServiceBuilder';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ProfileServiceUtils from 'services/profile/ProfileServiceUtils';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import UserRegistrationServiceBuilder from 'services/registration/UserRegistrationServiceBuilder';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 
 export class ProfileController {
     private static readonly logger = Logger.Of('ProfileController');
-    public static async profile(req: Request, res: Response) {
+    public static async get(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
             const userFromSession = req.session.user as IUserSession;
             const profileService = ProfileServiceBuilder.build();
-            const response = await profileService.getProfile(userFromSession.userId);
+            const response = await profileService.get(userFromSession.userId);
             res.status(HttpCode.OK).json(
                 responseBuilder
                     .setStatus(ResponseStatusType.OK)
@@ -31,15 +31,19 @@ export class ProfileController {
         }
     }
 
-    public static async confirmEmail(req: Request, res: Response) {
+    public static async patch(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
             const userFromSession = req.session.user as IUserSession;
-            const response = await UserRegistrationServiceBuilder.build().confirmUserMail(
-                userFromSession.userId,
-                Number(req.body.code),
-            );
-            res.status(200).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build());
+            if (Number(req.body.confirmationCode)) {
+                const response = await UserRegistrationServiceBuilder.build().confirmUserMail(
+                    userFromSession.userId,
+                    Number(req.body.confirmationCode),
+                );
+                res.status(200).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build());
+            } else {
+                res.status(404).json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setData({}).build());
+            }
         } catch (e: unknown) {
             ProfileController.logger.error(`Comfirm mail failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.PROFILE_ERROR);

@@ -1,4 +1,4 @@
-import { IUserStatus } from 'interfaces/IUserStatus';
+import { IUserStatus } from 'tenpercent/shared/src/interfaces/IUserStatus';
 
 export interface IUser {
     userId: number;

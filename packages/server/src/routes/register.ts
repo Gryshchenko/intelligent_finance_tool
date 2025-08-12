@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post(
     '/signup',
-    sanitizeRequestBody(['email', 'password', 'locale']),
+    sanitizeRequestBody(['email', 'password', 'locale', 'publicName']),
     validateQuery({}),
     routesInputValidation(signupValidationRules),
     RegisterController.signup,

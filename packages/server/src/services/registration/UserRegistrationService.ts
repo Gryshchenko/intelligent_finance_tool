@@ -3,15 +3,15 @@ import { ICategoryService } from 'interfaces/ICategoryService';
 import { IUserService } from 'interfaces/IUserService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IGroupService } from 'interfaces/IGroupService';
-import { LanguageType } from 'types/LanguageType';
+import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
 import { IIncomeService } from 'interfaces/IIncomeService';
 import { IMailService } from 'interfaces/IMailService';
 import { IMailTemplateService } from 'interfaces/IMailTemplateService';
 import { IEmailConfirmationService } from 'interfaces/IEmailConfirmationService';
 import { IUser } from 'interfaces/IUser';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { IProfileService } from 'interfaces/IProfileService';
-import { RoleType } from 'types/RoleType';
+import { RoleType } from 'tenpercent/shared/src/types/RoleType';
 import TranslationsUtils from 'src/services/translations/TranslationsUtils';
 import Translations from 'src/services/translations/Translations';
 import TranslationLoaderImpl from 'src/services/translations/TranslationLoaderImpl';
@@ -26,7 +26,7 @@ import { user_initial } from 'src/config/user_initial';
 import currency_initial from 'src/config/currency_initial';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IBalanceService } from 'interfaces/IBalanceService';
 
 interface IDefaultData {
@@ -102,6 +102,7 @@ export default class UserRegistrationService extends LoggerBase {
         email: string,
         password: string,
         localeFromUser: LanguageType = LanguageType.US,
+        publicName: string,
     ): Promise<{ user: IUser; token: string }> {
         const uow = new UnitOfWork(this.db);
 
@@ -142,11 +143,12 @@ export default class UserRegistrationService extends LoggerBase {
 
                 const response = await Promise.all([
                     await this.userRoleService.createUserRole(user.userId, RoleType.Default, trx),
-                    await this.profileService.createProfile(
+                    await this.profileService.post(
                         {
                             userId: user.userId,
                             currencyId: currency.currencyId,
                             locale,
+                            publicName,
                         },
                         trx,
                     ),
@@ -163,8 +165,8 @@ export default class UserRegistrationService extends LoggerBase {
                 const profile = response[1] as IProfile;
                 await this.createInitialDataForNewUser(user.userId, profile, trx);
                 await uow.commit();
-                this.emailConfirmationService.sendConfirmationMailToUser(user.userId, user.email).catch((e) => {
-                    this._logger.info(
+                this.emailConfirmationService.sendConfirmationMail(user.userId, user.email).catch((e) => {
+                    this._logger.error(
                         `User creation confirmation mail send failed due reason: ${(e as { message: string }).message}`,
                     );
                 });
@@ -178,25 +180,37 @@ export default class UserRegistrationService extends LoggerBase {
             });
         } catch (e) {
             await uow.rollback();
-            this._logger.info(`User creation failed due to a server error: ${(e as { message: string }).message}`);
+            this._logger.error(`User creation failed due to a server error: ${(e as { message: string }).message}`);
             throw e;
         }
     }
 
     async confirmUserMail(userId: number, code: number): Promise<IUser> {
+        const uow = new UnitOfWork(this.db);
+
         try {
-            const userConfirmationData = await this.emailConfirmationService.getUserConfirmation(userId, code);
-            if (!userConfirmationData || userConfirmationData.confirmationCode !== code) {
-                throw new ValidationError({
-                    message: 'Confirmation mail failed due code not same',
-                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+            await uow.start();
+            const trxInProcess = uow.getTransaction();
+            if (Utils.isNull(trxInProcess)) {
+                throw new CustomError({
+                    message: "Transaction not initiated. User email can't not be confirmed",
+                    errorCode: ErrorCode.SIGNUP_TRANSACTION,
+                    statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }
-            await this.profileService.confirmationUserMail(userId);
-            const user = await this.userService.updateUserEmail(userId, userConfirmationData.email);
-            await this.emailConfirmationService.deleteUserConfirmation(userId, userConfirmationData.confirmationCode);
+            const trx = trxInProcess as unknown as IDBTransaction;
+            const user = await this.userService.getUser(userId);
+            const userConfirmationData = await this.emailConfirmationService.getUserConfirmation(userId, user.email);
+            if (Number(userConfirmationData?.confirmationCode) !== Number(code)) {
+                throw new ValidationError({
+                    message: 'User confirmation could not be confirmed',
+                });
+            }
+            await this.profileService.patch(userId, { mailConfirmed: true }, trx);
+            await uow.commit();
             return user;
         } catch (e) {
+            await uow.rollback();
             this._logger.info(`User  mail confirmation failed due to a server error: ${(e as { message: string }).message}`);
             throw e;
         }

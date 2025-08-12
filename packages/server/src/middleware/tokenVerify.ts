@@ -20,6 +20,7 @@ const tokenVerifyHandler = (req: Request, res: Response, next: NextFunction, err
     const token = extractToken(req);
     const userSession = SessionService.extractSessionFromRequest(req);
 
+    console.log(req.session);
     if (!token) {
         errorHandler('Token verification failed: token is null');
         return;

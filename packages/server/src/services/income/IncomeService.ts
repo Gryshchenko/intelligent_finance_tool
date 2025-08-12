@@ -1,6 +1,6 @@
 import { IIncomeDataAccess } from 'interfaces/IIncomeDataAccess';
 import { IIncomeService } from 'interfaces/IIncomeService';
-import { IIncome } from 'interfaces/IIncome';
+import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
 import { ICreateIncome } from 'interfaces/ICreateIncome';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';

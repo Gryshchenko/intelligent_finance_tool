@@ -1,11 +1,11 @@
-import { HttpCode } from '../src/types/HttpCode';
-import { ErrorCode } from '../src/types/ErrorCode';
 import { CustomError } from '../src/utils/errors/CustomError';
 import { DBError } from '../src/utils/errors/DBError';
 import { NotFoundError } from '../src/utils/errors/NotFoundError';
 import { ValidationError } from '../src/utils/errors/ValidationError';
 import { BaseError } from '../src/utils/errors/BaseError';
 import { isBaseError } from '../src/utils/errors/isBaseError';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
 describe('Error Classes', () => {
     const errorData = {

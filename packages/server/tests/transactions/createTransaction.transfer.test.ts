@@ -1,19 +1,28 @@
-// @ts-nocheck
-import { deleteUserAfterTest, generateRandomEmail, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+import {
+    deleteUserAfterTest,
+    generateRandomEmail,
+    generateRandomName,
+    generateRandomPassword,
+    generateSecureRandom,
+} from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config();
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../../src/app');
 
-let server;
+let server: never;
 
-let userIds = [];
+let userIds: string[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
 
+    // @ts-expect-error is necessary
     server = app.listen(port);
 });
 
@@ -22,6 +31,7 @@ afterAll((done) => {
         deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
+    // @ts-expect-error is necessary
     server.close(done);
 });
 
@@ -32,9 +42,8 @@ describe('POST /transaction/create - transfare', () => {
 
             const create_user = await agent
                 .post('/register/signup')
-                .send({ email: generateRandomEmail(5), password: generateRandomPassword() })
+                .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
                 .expect(200);
-            // @ts-ignore
             userIds.push(create_user.body.data.userId);
             const overview = await agent
                 .get(`/user/${create_user.body.data.userId}/overview/`)
@@ -43,11 +52,11 @@ describe('POST /transaction/create - transfare', () => {
                 .expect(200);
             const {
                 body: {
-                    data: { accounts, categories, incomes },
+                    data: { accounts },
                 },
             } = overview;
 
-            const incomeId = incomes[0].incomeId;
+            // const incomeId = incomes[0].incomeId;
             const accountId = accounts[0].accountId;
             const currencyId = accounts[0].currencyId;
             const targetAccountId = accounts[1].accountId;
@@ -109,9 +118,8 @@ describe('POST /transaction/create - transfare', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -135,9 +143,8 @@ describe('POST /transaction/create - transfare', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -160,9 +167,8 @@ describe('POST /transaction/create - transfare', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -185,9 +191,8 @@ describe('POST /transaction/create - transfare', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
-        // @ts-ignore
         userIds.push(create_user.body.data.userId);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)
@@ -211,7 +216,7 @@ describe('POST /transaction/create - transfare', () => {
 
         const create_user = await agent
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword() })
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
             .expect(200);
         const response = await agent
             .post(`/user/${create_user.body.data.userId}/transaction/`)

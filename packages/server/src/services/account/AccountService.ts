@@ -1,6 +1,6 @@
 import { IAccountDataAccess } from 'interfaces/IAccountDataAccess';
 import { IAccountService } from 'interfaces/IAccountService';
-import { IAccount } from 'interfaces/IAccount';
+import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';

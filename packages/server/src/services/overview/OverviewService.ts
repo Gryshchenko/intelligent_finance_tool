@@ -2,14 +2,14 @@ import { IAccountService } from 'interfaces/IAccountService';
 import { ICategoryService } from 'interfaces/ICategoryService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IIncomeService } from 'interfaces/IIncomeService';
-import { IOverview } from 'interfaces/IOverview';
-import { IAccount } from 'interfaces/IAccount';
-import { ICategory } from 'interfaces/ICategory';
-import { IIncome } from 'interfaces/IIncome';
-import { ErrorCode } from 'types/ErrorCode';
+import { IOverview } from 'tenpercent/shared/src/interfaces/IOverview';
+import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
+import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
+import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import Utils from 'src/utils/Utils';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 export default class OverviewService extends LoggerBase {
     protected accountService: IAccountService;

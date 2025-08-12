@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
-import { ErrorCode } from 'types/ErrorCode';
-import { HttpCode } from 'types/HttpCode';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 export const checkOriginReferer = (req: Request, res: Response, next: NextFunction) => {
     const trustedOrigin = getConfig().trustedOrigin;

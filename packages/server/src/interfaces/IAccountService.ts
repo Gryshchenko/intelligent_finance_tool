@@ -1,4 +1,4 @@
-import { IAccount } from 'interfaces/IAccount';
+import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 

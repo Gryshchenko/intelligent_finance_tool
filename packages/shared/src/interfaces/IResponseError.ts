@@ -1,4 +1,4 @@
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
 export interface IResponseError {
     errorCode: ErrorCode | undefined;

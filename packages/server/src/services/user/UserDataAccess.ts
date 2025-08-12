@@ -2,7 +2,7 @@ import { IUserDataAccess } from 'interfaces/IUserDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IUser } from 'interfaces/IUser';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IUserStatus } from 'interfaces/IUserStatus';
+import { IUserStatus } from 'tenpercent/shared/src/interfaces/IUserStatus';
 import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
@@ -27,7 +27,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
                     'users.updatedAt',
                     'users.status',
                     'profiles.locale',
-                    'profiles.userName',
+                    'profiles.publicName',
                     'profiles.additionalInfo',
                     'profiles.mailConfirmed',
                     'currencies.currencyCode',
@@ -112,13 +112,17 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         }
     }
 
-    public async updateUserEmail(userId: number, email: string): Promise<IUserServer> {
+    public async updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<IUserServer> {
         try {
             this._logger.info(`Updating email for userId: ${userId}`);
-            await this._db.engine()('users').where({ userId }).update({
-                email,
-                updatedAt: new Date(),
-            });
+            const query = trx || this._db.engine();
+            await query('users')
+                .where({ userId })
+                .update({
+                    email,
+                    updatedAt: new Date(),
+                })
+                .first();
             this._logger.info(`Email updated for userId: ${userId}`);
             return await this.fetchUserDetails(userId);
         } catch (e) {

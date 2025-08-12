@@ -1,11 +1,6 @@
-import { ResponseStatusType } from 'types/ResponseStatusType';
-import { IResponseError } from 'interfaces/IResponseError';
-
-export interface IResponse<T = unknown> {
-    status: ResponseStatusType | null;
-    data: T;
-    errors: IResponseError[] | null;
-}
+import { IResponse } from 'tenpercent/shared/src/interfaces/IResponse';
+import { IResponseError } from 'tenpercent/shared/src/interfaces/IResponseError';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 export default class ResponseBuilder {
     protected _response: IResponse = {

@@ -1,14 +1,14 @@
-import { RoleType } from 'types/RoleType';
+import { RoleType } from 'tenpercent/shared/src/types/RoleType';
 import { IUserService } from 'interfaces/IUserService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IAuthService } from 'interfaces/IAuthService';
 import { IUser } from 'interfaces/IUser';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import UserServiceUtils from 'src/services/user/UserServiceUtils';
 import { getConfig } from 'src/config/config';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 import jwt from 'jsonwebtoken';
 

@@ -19,20 +19,21 @@ import { ValidationTypes } from "../../types/ValidationTypes"
 
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
-export const SignUpScreen: FC<SignUpScreenProps> = () => {
+export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
+  const { navigation } = _props
   const authPasswordInput = useRef<TextInput>(null)
 
   const [authPassword, setAuthPassword] = useState<string>("")
-  const [name, setName] = useState<string>("")
+  const [publicName, setPublicName] = useState<string>("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
   const { authEmail, setAuthEmail, validationError, setAuthToken } = useAuth()
 
   const validationNameError = useMemo(() => {
-    if (!/^[a-zA-Z0-9]{3,10}$/.test(name)) return ValidationTypes.NAME
+    if (!/^[a-zA-Z0-9]{3,50}$/.test(publicName)) return ValidationTypes.NAME
     return ""
-  }, [name]) as TxKeyPath
+  }, [publicName]) as TxKeyPath
   const validationPasswordError = useMemo(() => {
     if (!authPassword || authPassword.length < 6) return ValidationTypes.MIN_LENGTH
     if (!/[A-Z]/.test(authPassword)) return ValidationTypes.PASSWORD_UPPERCASE
@@ -67,18 +68,16 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
     const response = await api.doSignUp({
       password: authPassword as string,
       email: authEmail as string,
-      name: name as string,
-      locale: "en_US",
+      publicName: publicName as string,
+      locale: "en-US",
     })
     if (response.kind === "ok") {
-      // Make a request to your server to get an authentication token.
-      // If successful, reset the fields and set the token.
       setIsSubmitted(false)
       setAuthPassword("")
       setAuthEmail("")
 
-      // We'll mock this with a fake token.
-      setAuthToken(String(Date.now()))
+      setAuthToken(response.token)
+      navigation.navigate({ name: "SignUpConfirmation", params: undefined })
     } else {
       console.error(`Error fetching episodes: ${JSON.stringify(response)}`)
     }
@@ -110,14 +109,14 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
       <Text tx="signUpScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
 
       <TextField
-        value={name}
-        onChangeText={setName}
+        value={publicName}
+        onChangeText={setPublicName}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="default"
-        labelTx="common:nameFieldLabel"
-        placeholderTx="common:nameFieldPlaceholder"
+        labelTx="common:publicNameFieldLabel"
+        placeholderTx="common:publicNameFieldPlaceholder"
         helper={errorName}
         status={errorName ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}

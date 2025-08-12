@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from '../src/interfaces/IDatabaseConnection';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const crypto = require('crypto');
 
 export function generateSecureRandom() {
@@ -18,11 +19,14 @@ export function generateRandomString(len = Math.floor(generateSecureRandom() * 1
     return userName;
 }
 
-export function generateRandomEmail(len = Math.floor(generateSecureRandom() * 10) + 5) {
+export function generateRandomEmail(len = Math.floor(generateSecureRandom() * 10) + 1) {
     const domains = ['test.com', 'example.com', 'demo.com'];
     const domain = domains[Math.floor(generateSecureRandom() * domains.length)];
 
     return `${generateRandomString(len)}@${domain}`;
+}
+export function generateRandomName(len = Math.floor(generateSecureRandom() * 10) + 5) {
+    return generateRandomString(len);
 }
 
 export function generateRandomPassword(len = Math.floor(generateSecureRandom() * 9) + 8) {

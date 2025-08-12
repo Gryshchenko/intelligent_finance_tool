@@ -13,6 +13,11 @@ const signupValidationRules = [
         onlyASCII: true,
         escapeHTML: true,
     }),
+    ...createSignupValidationRules('publicName', 'string', {
+        min: 2,
+        max: 40,
+        onlyASCII: true,
+    }),
 ];
 
 export default signupValidationRules;

@@ -1,7 +1,7 @@
-import { IAccount } from 'interfaces/IAccount';
+import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { AccountStatusType } from 'types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 
 export interface IAccountDataAccess {
     createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]>;

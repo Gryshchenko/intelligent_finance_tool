@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { ResponseStatusType } from 'types/ResponseStatusType';
-import { ErrorCode } from 'types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { IUser } from 'interfaces/IUser';
 import { IUserSession } from 'interfaces/IUserSession';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
@@ -133,7 +133,7 @@ export default class SessionService {
             resave: false,
             saveUninitialized: false,
             cookie: {
-                secure: true,
+                secure: process.env.ENV === 'production',
                 httpOnly: true,
                 maxAge: 1000 * 60 * 60,
             },

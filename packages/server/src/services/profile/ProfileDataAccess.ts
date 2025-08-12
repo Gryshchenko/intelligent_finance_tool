@@ -3,7 +3,9 @@ import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnect
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IProfile } from 'interfaces/IProfile';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
+import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
 import { DBError } from 'src/utils/errors/DBError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 
 export default class ProfileDataService extends LoggerBase implements IProfileDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -12,12 +14,12 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
         super();
         this._db = db;
     }
-    async createProfile(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile> {
+    async post(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile> {
         try {
             this._logger.info('Request to create profile');
-            const { userId, locale, currencyId } = data;
+            const { userId, locale, currencyId, publicName } = data;
             const query = trx || this._db.engine();
-            const response = await query('profiles').insert({ userId, locale, currencyId }, ['*']);
+            const response = await query('profiles').insert({ userId, locale, currencyId, publicName }, ['*']);
 
             if (!response?.[0]) {
                 throw new Error('Failed to create profile');
@@ -31,7 +33,7 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
         }
     }
 
-    async getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
+    async get(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
         try {
             this._logger.info('Request to retrieve profile');
             const query = trx || this._db.engine();
@@ -39,14 +41,11 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
                 .select<IProfile>(
                     'profiles.profileId',
                     'profiles.userId',
-                    'profiles.userName',
+                    'profiles.publicName',
                     'profiles.currencyId',
                     'profiles.additionalInfo',
                     'profiles.locale',
                     'profiles.mailConfirmed',
-                    'currencies.currencyCode',
-                    'currencies.currencyName',
-                    'currencies.symbol',
                 )
                 .innerJoin('currencies', 'profiles.currencyId', 'currencies.currencyId')
                 .where({ userId })
@@ -60,22 +59,33 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
         }
     }
 
-    async confirmationUserMail(userId: number): Promise<boolean> {
+    async patch(userId: number, properties: Partial<IProfilePatchRequest>, trx?: IDBTransaction): Promise<boolean> {
         try {
             this._logger.info('Request to confirm user email');
 
-            const data = await this._db
-                .engine()<IProfile>('profiles')
-                .where({ userId })
-                .update({ mailConfirmed: true }, ['mailConfirmed']);
+            const allowedKeys = ['mailConfirmed', 'locale', 'currencyId', 'publicName'] as string[];
 
-            if (!data?.[0]?.mailConfirmed) {
-                this._logger.warn('Email confirmation update failed');
-                return false;
-            }
+            validateAllowedProperties(properties, allowedKeys);
 
-            this._logger.info('Email confirmed successfully');
-            return data[0].mailConfirmed;
+            const properestForUpdate: Record<string, unknown> = {};
+
+            Object.keys(properties).forEach((key: string) => {
+                const value = (properties as Record<string, unknown>)[key];
+
+                if (value !== undefined && allowedKeys.includes(key as string)) {
+                    if (key === 'mailConfirmed' && value !== true) {
+                        return;
+                    }
+                    properestForUpdate[key] = value;
+                }
+            });
+
+            properestForUpdate.updatedAt = new Date().toISOString();
+            const query = trx || this._db.engine();
+            await query<IProfile>('profiles').where({ userId }).update(properestForUpdate).first();
+
+            this._logger.info(`Profile retrieved successfully`, properestForUpdate);
+            return true;
         } catch (e) {
             this._logger.error(`Email confirmation error: ${(e as { message: string }).message}`);
             throw new DBError({ message: `Email confirmation error: ${(e as { message: string }).message}` });

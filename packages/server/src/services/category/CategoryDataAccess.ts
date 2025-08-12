@@ -2,7 +2,7 @@ import { ICategoryDataAccess } from 'interfaces/ICategoryDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
-import { ICategory } from 'interfaces/ICategory';
+import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';

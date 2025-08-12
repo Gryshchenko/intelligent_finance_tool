@@ -1,9 +1,10 @@
 import { IProfile } from 'interfaces/IProfile';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
+import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
 
 export interface IProfileDataAccess {
-    createProfile(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined>;
-    getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined>;
-    confirmationUserMail(userId: number): Promise<boolean | undefined>;
+    post(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined>;
+    get(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined>;
+    patch(userId: number, properties: Partial<IProfilePatchRequest>, trx?: IDBTransaction): Promise<boolean | undefined>;
 }

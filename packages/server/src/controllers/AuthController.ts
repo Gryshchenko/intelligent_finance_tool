@@ -4,11 +4,11 @@ import Logger from 'helper/logger/Logger';
 import { validationResult } from 'express-validator';
 import AuthServiceBuilder from 'services/auth/AuthServiceBuilder';
 import SessionService from 'services/session/SessionService';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import UserServiceUtils from 'services/user/UserServiceUtils';
-import { ErrorCode } from 'types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { HttpCode } from 'types/HttpCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 

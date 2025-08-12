@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import Logger from 'helper/logger/Logger';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import UserRegistrationServiceBuilder from 'services/registration/UserRegistrationServiceBuilder';
-import { ResponseStatusType } from 'types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import SessionService from 'services/session/SessionService';
 import UserServiceUtils from 'services/user/UserServiceUtils';
-import { ErrorCode } from 'types/ErrorCode';
-import { HttpCode } from 'types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 export class RegisterController {
@@ -19,6 +19,7 @@ export class RegisterController {
                 req.body.email,
                 req.body.password,
                 req.body.locale,
+                req.body.publicName,
             );
             const { user, token } = response;
             SessionService.handleSessionRegeneration(req, res, user, token, RegisterController.logger, responseBuilder, () => {

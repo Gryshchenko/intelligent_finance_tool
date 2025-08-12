@@ -4,6 +4,11 @@ import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
 import Utils from 'src/utils/Utils';
 import { DBError } from 'src/utils/errors/DBError';
+import { ValidationError } from 'src/utils/errors/ValidationError';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { isBaseError } from 'src/utils/errors/isBaseError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 export default class EmailConfirmationDataAccess extends LoggerBase implements IEmailConfirmationDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -13,32 +18,36 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
         this._db = db;
     }
 
-    public async deleteUserConfirmation(userId: number, code: number): Promise<boolean> {
-        this._logger.info(`Attempting to delete confirmation with code ${code} for userId ${userId}`);
+    public async deleteUserConfirmation(userId: number, email: string): Promise<boolean> {
+        this._logger.info(`Attempting to delete confirmation with email ${email} for userId ${userId}`);
 
         try {
             const result = await this._db
                 .engine()<IEmailConfirmationData>('email_confirmations')
-                .where({ userId, confirmationCode: code })
+                .where({ userId, email })
                 .delete();
 
             const isDeleted = Utils.greaterThen0(result);
-            this._logger.info(
-                isDeleted
-                    ? `Successfully deleted confirmation with code ${code} for userId ${userId}`
-                    : `No confirmation found with code ${code} for userId ${userId}`,
-            );
+            if (!isDeleted) {
+                this._logger.error(`No confirmation found with email ${email} for userId ${userId}`);
+                throw new ValidationError({
+                    message: `No confirmation found with email ${email} for userId ${userId}`,
+                    statusCode: HttpCode.NOT_FOUND,
+                });
+            }
+            this._logger.info(`Successfully deleted confirmation with email ${email} for userId ${userId}`);
 
             return isDeleted;
         } catch (e) {
             this._logger.error(`Error deleting confirmation for userId ${userId}: ${(e as { message: string }).message}`);
             throw new DBError({
                 message: `Error deleting confirmation for userId ${userId}: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
 
-    public async getUserConfirmationWithEmail(userId: number, email: string): Promise<IEmailConfirmationData | undefined> {
+    public async getUserConfirmation(userId: number, email: string): Promise<IEmailConfirmationData | undefined> {
         this._logger.info(`Fetching confirmation for userId ${userId} with email ${email}`);
 
         try {
@@ -51,7 +60,12 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             if (data) {
                 this._logger.info(`Successfully fetched confirmation for userId ${userId} with email ${email}`);
             } else {
-                this._logger.warn(`No confirmation found for userId ${userId} with email ${email}`);
+                this._logger.error(`No confirmation found for userId ${userId} with email ${email}`);
+                throw new ValidationError({
+                    message: `No confirmation found for userId ${userId} with email ${email}`,
+                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+                    statusCode: HttpCode.NOT_FOUND,
+                });
             }
 
             return data as IEmailConfirmationData;
@@ -61,33 +75,7 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             );
             throw new DBError({
                 message: `Error fetching confirmation for userId ${userId} with email ${email}: ${(e as { message: string }).message}`,
-            });
-        }
-    }
-
-    public async getUserConfirmationWithCode(userId: number, code: number): Promise<IEmailConfirmationData | undefined> {
-        this._logger.info(`Fetching confirmation for userId ${userId} with confirmation code ${code}`);
-
-        try {
-            const data = await this._db
-                .engine()<IEmailConfirmationData>('email_confirmations')
-                .where({ userId, confirmationCode: code })
-                .select('*')
-                .first();
-
-            if (data) {
-                this._logger.info(`Successfully fetched confirmation for userId ${userId} with code ${code}`);
-            } else {
-                this._logger.warn(`No confirmation found for userId ${userId} with code ${code}`);
-            }
-
-            return data as IEmailConfirmationData;
-        } catch (e) {
-            this._logger.error(
-                `Error fetching confirmation for userId ${userId} with code ${code}: ${(e as { message: string }).message}`,
-            );
-            throw new DBError({
-                message: `Error fetching confirmation for userId ${userId} with code ${code}: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }

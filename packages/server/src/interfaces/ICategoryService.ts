@@ -1,5 +1,5 @@
 import { ICreateCategory } from 'interfaces/ICreateCategory';
-import { ICategory } from 'interfaces/ICategory';
+import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 
 export interface ICategoryService {

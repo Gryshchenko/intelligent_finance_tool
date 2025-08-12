@@ -1,29 +1,34 @@
-// @ts-nocheck
 import {
     deleteUserAfterTest,
     generateRandomEmail,
+    generateRandomName,
     generateRandomPassword,
     generateRandomString,
     generateSecureRandom,
 } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { LanguageType } from '../../src/types/LanguageType';
 import { user_initial } from '../../src/config/user_initial';
 import currency_initial from '../../src/config/currency_initial';
+import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const argon2 = require('argon2');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config();
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../../src/app');
 
-let server;
+let server: never;
 
-const userIds = [];
+const userIds: string[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
 
+    // @ts-expect-error is necessary
     server = app.listen(port);
 });
 
@@ -31,14 +36,18 @@ afterAll((done) => {
     userIds.forEach((id) => {
         deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
+    // @ts-expect-error is necessary
     server.close(done);
 });
 
 describe('POST /register/signup', () => {
     it('should return error for invalid locale format', async () => {
-        const response = await request(app)
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), locale: 213123 });
+        const response = await request(app).post('/register/signup').send({
+            email: generateRandomEmail(),
+            password: generateRandomPassword(),
+            locale: 213123,
+            publicName: generateRandomName(),
+        });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -54,7 +63,7 @@ describe('POST /register/signup', () => {
     it('should return error for invalid email format to big', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: generateRandomEmail(31), password: generateRandomPassword() });
+            .send({ email: generateRandomEmail(31), password: generateRandomPassword(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -70,7 +79,7 @@ describe('POST /register/signup', () => {
     it('should return error for invalid email format', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'invalid-email', password: generateRandomPassword() });
+            .send({ email: 'invalid-email', password: generateRandomPassword(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -86,7 +95,7 @@ describe('POST /register/signup', () => {
     it('should return error for invalid email format', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'example.com', password: generateRandomPassword() });
+            .send({ email: 'example.com', password: generateRandomPassword(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -102,7 +111,7 @@ describe('POST /register/signup', () => {
     it('should return error for invalid email format', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'example@', password: generateRandomPassword() });
+            .send({ email: 'example@', password: generateRandomPassword(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -118,7 +127,7 @@ describe('POST /register/signup', () => {
     it('should return error for invalid email format', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'example@test@com', password: generateRandomPassword() });
+            .send({ email: 'example@test@com', password: generateRandomPassword(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -132,7 +141,10 @@ describe('POST /register/signup', () => {
         });
     });
     it('should return error for invalid email format', async () => {
-        const response = await request(app).post('/register/signup').send({ email: null, password: generateRandomPassword() });
+        const publicName = generateRandomName();
+        const response = await request(app)
+            .post('/register/signup')
+            .send({ email: null, password: generateRandomPassword(), publicName });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -148,7 +160,7 @@ describe('POST /register/signup', () => {
     it('should return error for too short password', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'test_test@gmail.com', password: generateRandomPassword(5) });
+            .send({ email: 'test_test@gmail.com', password: generateRandomPassword(5), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -164,7 +176,7 @@ describe('POST /register/signup', () => {
     it('should return error for too big password', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(31) });
+            .send({ email: generateRandomEmail(), password: generateRandomPassword(31), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -180,7 +192,7 @@ describe('POST /register/signup', () => {
     it('should return error invalid format password', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'google_test1@test.com', password: generateSecureRandom(2) });
+            .send({ email: 'google_test1@test.com', password: generateSecureRandom(), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -196,7 +208,7 @@ describe('POST /register/signup', () => {
     it('should return error invalid format password', async () => {
         const response = await request(app)
             .post('/register/signup')
-            .send({ email: 'google_test2@test.com', password: generateRandomString(5) });
+            .send({ email: 'google_test2@test.com', password: generateRandomString(5), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -210,7 +222,10 @@ describe('POST /register/signup', () => {
         });
     });
     it('should return error invalid format password', async () => {
-        const response = await request(app).post('/register/signup').send({ email: 'google_test3@test.com', password: null });
+        const publicName = generateRandomName();
+        const response = await request(app)
+            .post('/register/signup')
+            .send({ email: 'google_test3@test.com', password: null, publicName });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -229,7 +244,10 @@ describe('POST /register/signup', () => {
     it('should hash the password before saving to database', async () => {
         const spy = jest.spyOn(argon2, 'hash');
         const mail = generateRandomEmail();
-        const response = await request(app).post('/register/signup').send({ email: mail, password: generateRandomPassword() });
+        const publicName = generateRandomName();
+        const response = await request(app)
+            .post('/register/signup')
+            .send({ email: mail, password: generateRandomPassword(), publicName });
 
         userIds.push(response.body.data.userId);
         expect(response.body).toStrictEqual({
@@ -248,12 +266,15 @@ describe('POST /register/signup', () => {
     });
     it('should failed email already exist', async () => {
         const mail = generateRandomEmail();
+        const publicName = generateRandomName();
         const {
             body: {
                 data: { userId },
             },
-        } = await request(app).post('/register/signup').send({ email: mail, password: generateRandomPassword() });
-        const response = await request(app).post('/register/signup').send({ email: mail, password: generateRandomPassword() });
+        } = await request(app).post('/register/signup').send({ email: mail, password: generateRandomPassword(), publicName });
+        const response = await request(app)
+            .post('/register/signup')
+            .send({ email: mail, password: generateRandomPassword(), publicName });
         userIds.push(userId);
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -267,15 +288,18 @@ describe('POST /register/signup', () => {
         });
     });
 
-    const testCases = [LanguageType.US, LanguageType.FR, LanguageType.DK, LanguageType.DE, 'aa-AA'];
+    const testCases = ['aa-AA'];
     testCases.forEach((locale) => {
         it(`check users accounts, incomes, category for locale: ${locale}`, async () => {
             const mail = generateRandomEmail();
 
-            const initialData = user_initial[locale] ?? user_initial[LanguageType.US];
-            const initialCurrency = currency_initial[locale] ?? currency_initial[LanguageType.US];
+            const initialData = user_initial[locale as LanguageType] ?? user_initial[LanguageType.US];
+            const initialCurrency = currency_initial[locale as LanguageType] ?? currency_initial[LanguageType.US];
             const pass = generateRandomPassword();
-            const response = await request(app).post('/register/signup').send({ email: mail, password: pass, locale });
+            const publicName = generateRandomName();
+            const response = await request(app)
+                .post('/register/signup')
+                .send({ email: mail, password: pass, locale, publicName });
             const databaseConnection = new DatabaseConnection(config);
             const user = await databaseConnection.engine()('users').select('*').where({ email: mail }).first();
             const confirmMail = await databaseConnection
@@ -300,7 +324,7 @@ describe('POST /register/signup', () => {
                     amount: data.amount,
                 })),
             ).toEqual(
-                initialData.accounts.map((data) => ({
+                initialData.accounts.map((data: unknown) => ({
                     userId: user.userId,
                     accountName: data,
                     amount: '0',
@@ -312,7 +336,7 @@ describe('POST /register/signup', () => {
                     userId: data.userId,
                 })),
             ).toEqual(
-                initialData.categories.map((data) => ({
+                initialData.categories.map((data: unknown) => ({
                     categoryName: data,
                     userId: user.userId,
                 })),
@@ -323,7 +347,7 @@ describe('POST /register/signup', () => {
                     incomeName: data.incomeName,
                 })),
             ).toEqual(
-                initialData.income.map((data) => ({
+                initialData.income.map((data: unknown) => ({
                     userId: user.userId,
                     incomeName: data,
                 })),

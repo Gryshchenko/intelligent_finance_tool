@@ -4,6 +4,7 @@ import { IProfile } from 'interfaces/IProfile';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
+import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
 
 export default class ProfileService extends LoggerBase implements IProfileService {
     private readonly _profileDataAccess: IProfileDataAccess;
@@ -13,15 +14,19 @@ export default class ProfileService extends LoggerBase implements IProfileServic
         this._profileDataAccess = profileDataAccess;
     }
 
-    public async createProfile(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined> {
-        return await this._profileDataAccess.createProfile(data, trx);
+    public async post(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined> {
+        return await this._profileDataAccess.post(data, trx);
     }
 
-    public async getProfile(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
-        return await this._profileDataAccess.getProfile(userId, trx);
+    public async get(userId: number, trx?: IDBTransaction): Promise<IProfile | undefined> {
+        return await this._profileDataAccess.get(userId, trx);
     }
 
-    public async confirmationUserMail(userId: number): Promise<boolean | undefined> {
-        return await this._profileDataAccess.confirmationUserMail(userId);
+    public async patch(
+        userId: number,
+        properties: Partial<IProfilePatchRequest>,
+        trx?: IDBTransaction,
+    ): Promise<boolean | undefined> {
+        return await this._profileDataAccess.patch(userId, properties, trx);
     }
 }

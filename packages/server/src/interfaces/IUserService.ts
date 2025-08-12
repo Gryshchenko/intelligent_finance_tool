@@ -7,5 +7,5 @@ export interface IUserService {
     getUserAuthenticationData(email: string): Promise<IGetUserAuthenticationData | undefined>;
     getUser(userId: number): Promise<IUser>;
     createUser(email: string, password: string, trx?: IDBTransaction): Promise<ICreateUser>;
-    updateUserEmail(userId: number, email: string): Promise<IUser>;
+    updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<IUser>;
 }
