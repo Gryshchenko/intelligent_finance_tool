@@ -78,7 +78,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
     public async createConfirmationMail(userId: number, email: string, trx?: IDBTransaction): Promise<IEmailConfirmationData> {
         try {
             const confirmationCode: number = this.createConfirmationKey();
-            await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
+            const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
             // const userConfirmationDataInWork = userConfirmationData as IEmailConfirmationData;
             // this.isConfirmationCodeAlreadySend(userConfirmationDataInWork);
             // this.checkIsMailConfirmed(userConfirmationDataInWork);
