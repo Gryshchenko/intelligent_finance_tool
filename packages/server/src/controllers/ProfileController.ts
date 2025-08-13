@@ -6,7 +6,6 @@ import ProfileServiceBuilder from 'services/profile/ProfileServiceBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ProfileServiceUtils from 'services/profile/ProfileServiceUtils';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import UserRegistrationServiceBuilder from 'services/registration/UserRegistrationServiceBuilder';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
@@ -34,16 +33,7 @@ export class ProfileController {
     public static async patch(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const userFromSession = req.session.user as IUserSession;
-            if (Number(req.body.confirmationCode)) {
-                const response = await UserRegistrationServiceBuilder.build().confirmUserMail(
-                    userFromSession.userId,
-                    Number(req.body.confirmationCode),
-                );
-                res.status(200).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build());
-            } else {
-                res.status(404).json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setData({}).build());
-            }
+            res.status(HttpCode.NOT_IMPLEMENTED).json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setData({}).build());
         } catch (e: unknown) {
             ProfileController.logger.error(`Comfirm mail failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.PROFILE_ERROR);

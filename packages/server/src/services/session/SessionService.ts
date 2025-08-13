@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { IUser } from 'interfaces/IUser';
 import { IUserSession } from 'interfaces/IUserSession';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
 import { getConfig } from 'src/config/config';
 import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
 import { UserAgentService } from 'src/services/userAgentService/UserAgentService';
 import Logger from 'helper/logger/Logger';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const session = require('express-session');
 const redis = require('redis');
@@ -53,7 +53,11 @@ export default class SessionService {
     }
 
     private static buildSessionObject(
-        user: IUser,
+        user: {
+            userId: number;
+            status: UserStatus;
+            email: string;
+        },
         token: string,
         ip: string | undefined,
         sessionId: string,
@@ -83,7 +87,11 @@ export default class SessionService {
         token,
     }: {
         req: Request;
-        user: IUser;
+        user: {
+            userId: number;
+            status: UserStatus;
+            email: string;
+        };
         token: string;
         err?: string;
         handleError: (err: string) => void;
@@ -143,7 +151,11 @@ export default class SessionService {
     public static handleSessionRegeneration(
         req: Request,
         res: Response,
-        user: IUser,
+        user: {
+            userId: number;
+            status: UserStatus;
+            email: string;
+        },
         token: string,
         logger: Logger,
         responseBuilder: ResponseBuilder,

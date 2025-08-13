@@ -9,6 +9,8 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 
 export default class EmailConfirmationDataAccess extends LoggerBase implements IEmailConfirmationDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -46,6 +48,51 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             });
         }
     }
+    public async patchUserConfirmation(
+        userId: number,
+        email: string,
+        properties: Record<string, unknown>,
+        trx?: IDBTransaction,
+    ): Promise<void> {
+        console.log(11111, properties);
+        const allowedProperties = {
+            confirmationCode: Number(properties.confirmationCode),
+            expiresAt: properties.expiresAt as Date,
+            confirmed: properties.confirmed,
+        };
+        this._logger.info(`Patch confirmation for userId ${userId} with email ${email}`, {
+            confirmationCode: String(allowedProperties.confirmationCode).slice(0, 2),
+        });
+
+        try {
+            const allowedKeys = ['expiresAt', 'confirmationCode', 'confirmed'];
+            validateAllowedProperties(allowedProperties, allowedKeys);
+            const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
+            const query = trx || this._db.engine();
+            const data = await query<IEmailConfirmationData>('email_confirmations')
+                .where({ userId, email })
+                .update(properestForUpdate);
+
+            if (data) {
+                this._logger.info(`Successfully patch confirmation for userId ${userId} with email ${email}`);
+            } else {
+                this._logger.error(`No confirmation found for userId ${userId} with email ${email}`);
+                throw new ValidationError({
+                    message: `No confirmation found for userId ${userId} with email ${email}`,
+                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+                    statusCode: HttpCode.NOT_FOUND,
+                });
+            }
+        } catch (e) {
+            this._logger.error(
+                `Error patch confirmation for userId ${userId} with email ${email}: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Error patch confirmation for userId ${userId} with email ${email}: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
+    }
 
     public async getUserConfirmation(userId: number, email: string): Promise<IEmailConfirmationData | undefined> {
         this._logger.info(`Fetching confirmation for userId ${userId} with email ${email}`);
@@ -61,11 +108,6 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
                 this._logger.info(`Successfully fetched confirmation for userId ${userId} with email ${email}`);
             } else {
                 this._logger.error(`No confirmation found for userId ${userId} with email ${email}`);
-                throw new ValidationError({
-                    message: `No confirmation found for userId ${userId} with email ${email}`,
-                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
-                    statusCode: HttpCode.NOT_FOUND,
-                });
             }
 
             return data as IEmailConfirmationData;

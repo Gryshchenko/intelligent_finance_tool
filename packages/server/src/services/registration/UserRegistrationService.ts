@@ -185,7 +185,7 @@ export default class UserRegistrationService extends LoggerBase {
         }
     }
 
-    async confirmUserMail(userId: number, code: number): Promise<IUser> {
+    async confirmUserMail(userId: number, email: string, code: number): Promise<void> {
         const uow = new UnitOfWork(this.db);
 
         try {
@@ -199,16 +199,8 @@ export default class UserRegistrationService extends LoggerBase {
                 });
             }
             const trx = trxInProcess as unknown as IDBTransaction;
-            const user = await this.userService.getUser(userId);
-            const userConfirmationData = await this.emailConfirmationService.getUserConfirmation(userId, user.email);
-            if (Number(userConfirmationData?.confirmationCode) !== Number(code)) {
-                throw new ValidationError({
-                    message: 'User confirmation could not be confirmed',
-                });
-            }
-            await this.profileService.patch(userId, { mailConfirmed: true }, trx);
+            await this.emailConfirmationService.confirmUserMail(userId, email, code, trx);
             await uow.commit();
-            return user;
         } catch (e) {
             await uow.rollback();
             this._logger.info(`User  mail confirmation failed due to a server error: ${(e as { message: string }).message}`);

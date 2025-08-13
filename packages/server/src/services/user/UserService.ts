@@ -28,15 +28,10 @@ export default class UserService extends LoggerBase implements IUserService {
         const hashStr = await UserServiceUtils.hashPassword(password, salt);
         const hash = hashStr as unknown as string;
 
-        const user = await this._userDataAccess.createUser(email, hash, salt.toString('hex'), trx);
-        return user;
+        return await this._userDataAccess.createUser(email, hash, salt.toString('hex'), trx);
     }
 
-    public async updateUserEmail(userId: number, email: string): Promise<IUser> {
-        const response = await this._userDataAccess.getUserEmail(userId);
-        if (response?.email && email !== response.email) {
-            return UserServiceUtils.formatUserDetails(await this._userDataAccess.updateUserEmail(userId, email));
-        }
-        return this.getUser(userId);
+    public async updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<void> {
+        await this._userDataAccess.updateUserEmail(userId, email, trx);
     }
 }

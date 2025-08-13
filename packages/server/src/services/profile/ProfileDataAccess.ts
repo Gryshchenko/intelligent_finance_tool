@@ -6,6 +6,7 @@ import { ICreateProfile } from 'interfaces/ICreateProfile';
 import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
 import { DBError } from 'src/utils/errors/DBError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 
 export default class ProfileDataService extends LoggerBase implements IProfileDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -67,18 +68,7 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
 
             validateAllowedProperties(properties, allowedKeys);
 
-            const properestForUpdate: Record<string, unknown> = {};
-
-            Object.keys(properties).forEach((key: string) => {
-                const value = (properties as Record<string, unknown>)[key];
-
-                if (value !== undefined && allowedKeys.includes(key as string)) {
-                    if (key === 'mailConfirmed' && value !== true) {
-                        return;
-                    }
-                    properestForUpdate[key] = value;
-                }
-            });
+            const properestForUpdate = getOnlyNotEmptyProperties(properties, allowedKeys);
 
             properestForUpdate.updatedAt = new Date().toISOString();
             const query = trx || this._db.engine();

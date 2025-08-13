@@ -2,7 +2,7 @@ import { IUserDataAccess } from 'interfaces/IUserDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IUser } from 'interfaces/IUser';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IUserStatus } from 'tenpercent/shared/src/interfaces/IUserStatus';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
@@ -86,7 +86,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
                     email,
                     passwordHash,
                     salt,
-                    status: IUserStatus.ACTIVE,
+                    status: UserStatus.NO_VERIFIED,
                 },
                 ['userId', 'status', 'email', 'createdAt', 'updatedAt'],
             );
@@ -112,19 +112,21 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         }
     }
 
-    public async updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<IUserServer> {
+    public async updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<boolean> {
         try {
             this._logger.info(`Updating email for userId: ${userId}`);
             const query = trx || this._db.engine();
-            await query('users')
-                .where({ userId })
-                .update({
-                    email,
-                    updatedAt: new Date(),
-                })
-                .first();
-            this._logger.info(`Email updated for userId: ${userId}`);
-            return await this.fetchUserDetails(userId);
+            const updatedCount = await query('users').where({ userId }).update({
+                email,
+                updatedAt: new Date(),
+            });
+            if (updatedCount > 0) {
+                this._logger.info(`Email updated for userId: ${userId}`);
+                return true;
+            } else {
+                this._logger.info(`Email not updated for userId: ${userId}`);
+                return false;
+            }
         } catch (e) {
             this._logger.error(`Error updating email for userId: ${userId} - ${(e as { message: string }).message}`);
             throw new DBError({ message: `Error updating email for userId: ${userId} - ${(e as { message: string }).message}` });

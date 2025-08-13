@@ -10,6 +10,7 @@ import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 
 export default class AccountDataAccess extends LoggerBase implements IAccountDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -112,9 +113,12 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 updateAt: new Date().toISOString(),
                 status: properties.status,
             };
-            validateAllowedProperties(allowedProperties, ['accountName', 'amount', 'updateAt', 'status']);
+
+            const allowedKeys = ['accountName', 'amount', 'updateAt', 'status'];
+            validateAllowedProperties(allowedProperties, allowedKeys);
+            const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();
-            const data = await query('accounts').update(properties).where({ userId, accountId });
+            const data = await query('accounts').update(properestForUpdate).where({ userId, accountId });
 
             if (!data) {
                 throw new NotFoundError({

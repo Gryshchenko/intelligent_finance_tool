@@ -5,4 +5,5 @@ export interface IError {
     message: string;
     errorCode?: ErrorCode;
     statusCode?: HttpCode;
+    payload?: Record<string, unknown>;
 }

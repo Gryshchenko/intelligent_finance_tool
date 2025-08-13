@@ -11,6 +11,7 @@ import config from '../../src/config/dbConfig';
 import { user_initial } from '../../src/config/user_initial';
 import currency_initial from '../../src/config/currency_initial';
 import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const argon2 = require('argon2');
@@ -288,7 +289,7 @@ describe('POST /register/signup', () => {
         });
     });
 
-    const testCases = ['aa-AA'];
+    const testCases = [LanguageType.US, LanguageType.FR, LanguageType.DK, LanguageType.DE, 'aa-AA'];
     testCases.forEach((locale) => {
         it(`check users accounts, incomes, category for locale: ${locale}`, async () => {
             const mail = generateRandomEmail();
@@ -301,7 +302,26 @@ describe('POST /register/signup', () => {
                 .post('/register/signup')
                 .send({ email: mail, password: pass, locale, publicName });
             const databaseConnection = new DatabaseConnection(config);
+
             const user = await databaseConnection.engine()('users').select('*').where({ email: mail }).first();
+            const confirm = await databaseConnection
+                .engine()('email_confirmations')
+                .select('*')
+                .where({ userId: user.userId, email: mail })
+                .first();
+            console.log(confirm);
+            expect(confirm.confirmationCode).toBeTruthy();
+            expect(confirm.confirmed).toBe(false);
+            const confirmMailResponse = await request(app)
+                .post('/signup/confirm-mail')
+                .send({ email: mail, confirmationCode: confirm.confirmationCode });
+            expect(confirmMailResponse.status).toBe(HttpCode.NO_CONTENT);
+            const confirmAfter = await databaseConnection
+                .engine()('email_confirmations')
+                .select('*')
+                .where({ userId: user.userId, email: mail })
+                .first();
+            expect(confirmAfter.confirmed).toBe(true);
             const confirmMail = await databaseConnection
                 .engine()('email_confirmations')
                 .select('*')

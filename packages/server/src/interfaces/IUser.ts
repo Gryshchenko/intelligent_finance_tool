@@ -1,9 +1,9 @@
-import { IUserStatus } from 'tenpercent/shared/src/interfaces/IUserStatus';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 export interface IUser {
     userId: number;
     email: string;
-    status: IUserStatus;
+    status: UserStatus;
     createdAt: string;
     updatedAt: string;
     currency?: {

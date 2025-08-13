@@ -30,6 +30,6 @@ export default class TimeManagerUTC {
     }
 
     isFirstDateLessThanSecond(date1: Date, date2: Date): boolean {
-        return date1.getTime() < date2.getTime();
+        return date1.getTime() <= date2.getTime();
     }
 }

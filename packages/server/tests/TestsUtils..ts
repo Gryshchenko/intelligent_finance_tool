@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from '../src/interfaces/IDatabaseConnection';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const crypto = require('crypto');
 
@@ -19,13 +20,13 @@ export function generateRandomString(len = Math.floor(generateSecureRandom() * 1
     return userName;
 }
 
-export function generateRandomEmail(len = Math.floor(generateSecureRandom() * 10) + 1) {
+export function generateRandomEmail(len = 10) {
     const domains = ['test.com', 'example.com', 'demo.com'];
     const domain = domains[Math.floor(generateSecureRandom() * domains.length)];
 
     return `${generateRandomString(len)}@${domain}`;
 }
-export function generateRandomName(len = Math.floor(generateSecureRandom() * 10) + 5) {
+export function generateRandomName(len = 6) {
     return generateRandomString(len);
 }
 
@@ -67,3 +68,15 @@ export async function deleteUserAfterTest(id: string, db: IDatabaseConnection) {
     await db.engine()('balance').delete().where({ userId: id });
     await db.engine()('users').delete().where({ userId: id });
 }
+
+// export async function signUpUser = (agent) => {
+//         const user = await agent
+//             .post('/register/signup')
+//             .send({
+//                 email: generateRandomEmail(),
+//                 password: generateRandomPassword(),
+//                 publicName: generateRandomName(),
+//             })
+//             .expect(HttpCode.OK);
+//         return user;
+// }
