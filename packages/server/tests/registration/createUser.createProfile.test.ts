@@ -8,6 +8,9 @@ import {
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import { DBError } from '../../src/utils/errors/DBError';
 import config from '../../src/config/dbConfig';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -40,7 +43,7 @@ jest.mock('../../src/services/profile/ProfileService', () => {
             return {
                 createProfile: jest
                     .fn()
-                    .mockImplementation(() => Promise.reject(new DBError({ message: 'cant create profile', errorCode: 5001 }))),
+                    .mockImplementation(() => Promise.reject(new DBError({ message: 'cant create profile', errorCode: ErrorCode.SIGNUP_CATCH_ERROR }))),
             };
         }),
     };
@@ -57,15 +60,15 @@ describe('transaction POST /register/signup', () => {
         const databaseConnection = new DatabaseConnection(config);
         const data = await databaseConnection.engine()('users').select('*').where({ email: mail });
         expect(data).toStrictEqual([]);
-        expect(response.status).toBe(500);
+        expect(response.status).toBe(HttpCode.INTERNAL_SERVER_ERROR);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 5001,
+                    errorCode: ErrorCode.SIGNUP_CATCH_ERROR,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
 });

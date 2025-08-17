@@ -1,6 +1,7 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -44,7 +45,7 @@ describe('PATCH /transaction/patch - amount', () => {
             body: {
                 data: { accounts },
             },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
         const accountId = accounts[0].accountId;
         const currencyId = accounts[0].currencyId;
@@ -61,11 +62,11 @@ describe('PATCH /transaction/patch - amount', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(201);
+            .expect(HttpCode.CREATED);
         const transaction = await agent
             .get(`/user/${userId}/transaction/${response.body.data.transactionId}`)
             .set('authorization', authorization)
-            .expect(200);
+            .expect(HttpCode.OK);
 
         const newDate = new Date().toISOString();
         expect(transaction.body.data.amount).toStrictEqual('1000');
@@ -83,11 +84,11 @@ describe('PATCH /transaction/patch - amount', () => {
                 targetAccountId: accountId,
                 accountId: targetAccountId,
             })
-            .expect(204);
+            .expect(HttpCode.NO_CONTENT);
         const transactionPatch = await agent
             .get(`/user/${userId}/transaction/${response.body.data.transactionId}`)
             .set('authorization', authorization)
-            .expect(200);
+            .expect(HttpCode.OK);
 
         expect(transactionPatch.body.data.amount).toStrictEqual('1500');
         expect(transactionPatch.body.data.description).toStrictEqual('Test 1');
@@ -100,18 +101,18 @@ describe('PATCH /transaction/patch - amount', () => {
             .send({
                 testq: 'something wrong',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
-        await agent.get(`/user/${userId}/transaction/-100`).set('authorization', authorization).expect(400);
+        await agent.get(`/user/${userId}/transaction/-100`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
 
         await agent
             .delete(`/user/${userId}/transaction/${response.body.data.transactionId}`)
             .set('authorization', authorization)
-            .expect(204);
+            .expect(HttpCode.NO_CONTENT);
         await agent
             .get(`/user/${userId}/transaction/${response.body.data.transactionId}`)
             .set('authorization', authorization)
-            .expect(404);
+            .expect(HttpCode.NOT_FOUND);
     });
     it(`pagination`, async () => {
         const agent = request.agent(app);
@@ -127,7 +128,7 @@ describe('PATCH /transaction/patch - amount', () => {
             body: {
                 data: { accounts },
             },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
         const accountId = accounts[0].accountId;
         const currencyId = accounts[0].currencyId;
@@ -149,7 +150,7 @@ describe('PATCH /transaction/patch - amount', () => {
                     amount: num,
                     description: 'Test',
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             transactionIds.push(transactionId);
         }
         const {
@@ -159,7 +160,7 @@ describe('PATCH /transaction/patch - amount', () => {
         } = await agent
             .get(`/user/${userId}/transactions/?limit=3&cursor=${transactionIds[0]}`)
             .set('authorization', authorization)
-            .expect(200);
+            .expect(HttpCode.OK);
         expect(limit).toStrictEqual(3);
         expect(cursor).toStrictEqual(transactionIds[0]);
         expect(data.length).toStrictEqual(3);
@@ -175,7 +176,7 @@ describe('PATCH /transaction/patch - amount', () => {
         } = await agent
             .get(`/user/${userId}/transactions/?limit=3&cursor=${transactionIds[3]}`)
             .set('authorization', authorization)
-            .expect(200);
+            .expect(HttpCode.OK);
         expect(remainingData.length).toBeLessThanOrEqual(3);
         // @ts-expect-error is necessary
         expect(remainingData.map((t: unknown) => t.transactionId)).toStrictEqual([]);
@@ -183,6 +184,6 @@ describe('PATCH /transaction/patch - amount', () => {
         await agent
             .get(`/user/${userId}/transactions/?limit=3&cursor=invalid_cursor`)
             .set('authorization', authorization)
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
     });
 });

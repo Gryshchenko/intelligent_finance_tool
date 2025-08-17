@@ -1,6 +1,9 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -44,7 +47,7 @@ describe('POST /transaction/create - expense', () => {
                 .get(`/user/${userId}/overview/`)
                 .set('authorization', authorization)
                 .send({})
-                .expect(200);
+                .expect(HttpCode.OK);
             const {
                 body: {
                     data: { accounts, categories },
@@ -58,7 +61,7 @@ describe('POST /transaction/create - expense', () => {
 
             const {
                 body: { data: accountBefor },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
             const response = await agent
                 .post(`/user/${userId}/transaction/`)
@@ -71,10 +74,10 @@ describe('POST /transaction/create - expense', () => {
                     description: 'Test',
                     categoryId,
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             const {
                 body: { data: accountAfter },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             expect(Number((accountBefor.amount - num).toFixed(2))).toStrictEqual(accountAfter.amount);
             expect(response.body).toStrictEqual({
                 data: {
@@ -104,12 +107,12 @@ describe('POST /transaction/create - expense', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss accountId', async () => {
@@ -131,12 +134,12 @@ describe('POST /transaction/create - expense', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss categoryId and accountId', async () => {
@@ -157,12 +160,12 @@ describe('POST /transaction/create - expense', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss amount', async () => {
@@ -184,12 +187,12 @@ describe('POST /transaction/create - expense', () => {
                 transactionTypeId: 2,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7006 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.AMOUNT_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - not allow unknown properties', async () => {
@@ -212,12 +215,12 @@ describe('POST /transaction/create - expense', () => {
                 description: 'Test',
                 test: 'unknown',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 1 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
 });

@@ -1,13 +1,11 @@
 import {
     createUser,
     deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
     generateSecureRandom,
 } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -56,7 +54,7 @@ describe('Access control', () => {
                 amount: 1000,
                 currencyId: 1,
             })
-            .expect(200);
+            .expect(HttpCode.OK);
 
         const accountId = accountRes.body.data.accountId;
 
@@ -67,7 +65,7 @@ describe('Access control', () => {
                 categoryName: 'Groceries',
                 currencyId: 1,
             })
-            .expect(200);
+            .expect(HttpCode.OK);
 
         const categoryId = categoryRes.body.data.categoryId;
 
@@ -82,7 +80,7 @@ describe('Access control', () => {
                 amount: 100,
                 description: 'Hidden from others',
             })
-            .expect(201);
+            .expect(HttpCode.CREATED);
 
         const transactionId = transactionRes.body.data.transactionId;
 
@@ -92,12 +90,12 @@ describe('Access control', () => {
         });
         userIds.push(userBId);
 
-        await agent.get(`/user/${userBId}/accounts/${accountId}`).set('authorization', authB).expect(404);
+        await agent.get(`/user/${userBId}/accounts/${accountId}`).set('authorization', authB).expect(HttpCode.NOT_FOUND);
 
-        await agent.get(`/user/${userBId}/categories/${categoryId}`).set('authorization', authB).expect(404);
+        await agent.get(`/user/${userBId}/categories/${categoryId}`).set('authorization', authB).expect(HttpCode.NOT_FOUND);
 
-        await agent.get(`/user/${userAId}/balance`).set('authorization', authB).expect(403);
+        await agent.get(`/user/${userAId}/balance`).set('authorization', authB).expect(HttpCode.FORBIDDEN);
 
-        await agent.delete(`/user/${userBId}/transaction/${transactionId}`).set('authorization', authB).expect(404);
+        await agent.delete(`/user/${userBId}/transaction/${transactionId}`).set('authorization', authB).expect(HttpCode.NOT_FOUND);
     });
 });

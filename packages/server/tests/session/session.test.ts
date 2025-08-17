@@ -1,4 +1,7 @@
 import { generateRandomEmail, generateRandomName, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -43,7 +46,7 @@ describe('Session Security Test', () => {
     //             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
     //         )
     //         .send({ email: generateRandomEmail(), password: generateRandomPassword() })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
 
     //     const res2 = await agent2
     //         .post('/register/signup')
@@ -52,7 +55,7 @@ describe('Session Security Test', () => {
     //             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36',
     //         )
     //         .send({ email: generateRandomEmail(), password: generateRandomPassword() })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
 
     //     const response = await agent2
     //         .get(`/user/${res1.body.data.profile.userId}/profile/`)
@@ -62,7 +65,7 @@ describe('Session Security Test', () => {
     //         )
     //         .set('authorization', res1.header['authorization']);
 
-    //     expect(response.body).toStrictEqual({ data: {}, errors: [], status: 2 });
+    //     expect(response.body).toStrictEqual({ data: {}, errors: [], ResponseStatusType.INTERNAL });
     // });
     it('should not allow access with non-existent session', async () => {
         request.agent(app);
@@ -70,7 +73,7 @@ describe('Session Security Test', () => {
         const res1 = await request(app)
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
+            .expect(HttpCode.OK);
 
         const fakeSessionId = 's%3AAc4EsOmQCjfakeYtYtqUGfKndukyhy.v%2Bx9gufakeKB42GbwerZA;dsfsdf=sdffsd;dsfdsf=sdfsdf;';
         const cookie = res1.header['set-cookie'][0];
@@ -88,10 +91,10 @@ describe('Session Security Test', () => {
             data: {},
             errors: [
                 {
-                    errorCode: 5000,
+                    errorCode: ErrorCode.AUTH,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     //
@@ -101,14 +104,14 @@ describe('Session Security Test', () => {
     //     await agent
     //         .post('/login')
     //         .send({ username: 'testuser' })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     // Имитируем истечение времени сессии
     //     await new Promise((resolve) => setTimeout(resolve, 2000));
     //
     //     const response = await agent
     //         .get('/session')
-    //         .expect(401);
+    //         .expect(HttpCode.UNAUTHORIZED);
     //
     //     expect(response.text).toBe('No session');
     // });
@@ -119,7 +122,7 @@ describe('Session Security Test', () => {
     //     await agent
     //         .post('/login')
     //         .send({ username: 'testuser' })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     const sessionCookie = agent.jar.getCookie('connect.sid', { path: '/' });
     //     const tamperedSessionCookie = sessionCookie.cookieString().replace('s:', 'tampered:');
@@ -127,7 +130,7 @@ describe('Session Security Test', () => {
     //     const response = await request(app)
     //         .get('/session')
     //         .set('Cookie', tamperedSessionCookie)
-    //         .expect(401);
+    //         .expect(HttpCode.UNAUTHORIZED);
     //
     //     expect(response.text).toBe('No session');
     // });
@@ -139,20 +142,20 @@ describe('Session Security Test', () => {
     //     await agent1
     //         .post('/login')
     //         .send({ username: 'testuser' })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     await agent2
     //         .post('/login')
     //         .send({ username: 'testuser' })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     const response1 = await agent1
     //         .get('/session')
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     const response2 = await agent2
     //         .get('/session')
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     expect(response1.text).toBe('Hello, testuser');
     //     expect(response2.text).toBe('Hello, testuser');
@@ -164,16 +167,16 @@ describe('Session Security Test', () => {
     //     await agent
     //         .post('/login')
     //         .send({ username: 'testuser' })
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     // Логика удаления сессии, возможно, через специальный маршрут /logout
     //     await agent
     //         .post('/logout')
-    //         .expect(200);
+    //         .expect(HttpCode.OK);
     //
     //     const response = await agent
     //         .get('/session')
-    //         .expect(401);
+    //         .expect(HttpCode.UNAUTHORIZED);
     //
     //     expect(response.text).toBe('No session');
     // });

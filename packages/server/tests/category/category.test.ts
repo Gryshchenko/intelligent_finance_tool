@@ -1,15 +1,13 @@
 import {
     createUser,
     deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
     generateSecureRandom,
 } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
 import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -61,7 +59,7 @@ describe('Category', () => {
                     currencyId: 1,
                     categoryName: name,
                 })
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(categoryId).toBeTruthy();
             expect(categoryName).toStrictEqual(name);
         }
@@ -83,7 +81,7 @@ describe('Category', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent.post(`/user/${userId}/category/`).set('authorization', authorization).send(data).expect(400);
+            await agent.post(`/user/${userId}/category/`).set('authorization', authorization).send(data).expect(HttpCode.BAD_REQUEST);
         }
     });
     it(`PATCH - update category`, async () => {
@@ -114,7 +112,7 @@ describe('Category', () => {
                     currencyId: 1,
                     categoryName: name,
                 })
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(categoryId).toBeTruthy();
             expect(categoryName).toStrictEqual(name);
             obj[i]['id'] = categoryId;
@@ -128,12 +126,12 @@ describe('Category', () => {
                 .send({
                     categoryName: `${name}${id}`,
                 })
-                .expect(204);
+                .expect(HttpCode.NO_CONTENT);
             const {
                 body: {
                     data: { categoryId, categoryName },
                 },
-            } = await agent.get(`/user/${userId}/category/${id}`).set('authorization', authorization).expect(200);
+            } = await agent.get(`/user/${userId}/category/${id}`).set('authorization', authorization).expect(HttpCode.OK);
 
             expect(categoryId).toStrictEqual(id);
             expect(categoryName).toStrictEqual(`${name}${id}`);
@@ -145,7 +143,7 @@ describe('Category', () => {
                 .send({
                     categoryName: `any`,
                 })
-                .expect(404);
+                .expect(HttpCode.NOT_FOUND);
         }
         for (const id of ['sdsd', null, undefined, -1]) {
             await agent
@@ -154,9 +152,9 @@ describe('Category', () => {
                 .send({
                     categoryName: `any`,
                 })
-                .expect(400);
+                .expect(HttpCode.BAD_REQUEST);
         }
-        await agent.patch(`/user/${userId}/category/${obj[0].id}`).set('authorization', authorization).expect(400);
+        await agent.patch(`/user/${userId}/category/${obj[0].id}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
     it(`unknown properties`, async () => {
         const agent = request.agent(app);
@@ -176,17 +174,17 @@ describe('Category', () => {
                 categoryName: 'Test',
                 something: 200,
             })
-            .expect(400);
-        await agent.post(`/user/${userId}/category/`).set('authorization', authorization).expect(400);
-        await agent.post(`/user/${userId}/category/?something=200`).set('authorization', authorization).expect(400);
+            .expect(HttpCode.BAD_REQUEST);
+        await agent.post(`/user/${userId}/category/`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent.post(`/user/${userId}/category/?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
         await agent
             .get(`/user/${userId}/category/${21}`)
             .set('authorization', authorization)
             .send({
                 something: 200,
             })
-            .expect(404);
-        await agent.get(`/user/${userId}/category/${21}?something=200`).set('authorization', authorization).expect(400);
+            .expect(HttpCode.NOT_FOUND);
+        await agent.get(`/user/${userId}/category/${21}?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
     it(`DELETE - delete category`, async () => {
         const agent = request.agent(app);
@@ -201,7 +199,7 @@ describe('Category', () => {
             body: {
                 data: { accounts },
             },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
         const {
             body: {
@@ -214,7 +212,7 @@ describe('Category', () => {
                 currencyId: 1,
                 categoryName: 'Test 1',
             })
-            .expect(200);
+            .expect(HttpCode.OK);
         const transactions = [
             {
                 transactionTypeId: TransactionType.Expense,
@@ -252,27 +250,27 @@ describe('Category', () => {
                     ...transaction,
                     categoryId,
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             ids.push(transactionId);
         }
-        await agent.get(`/user/${userId}/category/${categoryId}`).set('authorization', authorization).expect(200);
+        await agent.get(`/user/${userId}/category/${categoryId}`).set('authorization', authorization).expect(HttpCode.OK);
         await agent
             .patch(`/user/${userId}/category/${categoryId}`)
             .set('authorization', authorization)
             .send({
                 status: AccountStatusType.Disable,
             })
-            .expect(204);
+            .expect(HttpCode.NO_CONTENT);
         for (const id of ids) {
-            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(200);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
         for (const id of ids) {
-            await agent.delete(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(204);
+            await agent.delete(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
         }
-        await agent.delete(`/user/${userId}/category/${categoryId}`).set('authorization', authorization).expect(204);
+        await agent.delete(`/user/${userId}/category/${categoryId}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
         for (const id of ids) {
-            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(404);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NOT_FOUND);
         }
-        await agent.delete(`/user/${userId}/category/99999999}`).set('authorization', authorization).expect(400);
+        await agent.delete(`/user/${userId}/category/99999999}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
 });

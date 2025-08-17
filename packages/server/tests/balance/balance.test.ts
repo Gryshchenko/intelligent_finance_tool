@@ -2,6 +2,7 @@ import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsU
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import Utils from '../../src/utils/Utils';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -41,7 +42,7 @@ describe('POST /balance', () => {
         });
         userIds.push(userId);
 
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, incomes },
@@ -65,12 +66,12 @@ describe('POST /balance', () => {
                     amount: num,
                     description: 'Test',
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             const {
                 body: {
                     data: { balanceId, balance },
                 },
-            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             expect(balanceId).toBeTruthy();
             expect(Number(balance).toFixed(2)).toBe(String(sum.toFixed(2)));
         }
@@ -84,7 +85,7 @@ describe('POST /balance', () => {
             databaseConnection,
         });
         userIds.push(userId);
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, categories },
@@ -108,12 +109,12 @@ describe('POST /balance', () => {
                     amount: num,
                     description: 'Test',
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             const {
                 body: {
                     data: { balanceId, balance },
                 },
-            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             expect(balanceId).toBeTruthy();
             expect(Number(balance).toFixed(2)).toBe(String(sum.toFixed(2)));
         }
@@ -132,10 +133,10 @@ describe('POST /balance', () => {
                 body: {
                     data: { balance },
                 },
-            } = await agent.get(`/user/${id}/balance`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${id}/balance`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             return balance;
         };
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, incomes },
@@ -164,14 +165,14 @@ describe('POST /balance', () => {
                     amount: create,
                     description: 'Test',
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
 
             expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(originalBalance + create));
             const get = await agent
                 .get(`/user/${userId}/transaction/${transactionId}`)
                 .set('authorization', authorization)
                 .send()
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(Utils.roundNumber(get.body.data.amount)).toBe(Utils.roundNumber(create));
             await agent
                 .patch(`/user/${userId}/transaction/${transactionId}`)
@@ -179,19 +180,19 @@ describe('POST /balance', () => {
                 .send({
                     amount: modify,
                 })
-                .expect(204);
+                .expect(HttpCode.NO_CONTENT);
             const afterPatch = await agent
                 .get(`/user/${userId}/transaction/${transactionId}`)
                 .set('authorization', authorization)
                 .send()
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(Utils.roundNumber(afterPatch.body.data.amount)).toBe(Utils.roundNumber(modify));
             expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(modify));
             await agent
                 .delete(`/user/${userId}/transaction/${transactionId}`)
                 .set('authorization', authorization)
                 .send()
-                .expect(204);
+                .expect(HttpCode.NO_CONTENT);
             expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(originalBalance));
         }
     });
@@ -209,7 +210,7 @@ describe('POST /balance', () => {
         };
 
         const getCurrencyData = async (currency: string, auth: string) => {
-            const res = await agent.get(`/currencies/?currency=${currency}`).set('authorization', auth).expect(200);
+            const res = await agent.get(`/currencies/?currency=${currency}`).set('authorization', auth).expect(HttpCode.OK);
             return res.body.data;
         };
 
@@ -217,7 +218,7 @@ describe('POST /balance', () => {
             const res = await agent
                 .get(`/exchange-rates/?currency=${base}&targetCurrency=${target}`)
                 .set('authorization', auth)
-                .expect(200);
+                .expect(HttpCode.OK);
             return Number(res.body.data.rate);
         };
 
@@ -225,11 +226,11 @@ describe('POST /balance', () => {
             return await agent
                 .get(`/exchange-rates/?currency=${base}&targetCurrency=${target}`)
                 .set('authorization', auth)
-                .expect(404);
+                .expect(HttpCode.NOT_FOUND);
         };
 
         const getBalance = async (userId: string, auth: string) => {
-            const res = await agent.get(`/user/${userId}/balance`).set('authorization', auth).expect(200);
+            const res = await agent.get(`/user/${userId}/balance`).set('authorization', auth).expect(HttpCode.OK);
             return Number(res.body.data.balance);
         };
 
@@ -242,7 +243,7 @@ describe('POST /balance', () => {
                     amount: newAmount,
                     currencyId,
                 })
-                .expect(200);
+                .expect(HttpCode.OK);
             return res.body.data;
         };
         const createAccountFailed = async (userId: string, currencyId: string, currency: string, auth: string) => {
@@ -254,7 +255,7 @@ describe('POST /balance', () => {
                     amount: newAmount,
                     currencyId,
                 })
-                .expect(404);
+                .expect(HttpCode.NOT_FOUND);
         };
 
         const { userId, auth } = await registerUser();

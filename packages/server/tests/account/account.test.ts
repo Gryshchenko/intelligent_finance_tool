@@ -10,6 +10,7 @@ import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
 import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -66,7 +67,7 @@ describe('Account', () => {
                     accountName: name,
                     amount: newAmount,
                 })
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(accountId).toBeTruthy();
             expect(Number(amount)).toStrictEqual(newAmount);
             expect(accountName).toStrictEqual(name);
@@ -97,7 +98,7 @@ describe('Account', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent.post(`/user/${userId}/account/`).set('authorization', authorization).send(data).expect(400);
+            await agent.post(`/user/${userId}/account/`).set('authorization', authorization).send(data).expect(HttpCode.BAD_REQUEST);
         }
     });
     it(`PATCH - update account`, async () => {
@@ -129,7 +130,7 @@ describe('Account', () => {
                     accountName: name,
                     amount: newAmount,
                 })
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(accountId).toBeTruthy();
             expect(Number(amount)).toStrictEqual(newAmount);
             expect(accountName).toStrictEqual(name);
@@ -145,12 +146,12 @@ describe('Account', () => {
                     accountName: `${name}${id}`,
                     amount: newAmount + 1000,
                 })
-                .expect(204);
+                .expect(HttpCode.NO_CONTENT);
             const {
                 body: {
                     data: { accountId, amount, accountName },
                 },
-            } = await agent.get(`/user/${userId}/account/${id}`).set('authorization', authorization).expect(200);
+            } = await agent.get(`/user/${userId}/account/${id}`).set('authorization', authorization).expect(HttpCode.OK);
 
             expect(accountId).toStrictEqual(id);
             expect(Number(amount)).toStrictEqual(newAmount + 1000);
@@ -164,7 +165,7 @@ describe('Account', () => {
                     accountName: `any`,
                     amount: 1000,
                 })
-                .expect(404);
+                .expect(HttpCode.NOT_FOUND);
         }
         for (const id of ['sdsd', null, undefined, -1]) {
             await agent
@@ -174,9 +175,9 @@ describe('Account', () => {
                     accountName: `any`,
                     amount: 1000,
                 })
-                .expect(400);
+                .expect(HttpCode.BAD_REQUEST);
         }
-        await agent.patch(`/user/${userId}/account/${obj[0].id}`).set('authorization', authorization).expect(400);
+        await agent.patch(`/user/${userId}/account/${obj[0].id}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
     it(`unknown properties`, async () => {
         const agent = request.agent(app);
@@ -195,17 +196,17 @@ describe('Account', () => {
                 amount: 10,
                 something: 200,
             })
-            .expect(400);
-        await agent.post(`/user/${userId}/account/`).set('authorization', authorization).expect(400);
-        await agent.post(`/user/${userId}/account/?something=200`).set('authorization', authorization).expect(400);
+            .expect(HttpCode.BAD_REQUEST);
+        await agent.post(`/user/${userId}/account/`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent.post(`/user/${userId}/account/?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
         await agent
             .get(`/user/${userId}/account/${21}`)
             .set('authorization', authorization)
             .send({
                 something: 200,
             })
-            .expect(404);
-        await agent.get(`/user/${userId}/account/${21}?something=200`).set('authorization', authorization).expect(400);
+            .expect(HttpCode.NOT_FOUND);
+        await agent.get(`/user/${userId}/account/${21}?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
     it(`DELETE - delete account - hide`, async () => {
         const agent = request.agent(app);
@@ -219,7 +220,7 @@ describe('Account', () => {
             body: {
                 data: { incomes, categories, accounts },
             },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
         const incomeId = incomes[0].incomeId;
         const categoryId = categories[0].categoryId;
@@ -236,7 +237,7 @@ describe('Account', () => {
                 accountName: 'Test 1',
                 amount: 20000,
             })
-            .expect(200);
+            .expect(HttpCode.OK);
         const transactions = [
             {
                 transactionTypeId: TransactionType.Income,
@@ -269,20 +270,20 @@ describe('Account', () => {
                     description: 'Test',
                     ...transaction,
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             ids.push(transactionId);
         }
-        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(200);
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(HttpCode.OK);
         await agent
             .patch(`/user/${userId}/account/${accountId}`)
             .set('authorization', authorization)
             .send({
                 status: AccountStatusType.Disable,
             })
-            .expect(204);
-        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(404);
+            .expect(HttpCode.NO_CONTENT);
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(HttpCode.NOT_FOUND);
         for (const id of ids) {
-            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(200);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
     });
     it(`DELETE - delete account - full`, async () => {
@@ -298,7 +299,7 @@ describe('Account', () => {
             body: {
                 data: { incomes, categories, accounts },
             },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
         const incomeId = incomes[0].incomeId;
         const categoryId = categories[0].categoryId;
@@ -315,7 +316,7 @@ describe('Account', () => {
                 accountName: 'Test 1',
                 amount: 20000,
             })
-            .expect(200);
+            .expect(HttpCode.OK);
         const transactions = [
             {
                 transactionTypeId: TransactionType.Income,
@@ -348,17 +349,17 @@ describe('Account', () => {
                     description: 'Test',
                     ...transaction,
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             ids.push(transactionId);
         }
-        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(200);
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(HttpCode.OK);
         for (const id of ids) {
-            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(200);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
-        await agent.delete(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(204);
+        await agent.delete(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
         for (const id of ids) {
-            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(404);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NOT_FOUND);
         }
-        await agent.delete(`/user/${userId}/account/99999999}`).set('authorization', authorization).expect(400);
+        await agent.delete(`/user/${userId}/account/99999999}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
     });
 });

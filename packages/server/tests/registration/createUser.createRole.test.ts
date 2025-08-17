@@ -1,6 +1,9 @@
 import { generateRandomEmail, generateRandomName, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -43,15 +46,15 @@ describe('transaction POST /register/signup', () => {
         const databaseConnection = new DatabaseConnection(config);
         const data = await databaseConnection.engine()('users').select('*').where({ email: mail });
         expect(data).toStrictEqual([]);
-        expect(response.status).toBe(500);
+        expect(response.status).toBe(HttpCode.INTERNAL_SERVER_ERROR);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 5001,
+                    errorCode: ErrorCode.SIGNUP_CATCH_ERROR,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
 });

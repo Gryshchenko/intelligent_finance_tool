@@ -1,6 +1,9 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -44,7 +47,7 @@ describe('POST /transaction/create - transfare', () => {
                 .get(`/user/${userId}/overview/`)
                 .set('authorization', authorization)
                 .send({})
-                .expect(200);
+                .expect(HttpCode.OK);
             const {
                 body: {
                     data: { accounts },
@@ -58,7 +61,7 @@ describe('POST /transaction/create - transfare', () => {
 
             const {
                 body: { data: accountBefor },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
 
             const {
                 body: { data: targetAccountBefor },
@@ -66,7 +69,7 @@ describe('POST /transaction/create - transfare', () => {
                 .get(`/user/${userId}/account/${targetAccountId}`)
                 .set('authorization', authorization)
                 .send({})
-                .expect(200);
+                .expect(HttpCode.OK);
             const response = await agent
                 .post(`/user/${userId}/transaction/`)
                 .set('authorization', authorization)
@@ -78,17 +81,17 @@ describe('POST /transaction/create - transfare', () => {
                     amount: num,
                     description: 'Test',
                 })
-                .expect(201);
+                .expect(HttpCode.CREATED);
             const {
                 body: { data: accountAfter },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             const {
                 body: { data: targetAccountAfter },
             } = await agent
                 .get(`/user/${userId}/account/${targetAccountId}`)
                 .set('authorization', authorization)
                 .send({})
-                .expect(200);
+                .expect(HttpCode.OK);
             expect(Number((accountBefor.amount - num).toFixed(2))).toStrictEqual(accountAfter.amount);
             expect(Number((targetAccountBefor.amount + num).toFixed(2))).toStrictEqual(targetAccountAfter.amount);
             expect(response.body).toStrictEqual({
@@ -118,12 +121,12 @@ describe('POST /transaction/create - transfare', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss accountId', async () => {
@@ -143,12 +146,12 @@ describe('POST /transaction/create - transfare', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss targetAccountId and accountId', async () => {
@@ -168,12 +171,12 @@ describe('POST /transaction/create - transfare', () => {
                 amount: 1000,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7005 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - miss amount', async () => {
@@ -194,12 +197,12 @@ describe('POST /transaction/create - transfare', () => {
                 transactionTypeId: 3,
                 description: 'Test',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 7006 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.AMOUNT_ERROR }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should not create new transaction - not allow unknown properties', async () => {
@@ -222,12 +225,12 @@ describe('POST /transaction/create - transfare', () => {
                 description: 'Test',
                 test: 'unknown',
             })
-            .expect(400);
+            .expect(HttpCode.BAD_REQUEST);
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: 1 }],
-            status: 2,
+            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            status: ResponseStatusType.INTERNAL,
         });
     });
 });

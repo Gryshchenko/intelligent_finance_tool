@@ -13,6 +13,8 @@ import { user_initial } from '../../src/config/user_initial';
 import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const argon2 = require('argon2');
@@ -51,15 +53,15 @@ describe('POST /register/signup', () => {
             publicName: generateRandomName(),
         });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4010,
+                    errorCode: ErrorCode.LOCALE_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format to big', async () => {
@@ -67,15 +69,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(31), password: generateRandomPassword(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format', async () => {
@@ -83,15 +85,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'invalid-email', password: generateRandomPassword(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format', async () => {
@@ -99,15 +101,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'example.com', password: generateRandomPassword(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format', async () => {
@@ -115,15 +117,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'example@', password: generateRandomPassword(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format', async () => {
@@ -131,15 +133,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'example@test@com', password: generateRandomPassword(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for invalid email format', async () => {
@@ -148,15 +150,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: null, password: generateRandomPassword(), publicName });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4000,
+                    errorCode: ErrorCode.EMAIL_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for too short password', async () => {
@@ -164,15 +166,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'test_test@gmail.com', password: generateRandomPassword(5), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error for too big password', async () => {
@@ -180,15 +182,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: generateRandomEmail(), password: generateRandomPassword(31), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error invalid format password', async () => {
@@ -196,15 +198,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'google_test1@test.com', password: generateSecureRandom(), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error invalid format password', async () => {
@@ -213,15 +215,15 @@ describe('POST /register/signup', () => {
 
             .send({ email: 'google_test2@test.com', password: generateRandomString(5), publicName: generateRandomName() });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should return error invalid format password', async () => {
@@ -230,18 +232,18 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: 'google_test3@test.com', password: null, publicName });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
                 {
-                    errorCode: 4002,
+                    errorCode: ErrorCode.PASSWORD_INVALID,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
     it('should hash the password before saving to database', async () => {
@@ -274,15 +276,15 @@ describe('POST /register/signup', () => {
             .post('/register/signup')
             .send({ email: mail, password: generateRandomPassword(), publicName });
         userIds.push(userId);
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpCode.BAD_REQUEST);
         expect(response.body).toStrictEqual({
             data: {},
             errors: [
                 {
-                    errorCode: 5003,
+                    errorCode: ErrorCode.SIGNUP_USER_ALREADY_EXIST,
                 },
             ],
-            status: 2,
+            status: ResponseStatusType.INTERNAL,
         });
     });
 
