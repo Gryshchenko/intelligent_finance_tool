@@ -1,4 +1,5 @@
 import {
+    createUser,
     deleteUserAfterTest,
     generateRandomEmail,
     generateRandomName,
@@ -41,12 +42,13 @@ describe('Account', () => {
     it(`POST - create account`, async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
 
-        userIds.push(create_user.body.data.userId);
+        userIds.push(userId);
         for (const { amount: newAmount, name } of [
             { amount: 100, name: 'Test 1' },
             { amount: -100, name: 'Test 2' },
@@ -57,8 +59,8 @@ describe('Account', () => {
                     data: { accountId, amount, accountName },
                 },
             } = await agent
-                .post(`/user/${create_user.body.data.userId}/account/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/account/`)
+                .set('authorization', authorization)
                 .send({
                     currencyId: 1,
                     accountName: name,
@@ -95,22 +97,19 @@ describe('Account', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent
-                .post(`/user/${create_user.body.data.userId}/account/`)
-                .set('authorization', create_user.header['authorization'])
-                .send(data)
-                .expect(400);
+            await agent.post(`/user/${userId}/account/`).set('authorization', authorization).send(data).expect(400);
         }
     });
     it(`PATCH - update account`, async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
 
-        userIds.push(create_user.body.data.userId);
+        userIds.push(userId);
         const obj = [
             { amount: 100, name: 'Test 1', id: null },
             { amount: -100, name: 'Test 2', id: null },
@@ -123,8 +122,8 @@ describe('Account', () => {
                     data: { accountId, amount, accountName },
                 },
             } = await agent
-                .post(`/user/${create_user.body.data.userId}/account/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/account/`)
+                .set('authorization', authorization)
                 .send({
                     currencyId: 1,
                     accountName: name,
@@ -140,8 +139,8 @@ describe('Account', () => {
 
         for (const { amount: newAmount, name, id } of obj) {
             await agent
-                .patch(`/user/${create_user.body.data.userId}/account/${id}`)
-                .set('authorization', create_user.header['authorization'])
+                .patch(`/user/${userId}/account/${id}`)
+                .set('authorization', authorization)
                 .send({
                     accountName: `${name}${id}`,
                     amount: newAmount + 1000,
@@ -151,10 +150,7 @@ describe('Account', () => {
                 body: {
                     data: { accountId, amount, accountName },
                 },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/account/${id}`)
-                .set('authorization', create_user.header['authorization'])
-                .expect(200);
+            } = await agent.get(`/user/${userId}/account/${id}`).set('authorization', authorization).expect(200);
 
             expect(accountId).toStrictEqual(id);
             expect(Number(amount)).toStrictEqual(newAmount + 1000);
@@ -162,8 +158,8 @@ describe('Account', () => {
         }
         for (const id of [999999999, 23129831, 238231]) {
             await agent
-                .patch(`/user/${create_user.body.data.userId}/account/${id}`)
-                .set('authorization', create_user.header['authorization'])
+                .patch(`/user/${userId}/account/${id}`)
+                .set('authorization', authorization)
                 .send({
                     accountName: `any`,
                     amount: 1000,
@@ -172,31 +168,27 @@ describe('Account', () => {
         }
         for (const id of ['sdsd', null, undefined, -1]) {
             await agent
-                .patch(`/user/${create_user.body.data.userId}/account/${id}`)
-                .set('authorization', create_user.header['authorization'])
+                .patch(`/user/${userId}/account/${id}`)
+                .set('authorization', authorization)
                 .send({
                     accountName: `any`,
                     amount: 1000,
                 })
                 .expect(400);
         }
-        await agent
-            .patch(`/user/${create_user.body.data.userId}/account/${obj[0].id}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(400);
+        await agent.patch(`/user/${userId}/account/${obj[0].id}`).set('authorization', authorization).expect(400);
     });
     it(`unknown properties`, async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
         await agent
-            .post(`/user/${create_user.body.data.userId}/account/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/account/`)
+            .set('authorization', authorization)
             .send({
                 currencyId: 1,
                 accountName: 'Test',
@@ -204,43 +196,30 @@ describe('Account', () => {
                 something: 200,
             })
             .expect(400);
+        await agent.post(`/user/${userId}/account/`).set('authorization', authorization).expect(400);
+        await agent.post(`/user/${userId}/account/?something=200`).set('authorization', authorization).expect(400);
         await agent
-            .post(`/user/${create_user.body.data.userId}/account/`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(400);
-        await agent
-            .post(`/user/${create_user.body.data.userId}/account/?something=200`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(400);
-        await agent
-            .get(`/user/${create_user.body.data.userId}/account/${21}`)
-            .set('authorization', create_user.header['authorization'])
+            .get(`/user/${userId}/account/${21}`)
+            .set('authorization', authorization)
             .send({
                 something: 200,
             })
             .expect(404);
-        await agent
-            .get(`/user/${create_user.body.data.userId}/account/${21}?something=200`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(400);
+        await agent.get(`/user/${userId}/account/${21}?something=200`).set('authorization', authorization).expect(400);
     });
     it(`DELETE - delete account - hide`, async () => {
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const {
             body: {
                 data: { incomes, categories, accounts },
             },
-        } = await agent
-            .get(`/user/${create_user.body.data.userId}/overview/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({})
-            .expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
 
         const incomeId = incomes[0].incomeId;
         const categoryId = categories[0].categoryId;
@@ -250,8 +229,8 @@ describe('Account', () => {
                 data: { accountId },
             },
         } = await agent
-            .post(`/user/${create_user.body.data.userId}/account/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/account/`)
+            .set('authorization', authorization)
             .send({
                 currencyId: 1,
                 accountName: 'Test 1',
@@ -281,8 +260,8 @@ describe('Account', () => {
                     data: { transactionId },
                 },
             } = await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     accountId,
                     currencyId: 1,
@@ -293,45 +272,33 @@ describe('Account', () => {
                 .expect(201);
             ids.push(transactionId);
         }
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(200);
         await agent
-            .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(200);
-        await agent
-            .patch(`/user/${create_user.body.data.userId}/account/${accountId}`)
-            .set('authorization', create_user.header['authorization'])
+            .patch(`/user/${userId}/account/${accountId}`)
+            .set('authorization', authorization)
             .send({
                 status: AccountStatusType.Disable,
             })
             .expect(204);
-        await agent
-            .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(404);
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(404);
         for (const id of ids) {
-            await agent
-                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
-                .set('authorization', create_user.header['authorization'])
-                .expect(200);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(200);
         }
     });
     it(`DELETE - delete account - full`, async () => {
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
 
-        userIds.push(create_user.body.data.userId);
+        userIds.push(userId);
         const {
             body: {
                 data: { incomes, categories, accounts },
             },
-        } = await agent
-            .get(`/user/${create_user.body.data.userId}/overview/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({})
-            .expect(200);
+        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
 
         const incomeId = incomes[0].incomeId;
         const categoryId = categories[0].categoryId;
@@ -341,8 +308,8 @@ describe('Account', () => {
                 data: { accountId },
             },
         } = await agent
-            .post(`/user/${create_user.body.data.userId}/account/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/account/`)
+            .set('authorization', authorization)
             .send({
                 currencyId: 1,
                 accountName: 'Test 1',
@@ -372,8 +339,8 @@ describe('Account', () => {
                     data: { transactionId },
                 },
             } = await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     accountId,
                     currencyId: 1,
@@ -384,29 +351,14 @@ describe('Account', () => {
                 .expect(201);
             ids.push(transactionId);
         }
-        await agent
-            .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(200);
+        await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(200);
         for (const id of ids) {
-            await agent
-                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
-                .set('authorization', create_user.header['authorization'])
-                .expect(200);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(200);
         }
-        await agent
-            .delete(`/user/${create_user.body.data.userId}/account/${accountId}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(204);
+        await agent.delete(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(204);
         for (const id of ids) {
-            await agent
-                .get(`/user/${create_user.body.data.userId}/transaction/${id}`)
-                .set('authorization', create_user.header['authorization'])
-                .expect(404);
+            await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(404);
         }
-        await agent
-            .delete(`/user/${create_user.body.data.userId}/account/99999999}`)
-            .set('authorization', create_user.header['authorization'])
-            .expect(400);
+        await agent.delete(`/user/${userId}/account/99999999}`).set('authorization', authorization).expect(400);
     });
 });

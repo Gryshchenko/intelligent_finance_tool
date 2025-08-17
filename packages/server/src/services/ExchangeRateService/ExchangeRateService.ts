@@ -55,7 +55,7 @@ export default class ExchangeRateService extends LoggerBase implements IExchange
                         .filter(
                             (rate) =>
                                 Time.getDiff({
-                                    to: rate.updateAt,
+                                    to: rate.updatedAt,
                                     duration: TimeDuration.Hour,
                                 }) >= 12,
                         )

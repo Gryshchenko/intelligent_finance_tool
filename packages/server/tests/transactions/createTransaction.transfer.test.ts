@@ -1,10 +1,4 @@
-import {
-    deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 
@@ -40,14 +34,15 @@ describe('POST /transaction/create - transfare', () => {
         it(`should create new transaction num: ${num}`, async () => {
             const agent = request.agent(app);
 
-            const create_user = await agent
-                .post('/register/signup')
-                .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-                .expect(200);
-            userIds.push(create_user.body.data.userId);
+            const databaseConnection = DatabaseConnection.instance(config);
+            const { userId, authorization } = await createUser({
+                agent,
+                databaseConnection,
+            });
+            userIds.push(userId);
             const overview = await agent
-                .get(`/user/${create_user.body.data.userId}/overview/`)
-                .set('authorization', create_user.header['authorization'])
+                .get(`/user/${userId}/overview/`)
+                .set('authorization', authorization)
                 .send({})
                 .expect(200);
             const {
@@ -63,22 +58,18 @@ describe('POST /transaction/create - transfare', () => {
 
             const {
                 body: { data: accountBefor },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
 
             const {
                 body: { data: targetAccountBefor },
             } = await agent
-                .get(`/user/${create_user.body.data.userId}/account/${targetAccountId}`)
-                .set('authorization', create_user.header['authorization'])
+                .get(`/user/${userId}/account/${targetAccountId}`)
+                .set('authorization', authorization)
                 .send({})
                 .expect(200);
             const response = await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     accountId,
                     currencyId,
@@ -90,16 +81,12 @@ describe('POST /transaction/create - transfare', () => {
                 .expect(201);
             const {
                 body: { data: accountAfter },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/account/${accountId}`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
+            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(200);
             const {
                 body: { data: targetAccountAfter },
             } = await agent
-                .get(`/user/${create_user.body.data.userId}/account/${targetAccountId}`)
-                .set('authorization', create_user.header['authorization'])
+                .get(`/user/${userId}/account/${targetAccountId}`)
+                .set('authorization', authorization)
                 .send({})
                 .expect(200);
             expect(Number((accountBefor.amount - num).toFixed(2))).toStrictEqual(accountAfter.amount);
@@ -116,14 +103,15 @@ describe('POST /transaction/create - transfare', () => {
     it('should not create new transaction - miss targetAccountId', async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const response = await agent
-            .post(`/user/${create_user.body.data.userId}/transaction/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/transaction/`)
+            .set('authorization', authorization)
             .send({
                 accountId: 21,
                 transactionTypeId: 3,
@@ -141,14 +129,15 @@ describe('POST /transaction/create - transfare', () => {
     it('should not create new transaction - miss accountId', async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const response = await agent
-            .post(`/user/${create_user.body.data.userId}/transaction/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/transaction/`)
+            .set('authorization', authorization)
             .send({
                 transactionTypeId: 3,
                 amount: 1000,
@@ -165,14 +154,15 @@ describe('POST /transaction/create - transfare', () => {
     it('should not create new transaction - miss targetAccountId and accountId', async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const response = await agent
-            .post(`/user/${create_user.body.data.userId}/transaction/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/transaction/`)
+            .set('authorization', authorization)
             .send({
                 transactionTypeId: 3,
                 amount: 1000,
@@ -189,14 +179,15 @@ describe('POST /transaction/create - transfare', () => {
     it('should not create new transaction - miss amount', async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const response = await agent
-            .post(`/user/${create_user.body.data.userId}/transaction/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/transaction/`)
+            .set('authorization', authorization)
             .send({
                 accountId: 5,
                 targetAccountId: 5,
@@ -214,13 +205,14 @@ describe('POST /transaction/create - transfare', () => {
     it('should not create new transaction - not allow unknown properties', async () => {
         const agent = request.agent(app);
 
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
         const response = await agent
-            .post(`/user/${create_user.body.data.userId}/transaction/`)
-            .set('authorization', create_user.header['authorization'])
+            .post(`/user/${userId}/transaction/`)
+            .set('authorization', authorization)
             .send({
                 accountId: 5,
                 targetAccountId: 5,

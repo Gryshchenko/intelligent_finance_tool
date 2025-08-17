@@ -88,7 +88,7 @@ export default class ExchangeRateDataAccess extends LoggerBase implements IExcha
             this._logger.info(`Fetch rate for baseCurrency: ${baseCurrency}, targetCurrency: ${targetCurrency}`);
             const data = await this._db
                 .engine()('currencyRates')
-                .select<IRate>('baseCurrency', 'targetCurrency', 'rate', 'updateAt')
+                .select<IRate>('baseCurrency', 'targetCurrency', 'rate', 'updatedAt')
                 .where({
                     baseCurrency,
                     targetCurrency,
@@ -115,7 +115,7 @@ export default class ExchangeRateDataAccess extends LoggerBase implements IExcha
             this._logger.info(`Fetch rates for baseCurrency: ${baseCurrency}`);
             const data = await this._db
                 .engine()('currencyRates')
-                .select<IRate[]>('baseCurrency', 'targetCurrency', 'rate', 'updateAt')
+                .select<IRate[]>('baseCurrency', 'targetCurrency', 'rate', 'updatedAt')
                 .where({
                     baseCurrency,
                 });

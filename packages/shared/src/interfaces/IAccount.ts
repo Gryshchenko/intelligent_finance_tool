@@ -1,4 +1,4 @@
-import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { AccountStatusType } from 'types/AccountStatusType';
 
 export interface IAccount {
     accountId: number;

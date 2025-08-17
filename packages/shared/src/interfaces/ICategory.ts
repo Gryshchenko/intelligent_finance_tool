@@ -1,4 +1,4 @@
-import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { AccountStatusType } from 'types/AccountStatusType';
 
 export interface ICategory {
     categoryName: string;
@@ -7,5 +7,5 @@ export interface ICategory {
     currencyId: number;
     status: AccountStatusType;
     createAt: Date;
-    updateAt: Date;
+    updatedAt: Date;
 }

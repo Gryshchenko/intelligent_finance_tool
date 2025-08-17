@@ -22,7 +22,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
 
             const data = await this._db
                 .engine()('balance')
-                .select('balanceId', 'balance', 'updateAt', 'createAt')
+                .select('balanceId', 'balance', 'updatedAt', 'createAt')
                 .where({ userId })
                 .first();
 
@@ -81,9 +81,9 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
             this._logger.info(`Patch balance for userId: ${userId}`);
             const allowedProperties = {
                 balance: properties.amount,
-                updateAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             };
-            validateAllowedProperties(allowedProperties, ['updateAt', 'balance']);
+            validateAllowedProperties(allowedProperties, ['updatedAt', 'balance']);
             const query = trx || this._db.engine();
             const data = (await query.transaction(async (trx) => {
                 return trx<IBalance>('balance')
@@ -91,7 +91,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
                     .update(
                         {
                             balance: trx.raw('balance + ?', [allowedProperties.balance]),
-                            updateAt: trx.fn.now(),
+                            updatedAt: trx.fn.now(),
                         },
                         'balance',
                     );

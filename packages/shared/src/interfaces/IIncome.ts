@@ -1,4 +1,4 @@
-import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { AccountStatusType } from 'types/AccountStatusType';
 
 export interface IIncome {
     incomeId: number;
@@ -7,5 +7,5 @@ export interface IIncome {
     currencyId: number;
     status: AccountStatusType;
     createAt: Date;
-    updateAt: Date;
+    updatedAt: Date;
 }

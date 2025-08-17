@@ -76,18 +76,18 @@ export async function deleteUserAfterTest(id: string, db: IDatabaseConnection) {
 
 export const createUser = async ({
     agent,
-    password = generateRandomEmail(),
+    password = generateRandomPassword(),
     email = generateRandomEmail(),
     publicName = generateRandomName(),
     locale = LanguageType.US,
     databaseConnection = new DatabaseConnection(config),
 }: {
     agent: Agent;
-    password: string;
-    email: string;
-    locale: LanguageType;
-    publicName: string;
-    databaseConnection: IDatabaseConnection;
+    password?: string;
+    email?: string;
+    locale?: LanguageType;
+    publicName?: string;
+    databaseConnection?: IDatabaseConnection;
 }): Promise<{ userId: string; authorization: string }> => {
     const { body, header } = await agent.post('/register/signup').send({ email, password, locale, publicName });
     const {
@@ -117,8 +117,8 @@ export const createUser = async ({
     expect(profile.body.data).toStrictEqual({
         profileId: expect.any(Number),
         publicName,
+        locale: expect.any(String),
         currencyId: expect.any(Number),
-        locale,
         mailConfirmed: true,
     });
     expect(userAfter.body.data).toStrictEqual({

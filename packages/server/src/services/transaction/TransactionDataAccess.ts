@@ -210,7 +210,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             description: properties.description,
             targetAccountId: properties.targetAccountId,
             createAt: properties.createAt,
-            updateAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
         validateAllowedProperties(allowedProperties, [
             'accountId',
@@ -220,7 +220,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             'description',
             'targetAccountId',
             'createAt',
-            'updateAt',
+            'updatedAt',
         ]);
         return allowedProperties;
     }
@@ -234,7 +234,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             'transactions.incomeId',
             'transactions.description',
             'transactions.createAt',
-            'transactions.updateAt',
+            'transactions.updatedAt',
             'transactions.currencyId',
             'transactions.targetAccountId',
             'transactions.transactionTypeId',

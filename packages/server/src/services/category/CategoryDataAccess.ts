@@ -102,11 +102,11 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             this._logger.info(`Patch categoryId: ${categoryId} for userId: ${userId}`);
             const allowedProperties = {
                 categoryName: properties.categoryName,
-                updateAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 status: properties.status,
             };
 
-            validateAllowedProperties(allowedProperties, ['categoryName', 'updateAt', 'status']);
+            validateAllowedProperties(allowedProperties, ['categoryName', 'updatedAt', 'status']);
             const query = trx || this._db.engine();
             const data = await query('categories').update(properties).where({ userId, categoryId });
 

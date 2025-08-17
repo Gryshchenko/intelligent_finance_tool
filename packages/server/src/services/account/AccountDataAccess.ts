@@ -110,11 +110,11 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             const allowedProperties = {
                 accountName: properties.accountName,
                 amount: properties.amount,
-                updateAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 status: properties.status,
             };
 
-            const allowedKeys = ['accountName', 'amount', 'updateAt', 'status'];
+            const allowedKeys = ['accountName', 'amount', 'updatedAt', 'status'];
             validateAllowedProperties(allowedProperties, allowedKeys);
             const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();

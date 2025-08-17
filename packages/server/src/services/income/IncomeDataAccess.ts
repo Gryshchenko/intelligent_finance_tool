@@ -109,11 +109,11 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             this._logger.info(`Patch incomeId: ${incomeId} for userId: ${userId}`);
             const allowedProperties = {
                 incomeName: properties.incomeName,
-                updateAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 status: properties.status,
             };
 
-            const allowedKeys = ['incomeName', 'updateAt', 'status'];
+            const allowedKeys = ['incomeName', 'updatedAt', 'status'];
             validateAllowedProperties(allowedProperties, allowedKeys);
             const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();

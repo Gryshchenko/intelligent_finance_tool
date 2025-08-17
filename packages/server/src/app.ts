@@ -26,6 +26,7 @@ import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRat
 import Logger from 'helper/logger/Logger';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import * as process from 'node:process';
 
 const app = express();
 const port = getConfig().appPort ?? 3000;
@@ -38,11 +39,13 @@ const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf
 
 const credentials: { key: string; cert: string } = { key: privateKey, cert: certificate };
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 min
-    limit: 100,
-});
-
+if (process.env.NODE_ENV !== 'test') {
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 min
+        limit: 100,
+    });
+    app.use(limiter);
+}
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.setTimeout(10000, () => {
         res.status(408).send(
@@ -59,7 +62,6 @@ app.use(checkOriginReferer);
 app.use(checkCors());
 app.use(express.json({ limit: '5kb' }));
 app.use(express.urlencoded({ limit: '5kb', extended: true }));
-app.use(limiter);
 app.use(express.json());
 app.use(helmet());
 app.use(passport.initialize());

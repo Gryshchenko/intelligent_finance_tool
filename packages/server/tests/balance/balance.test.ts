@@ -1,12 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import {
-    deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import Utils from '../../src/utils/Utils';
@@ -18,13 +10,14 @@ require('dotenv').config();
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../../src/app');
 
-let server;
+let server: never;
 
-let userIds = [];
+let userIds: string[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
 
+    // @ts-expect-error is necessary
     server = app.listen(port);
 });
 
@@ -33,6 +26,7 @@ afterAll((done) => {
         deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
+    // @ts-expect-error is necessary
     server.close(done);
 });
 
@@ -40,17 +34,14 @@ describe('POST /balance', () => {
     it(`create income transaction and increase balance`, async () => {
         let sum = 0;
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
 
-        const overview = await agent
-            .get(`/user/${create_user.body.data.userId}/overview/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({})
-            .expect(200);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
         const {
             body: {
                 data: { accounts, incomes },
@@ -64,8 +55,8 @@ describe('POST /balance', () => {
         for (const num of [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554]) {
             sum += num;
             await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     incomeId,
                     accountId,
@@ -79,11 +70,7 @@ describe('POST /balance', () => {
                 body: {
                     data: { balanceId, balance },
                 },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/balance`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
+            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(200);
             expect(balanceId).toBeTruthy();
             expect(Number(balance).toFixed(2)).toBe(String(sum.toFixed(2)));
         }
@@ -91,16 +78,13 @@ describe('POST /balance', () => {
     it(`create income transaction and decrease balance`, async () => {
         let sum = 0;
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
-        const overview = await agent
-            .get(`/user/${create_user.body.data.userId}/overview/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({})
-            .expect(200);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
         const {
             body: {
                 data: { accounts, categories },
@@ -114,8 +98,8 @@ describe('POST /balance', () => {
         for (const num of [10, 20, 32, 42.23, 4342, 342425, 32424.34, 324234.54, 5345345.345345, 5345345346.4554]) {
             sum -= num;
             await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     categoryId,
                     accountId,
@@ -129,11 +113,7 @@ describe('POST /balance', () => {
                 body: {
                     data: { balanceId, balance },
                 },
-            } = await agent
-                .get(`/user/${create_user.body.data.userId}/balance`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
+            } = await agent.get(`/user/${userId}/balance`).set('authorization', authorization).send({}).expect(200);
             expect(balanceId).toBeTruthy();
             expect(Number(balance).toFixed(2)).toBe(String(sum.toFixed(2)));
         }
@@ -141,28 +121,21 @@ describe('POST /balance', () => {
 
     it(`updates balance after modifying transaction amount`, async () => {
         const agent = request.agent(app);
-        const create_user = await agent
-            .post('/register/signup')
-            .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-            .expect(200);
-        userIds.push(create_user.body.data.userId);
+        const databaseConnection = DatabaseConnection.instance(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        userIds.push(userId);
         const getBalance = async (id: string) => {
             const {
                 body: {
                     data: { balance },
                 },
-            } = await agent
-                .get(`/user/${id}/balance`)
-                .set('authorization', create_user.header['authorization'])
-                .send({})
-                .expect(200);
+            } = await agent.get(`/user/${id}/balance`).set('authorization', authorization).send({}).expect(200);
             return balance;
         };
-        const overview = await agent
-            .get(`/user/${create_user.body.data.userId}/overview/`)
-            .set('authorization', create_user.header['authorization'])
-            .send({})
-            .expect(200);
+        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(200);
         const {
             body: {
                 data: { accounts, incomes },
@@ -175,14 +148,14 @@ describe('POST /balance', () => {
 
         for (const num of [[1000, 400]]) {
             const [create, modify] = num;
-            const originalBalance = await getBalance(create_user.body.data.userId);
+            const originalBalance = await getBalance(userId);
             const {
                 body: {
                     data: { transactionId },
                 },
             } = await agent
-                .post(`/user/${create_user.body.data.userId}/transaction/`)
-                .set('authorization', create_user.header['authorization'])
+                .post(`/user/${userId}/transaction/`)
+                .set('authorization', authorization)
                 .send({
                     accountId,
                     incomeId,
@@ -193,35 +166,33 @@ describe('POST /balance', () => {
                 })
                 .expect(201);
 
-            expect(Utils.roundNumber(await getBalance(create_user.body.data.userId))).toBe(
-                Utils.roundNumber(originalBalance + create),
-            );
+            expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(originalBalance + create));
             const get = await agent
-                .get(`/user/${create_user.body.data.userId}/transaction/${transactionId}`)
-                .set('authorization', create_user.header['authorization'])
+                .get(`/user/${userId}/transaction/${transactionId}`)
+                .set('authorization', authorization)
                 .send()
                 .expect(200);
             expect(Utils.roundNumber(get.body.data.amount)).toBe(Utils.roundNumber(create));
             await agent
-                .patch(`/user/${create_user.body.data.userId}/transaction/${transactionId}`)
-                .set('authorization', create_user.header['authorization'])
+                .patch(`/user/${userId}/transaction/${transactionId}`)
+                .set('authorization', authorization)
                 .send({
                     amount: modify,
                 })
                 .expect(204);
             const afterPatch = await agent
-                .get(`/user/${create_user.body.data.userId}/transaction/${transactionId}`)
-                .set('authorization', create_user.header['authorization'])
+                .get(`/user/${userId}/transaction/${transactionId}`)
+                .set('authorization', authorization)
                 .send()
                 .expect(200);
             expect(Utils.roundNumber(afterPatch.body.data.amount)).toBe(Utils.roundNumber(modify));
-            expect(Utils.roundNumber(await getBalance(create_user.body.data.userId))).toBe(Utils.roundNumber(modify));
+            expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(modify));
             await agent
-                .delete(`/user/${create_user.body.data.userId}/transaction/${transactionId}`)
-                .set('authorization', create_user.header['authorization'])
+                .delete(`/user/${userId}/transaction/${transactionId}`)
+                .set('authorization', authorization)
                 .send()
                 .expect(204);
-            expect(Utils.roundNumber(await getBalance(create_user.body.data.userId))).toBe(Utils.roundNumber(originalBalance));
+            expect(Utils.roundNumber(await getBalance(userId))).toBe(Utils.roundNumber(originalBalance));
         }
     });
     it('updates balance after adding accounts in other currencies', async () => {
@@ -229,11 +200,12 @@ describe('POST /balance', () => {
         const newAmount = 1000;
 
         const registerUser = async () => {
-            const res = await agent
-                .post('/register/signup')
-                .send({ email: generateRandomEmail(5), password: generateRandomPassword(), publicName: generateRandomName() })
-                .expect(200);
-            return { userId: res.body.data.userId, auth: res.header['authorization'] };
+            const databaseConnection = new DatabaseConnection(config);
+            const { userId, authorization } = await createUser({
+                agent,
+                databaseConnection,
+            });
+            return { userId: userId, auth: authorization };
         };
 
         const getCurrencyData = async (currency: string, auth: string) => {
@@ -308,11 +280,11 @@ describe('POST /balance', () => {
             expect(currentBalance).toBe(Utils.roundNumber(expectedBalance));
         }
         for (const currency of unsupportCurrency) {
-            const data = await getExchangeRateFailed('USD', currency, auth);
+            const data = await getExchangeRateFailed('USD', currency as string, auth);
             expect(data.body.errors.length).toBe(1);
             const {
                 body: { errors },
-            } = await createAccountFailed(userId, '-999', currency, auth);
+            } = await createAccountFailed(userId, '-999', currency as string, auth);
             expect(errors.length).toBe(1);
         }
     });

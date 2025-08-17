@@ -1,4 +1,5 @@
 import {
+    createUser,
     deleteUserAfterTest,
     generateRandomEmail,
     generateRandomName,
@@ -38,21 +39,13 @@ afterAll((done) => {
 describe('Access control', () => {
     it("denies access to another user's account, category, balance and transaction", async () => {
         const agent = request.agent(app);
-
-        const createUser = async () => {
-            return await agent
-                .post('/register/signup')
-                .send({
-                    email: generateRandomEmail(5),
-                    password: generateRandomPassword(),
-                    publicName: generateRandomName(),
-                })
-                .expect(200);
-        };
-
-        const userA = await createUser();
-        const userAId = userA.body.data.userId;
-        const authA = userA.header['authorization'];
+        const databaseConnection = new DatabaseConnection(config);
+        const { userId, authorization } = await createUser({
+            agent,
+            databaseConnection,
+        });
+        const userAId = userId;
+        const authA = authorization;
         userIds.push(userAId);
 
         const accountRes = await agent
@@ -93,9 +86,10 @@ describe('Access control', () => {
 
         const transactionId = transactionRes.body.data.transactionId;
 
-        const userB = await createUser();
-        const userBId = userB.body.data.userId;
-        const authB = userB.header['authorization'];
+        const { userId: userBId, authorization: authB } = await createUser({
+            agent,
+            databaseConnection,
+        });
         userIds.push(userBId);
 
         await agent.get(`/user/${userBId}/accounts/${accountId}`).set('authorization', authB).expect(404);
