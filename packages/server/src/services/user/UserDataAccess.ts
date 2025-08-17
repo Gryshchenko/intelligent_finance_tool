@@ -7,6 +7,14 @@ import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
 import { DBError } from 'src/utils/errors/DBError';
+import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
+import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
+import { ValidationError } from 'src/utils/errors/ValidationError';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { isBaseError } from 'src/utils/errors/isBaseError';
+import { BaseError } from 'src/utils/errors/BaseError';
 
 export default class UserDataService extends LoggerBase implements IUserDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -20,22 +28,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
             this._logger.info(`Fetching details for userId: ${userId}`);
             const user = await this._db
                 .engine()<IUser>('users')
-                .select(
-                    'users.email',
-                    'users.userId',
-                    'users.createdAt',
-                    'users.updatedAt',
-                    'users.status',
-                    'profiles.locale',
-                    'profiles.publicName',
-                    'profiles.additionalInfo',
-                    'profiles.mailConfirmed',
-                    'currencies.currencyCode',
-                    'currencies.currencyName',
-                    'currencies.symbol',
-                )
-                .innerJoin('profiles', 'users.userId', 'profiles.userId')
-                .innerJoin('currencies', 'profiles.currencyId', 'currencies.currencyId')
+                .select('users.email', 'users.userId', 'users.createdAt', 'users.updatedAt', 'users.status')
                 .where('users.userId', userId)
                 .first();
             this._logger.info(`User details fetched for userId: ${userId}`);
@@ -68,7 +61,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         }
     }
 
-    public async getUser(userId: number): Promise<IUserServer> {
+    public async get(userId: number): Promise<IUserServer> {
         try {
             return await this.fetchUserDetails(userId);
         } catch (e) {
@@ -77,7 +70,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         }
     }
 
-    public async createUser(email: string, passwordHash: string, salt: string, trx?: IDBTransaction): Promise<ICreateUserServer> {
+    public async create(email: string, passwordHash: string, salt: string, trx?: IDBTransaction): Promise<ICreateUserServer> {
         try {
             this._logger.info(`Creating user with email: ${email}`);
             const query = trx || this._db.engine();
@@ -130,6 +123,42 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         } catch (e) {
             this._logger.error(`Error updating email for userId: ${userId} - ${(e as { message: string }).message}`);
             throw new DBError({ message: `Error updating email for userId: ${userId} - ${(e as { message: string }).message}` });
+        }
+    }
+    public async patch(
+        userId: number,
+        properties: Partial<{ status: UserStatus; email: string }>,
+        trx?: IDBTransaction,
+    ): Promise<void> {
+        const allowedProperties = {
+            updatedAt: new Date().toISOString(),
+            status: properties.status,
+            email: properties.email,
+        };
+        this._logger.info(`Patch userId ${userId}`, allowedProperties);
+
+        try {
+            const allowedKeys = ['updatedAt', 'status', 'email'];
+            validateAllowedProperties(allowedProperties, allowedKeys);
+            const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
+            const query = trx || this._db.engine();
+            const data = await query<IEmailConfirmationData>('users').where({ userId }).update(properestForUpdate);
+
+            if (data) {
+                this._logger.info(`Successfully patch user for userId ${userId}`);
+            } else {
+                throw new ValidationError({
+                    message: `No found for userId: ${userId}`,
+                    errorCode: ErrorCode.USER_ID_ERROR,
+                    statusCode: HttpCode.NOT_FOUND,
+                });
+            }
+        } catch (e) {
+            this._logger.error(`Error patch user for userId ${userId}: ${(e as { message: string }).message}`);
+            throw new DBError({
+                message: `Error patch user for userId ${userId}: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
         }
     }
 }

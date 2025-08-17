@@ -36,7 +36,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
 
             this._logger.info('Password verification successful');
 
-            const user = await this.userService.getUser(userForCheck.userId);
+            const user = await this.userService.get(userForCheck.userId);
             const token = AuthService.createJWToken(user.userId, RoleType.Default);
             return { user, token };
         } catch (e) {

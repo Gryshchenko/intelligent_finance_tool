@@ -21,7 +21,7 @@ const passportSetup = (passport: PassportStatic) => {
         new JwtStrategy(options, (jwt_payload: { sub: string }, done: (a: unknown, b: IUser | boolean) => void) => {
             const userService = UserServiceBuilder.build();
             userService
-                .getUser(parseInt(jwt_payload.sub, 10))
+                .get(parseInt(jwt_payload.sub, 10))
                 .then((user) => {
                     if (user?.userId) {
                         done(null, user);

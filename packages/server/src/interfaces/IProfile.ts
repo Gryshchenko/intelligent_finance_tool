@@ -7,5 +7,4 @@ export interface IProfile {
     currencyId: number;
     locale: LanguageType;
     mailConfirmed: boolean;
-    additionInfo: Record<string, unknown>;
 }

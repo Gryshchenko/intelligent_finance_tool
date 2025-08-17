@@ -43,9 +43,6 @@ export default class UserServiceUtils {
             userId: user.userId,
             email: user.email,
             status: user.status,
-            currency: user.currency,
-            profile: user.profile,
-            additionalInfo: user.additionalInfo,
         };
     }
 
@@ -54,18 +51,6 @@ export default class UserServiceUtils {
             userId: draftUser.userId,
             email: draftUser.email,
             status: draftUser.status,
-            createdAt: draftUser.createdAt,
-            updatedAt: draftUser.updatedAt,
-            currency: {
-                currencyCode: draftUser.currencyCode || undefined,
-                currencyName: draftUser.currencyName || undefined,
-                symbol: draftUser.symbol || undefined,
-            },
-            profile: {
-                locale: draftUser.locale || undefined,
-                mailConfirmed: draftUser.mailConfirmed || undefined,
-            },
-            additionalInfo: draftUser.additionalInfo,
         };
     }
 }

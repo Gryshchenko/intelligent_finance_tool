@@ -6,6 +6,7 @@ import { ICreateUser } from 'interfaces/ICreateUser';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 export default class UserService extends LoggerBase implements IUserService {
     private readonly _userDataAccess: IUserDataAccess;
@@ -19,19 +20,25 @@ export default class UserService extends LoggerBase implements IUserService {
         return await this._userDataAccess.getUserAuthenticationData(email);
     }
 
-    public async getUser(userId: number): Promise<IUser> {
-        return UserServiceUtils.formatUserDetails(await this._userDataAccess.getUser(userId));
+    public async get(userId: number): Promise<IUser> {
+        return UserServiceUtils.formatUserDetails(await this._userDataAccess.get(userId));
     }
 
-    public async createUser(email: string, password: string, trx?: IDBTransaction): Promise<ICreateUser> {
+    public async create(email: string, password: string, trx?: IDBTransaction): Promise<ICreateUser> {
         const salt = UserServiceUtils.getRandomSalt();
         const hashStr = await UserServiceUtils.hashPassword(password, salt);
         const hash = hashStr as unknown as string;
 
-        return await this._userDataAccess.createUser(email, hash, salt.toString('hex'), trx);
+        return await this._userDataAccess.create(email, hash, salt.toString('hex'), trx);
     }
-
-    public async updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<void> {
-        await this._userDataAccess.updateUserEmail(userId, email, trx);
+    public async patch(
+        userId: number,
+        properties: Partial<{
+            email: string;
+            status: UserStatus;
+        }>,
+        trx?: IDBTransaction,
+    ): Promise<void> {
+        return await this._userDataAccess.patch(userId, properties, trx);
     }
 }

@@ -54,7 +54,6 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
         properties: Record<string, unknown>,
         trx?: IDBTransaction,
     ): Promise<void> {
-        console.log(11111, properties);
         const allowedProperties = {
             confirmationCode: Number(properties.confirmationCode),
             expiresAt: properties.expiresAt as Date,
@@ -76,7 +75,6 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             if (data) {
                 this._logger.info(`Successfully patch confirmation for userId ${userId} with email ${email}`);
             } else {
-                this._logger.error(`No confirmation found for userId ${userId} with email ${email}`);
                 throw new ValidationError({
                     message: `No confirmation found for userId ${userId} with email ${email}`,
                     errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
@@ -101,13 +99,12 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             const data = await this._db
                 .engine()<IEmailConfirmationData>('email_confirmations')
                 .where({ userId, email })
-                .select('*')
+                .select(['confirmationId', 'userId', 'email', 'confirmationCode', 'confirmed', 'expiresAt'])
                 .first();
-
             if (data) {
                 this._logger.info(`Successfully fetched confirmation for userId ${userId} with email ${email}`);
             } else {
-                this._logger.error(`No confirmation found for userId ${userId} with email ${email}`);
+                this._logger.info(`No confirmation found for userId ${userId} with email ${email}`);
             }
 
             return data as IEmailConfirmationData;
@@ -132,13 +129,15 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
         trx?: IDBTransaction,
     ): Promise<IEmailConfirmationData> {
         const { userId, confirmationCode, email, expiresAt } = payload;
-        this._logger.info(`Creating confirmation for userId ${userId} with email ${email} and code ${confirmationCode}`);
+        this._logger.info(
+            `Creating confirmation for userId ${userId} with email ${email} and code ${String(confirmationCode).slice(0, 2)}`,
+        );
 
         try {
             const query = trx || this._db.engine();
             const data = await query<IEmailConfirmationData>('email_confirmations').insert(
                 { email, userId, confirmationCode, expiresAt },
-                ['*'],
+                ['confirmationId', 'userId', 'email', 'confirmationCode', 'confirmed', 'expiresAt'],
             );
 
             this._logger.info(`Successfully created confirmation for userId ${userId} with email ${email}`);

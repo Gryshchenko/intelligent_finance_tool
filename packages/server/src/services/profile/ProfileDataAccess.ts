@@ -46,10 +46,10 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
                     'profiles.currencyId',
                     'profiles.additionalInfo',
                     'profiles.locale',
-                    'profiles.mailConfirmed',
+                    'email_confirmations.confirmed as mailConfirmed',
                 )
-                .innerJoin('currencies', 'profiles.currencyId', 'currencies.currencyId')
-                .where({ userId })
+                .innerJoin('email_confirmations', 'profiles.userId', 'email_confirmations.userId')
+                .where({ 'profiles.userId': userId })
                 .first();
 
             this._logger.info('Profile retrieval successful');
@@ -64,7 +64,7 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
         try {
             this._logger.info('Request to confirm user email');
 
-            const allowedKeys = ['mailConfirmed', 'locale', 'currencyId', 'publicName'] as string[];
+            const allowedKeys = ['locale', 'currencyId', 'publicName'] as string[];
 
             validateAllowedProperties(properties, allowedKeys);
 

@@ -1,4 +1,5 @@
 import {
+    createUser,
     deleteUserAfterTest,
     generateRandomEmail,
     generateRandomName,
@@ -9,9 +10,9 @@ import {
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { user_initial } from '../../src/config/user_initial';
-import currency_initial from '../../src/config/currency_initial';
 import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const argon2 = require('argon2');
@@ -209,6 +210,7 @@ describe('POST /register/signup', () => {
     it('should return error invalid format password', async () => {
         const response = await request(app)
             .post('/register/signup')
+
             .send({ email: 'google_test2@test.com', password: generateRandomString(5), publicName: generateRandomName() });
 
         expect(response.status).toBe(400);
@@ -292,51 +294,41 @@ describe('POST /register/signup', () => {
     const testCases = [LanguageType.US, LanguageType.FR, LanguageType.DK, LanguageType.DE, 'aa-AA'];
     testCases.forEach((locale) => {
         it(`check users accounts, incomes, category for locale: ${locale}`, async () => {
-            const mail = generateRandomEmail();
-
-            const initialData = user_initial[locale as LanguageType] ?? user_initial[LanguageType.US];
-            const initialCurrency = currency_initial[locale as LanguageType] ?? currency_initial[LanguageType.US];
-            const pass = generateRandomPassword();
-            const publicName = generateRandomName();
-            const response = await request(app)
-                .post('/register/signup')
-                .send({ email: mail, password: pass, locale, publicName });
             const databaseConnection = new DatabaseConnection(config);
 
-            const user = await databaseConnection.engine()('users').select('*').where({ email: mail }).first();
-            const confirm = await databaseConnection
-                .engine()('email_confirmations')
+            const agent = request.agent(app);
+            const initialData = user_initial[locale as LanguageType] ?? user_initial[LanguageType.US];
+            const password = generateRandomPassword();
+            const email = generateRandomEmail();
+            const publicName = generateRandomName();
+            const { userId, authorization } = await createUser({
+                password,
+                email,
+                publicName,
+                locale: locale as LanguageType,
+                agent,
+                databaseConnection,
+            });
+            expect(userId).toEqual(expect.any(Number));
+            const user = await databaseConnection.engine()('users').select('*').where({ email, userId }).first();
+            const profile = await databaseConnection
+                .engine()('profiles')
                 .select('*')
-                .where({ userId: user.userId, email: mail })
+                .innerJoin('email_confirmations', 'profiles.userId', 'email_confirmations.userId')
+                .where({ 'profiles.userId': user.userId })
                 .first();
-            console.log(confirm);
-            expect(confirm.confirmationCode).toBeTruthy();
-            expect(confirm.confirmed).toBe(false);
-            const confirmMailResponse = await request(app)
-                .post('/signup/confirm-mail')
-                .send({ email: mail, confirmationCode: confirm.confirmationCode });
-            expect(confirmMailResponse.status).toBe(HttpCode.NO_CONTENT);
-            const confirmAfter = await databaseConnection
-                .engine()('email_confirmations')
-                .select('*')
-                .where({ userId: user.userId, email: mail })
-                .first();
-            expect(confirmAfter.confirmed).toBe(true);
-            const confirmMail = await databaseConnection
-                .engine()('email_confirmations')
-                .select('*')
-                .where({ email: mail, userId: user.userId });
             const accounts = await databaseConnection.engine()('accounts').select('*').where({ userId: user.userId });
             const categories = await databaseConnection.engine()('categories').select('*').where({ userId: user.userId });
             const incomes = await databaseConnection.engine()('incomes').select('*').where({ userId: user.userId });
             const balance = await databaseConnection.engine()('balance').select('*').where({ userId: user.userId });
+            expect(profile.publicName).toStrictEqual(publicName);
+            expect(profile.locale).toStrictEqual(locale === 'aa-AA' ? LanguageType.US : locale);
+            expect(profile.userId).toStrictEqual(userId);
 
             expect(balance.length).toBe(1);
             expect(balance[0].userId).toBe(user.userId);
             expect(balance[0].balance).toBe('0');
             userIds.push(user.userId);
-            expect(confirmMail.length).toBe(1);
-            expect(confirmMail[0].email).toEqual(mail);
             expect(
                 accounts.map((data) => ({
                     userId: data.userId,
@@ -372,17 +364,23 @@ describe('POST /register/signup', () => {
                     incomeName: data,
                 })),
             );
+            const {
+                body: { data },
+            } = await agent.get(`/user/${userId}`).set('authorization', authorization);
+            expect(data.email).toBe(email);
+            expect(data.status).toBe(UserStatus.ACTIVE);
+            const profileResponse = await agent.get(`/user/${userId}/profile`).set('authorization', authorization);
+            console.log(profileResponse.body, 1);
+            console.log(profile, 2);
 
-            expect(response.status).toBe(200);
-            expect(response.body).toStrictEqual({
-                status: 1,
+            expect(profileResponse.body).toStrictEqual({
+                status: ResponseStatusType.OK,
                 data: {
-                    email: mail,
-                    status: 1,
-                    userId: expect.any(Number),
-                    currency: initialCurrency,
-                    profile: { locale: locale === 'aa-AA' ? LanguageType.US : locale },
-                    additionalInfo: null,
+                    publicName: publicName,
+                    mailConfirmed: profile.confirmed,
+                    profileId: profile.profileId,
+                    currencyId: profile.currencyId,
+                    locale: profile.locale,
                 },
                 errors: [],
             });

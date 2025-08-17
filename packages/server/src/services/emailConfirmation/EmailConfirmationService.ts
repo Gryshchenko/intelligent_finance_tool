@@ -157,7 +157,6 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
             });
         }
         await this.emailConfirmationDataAccess.patchUserConfirmation(userId, email, { confirmed: true, confirmationCode }, trx);
-        await this.userService.updateUserEmail(userId, userConfirmationDataInWork.email, trx);
     }
 
     public async deleteUserConfirmation(userId: number, email: string): Promise<boolean> {

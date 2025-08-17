@@ -28,6 +28,7 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IBalanceService } from 'interfaces/IBalanceService';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 interface IDefaultData {
     group: string;
@@ -125,7 +126,7 @@ export default class UserRegistrationService extends LoggerBase {
                 });
             }
             const trx = trxInProcess as unknown as IDBTransaction;
-            const user = await this.userService.createUser(email, password, trx);
+            const user = await this.userService.create(email, password, trx);
             if (user) {
                 const currencyCode = (currency_initial[locale] ?? currency_initial[LanguageType.US]).currencyCode;
                 const currency = await this.currencyService.getByCurrencyCode(currencyCode);
@@ -154,7 +155,7 @@ export default class UserRegistrationService extends LoggerBase {
                     ),
                     await this.emailConfirmationService.createConfirmationMail(user.userId, user.email, trx),
                 ]);
-                if (Utils.isNull(response[1]?.userId)) {
+                if (Utils.isNull(response[1]?.profileId)) {
                     throw new CustomError({
                         message: 'User profile creation failed during the registration process.',
                         statusCode: HttpCode.INTERNAL_SERVER_ERROR,
@@ -170,7 +171,7 @@ export default class UserRegistrationService extends LoggerBase {
                         `User creation confirmation mail send failed due reason: ${(e as { message: string }).message}`,
                     );
                 });
-                const readyUser = await this.userService.getUser(user.userId);
+                const readyUser = await this.userService.get(user.userId);
                 return { user: readyUser, token: newToken };
             }
             throw new CustomError({
@@ -200,6 +201,7 @@ export default class UserRegistrationService extends LoggerBase {
             }
             const trx = trxInProcess as unknown as IDBTransaction;
             await this.emailConfirmationService.confirmUserMail(userId, email, code, trx);
+            await this.userService.patch(userId, { status: UserStatus.ACTIVE }, trx);
             await uow.commit();
         } catch (e) {
             await uow.rollback();

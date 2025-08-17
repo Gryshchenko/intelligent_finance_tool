@@ -6,13 +6,13 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 
-const _logger = Logger.Of('SessionVerify');
+const _logger = Logger.Of('UserIdVerify');
 
 const userIdVerify = (req: Request, res: Response, next: NextFunction) => {
     const userFromSession = req.session.user as IUserSession;
     if (parseInt(req.params.userId) !== userFromSession.userId) {
         const responseBuilder = new ResponseBuilder();
-        _logger.info('UserId verified failed');
+        _logger.error('UserId verified failed');
         return res
             .status(HttpCode.FORBIDDEN)
             .json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH }).build());

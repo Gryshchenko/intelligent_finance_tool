@@ -11,10 +11,24 @@ import { validatePathQueryProperty } from 'src/utils/validation/validatePathQuer
 import income from 'routes/income';
 import category from 'routes/category';
 import balance from 'routes/balance';
+import { UserController } from 'controllers/UserController';
+import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
+import { validateQuery } from 'src/utils/validation/validateQuery';
+import userStatusVerify from 'middleware/userStatusVerify';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const userRouter = express.Router({ mergeParams: true });
 
-userRouter.use(tokenVerify, sessionVerify);
+userRouter.use(tokenVerify, sessionVerify, userStatusVerify(UserStatus.ACTIVE));
+
+userRouter.get(
+    '/:userId',
+    userIdVerify,
+    routesInputValidation([validatePathQueryProperty('userId')]),
+    sanitizeRequestBody([]),
+    validateQuery({}),
+    UserController.get,
+);
 
 userRouter.use('/:userId/profile', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), profile);
 

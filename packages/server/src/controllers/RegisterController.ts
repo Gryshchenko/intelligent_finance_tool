@@ -4,7 +4,6 @@ import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import UserRegistrationServiceBuilder from 'services/registration/UserRegistrationServiceBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import SessionService from 'services/session/SessionService';
-import UserServiceUtils from 'services/user/UserServiceUtils';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
@@ -38,10 +37,7 @@ export class RegisterController {
                 responseBuilder,
                 () => {
                     res.status(HttpCode.OK).json(
-                        responseBuilder
-                            .setStatus(ResponseStatusType.OK)
-                            .setData(UserServiceUtils.convertServerUserToClientUser(user))
-                            .build(),
+                        responseBuilder.setStatus(ResponseStatusType.OK).setData({ userId: user.userId }).build(),
                     );
                 },
             );
@@ -75,7 +71,7 @@ export class RegisterController {
                 },
             );
         } catch (e: unknown) {
-            RegisterController.logger.error(`Signup failed due reason: ${(e as { message: string }).message}`);
+            RegisterController.logger.error(`Signup confirm mail failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_VERIFICATION_FAILED);
         }
     }

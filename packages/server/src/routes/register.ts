@@ -7,6 +7,9 @@ import { validateQuery } from 'src/utils/validation/validateQuery';
 import signupConfirmMailValidationRules from 'src/utils/validation/signupConfirmMailValidationRules';
 import tokenVerify from 'middleware/tokenVerify';
 import sessionVerify from 'middleware/sessionVerify';
+import userIdVerify from 'middleware/userIdVerify';
+import userStatusVerify from 'middleware/userStatusVerify';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const router = express.Router();
 
@@ -19,9 +22,11 @@ router.post(
 );
 
 router.post(
-    '/signup/confirm-mail',
+    '/signup/:userId/confirm-mail',
     tokenVerify,
     sessionVerify,
+    userIdVerify,
+    userStatusVerify(UserStatus.NO_VERIFIED),
     sanitizeRequestBody(['confirmationCode']),
     validateQuery({}),
     routesInputValidation(signupConfirmMailValidationRules),

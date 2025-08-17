@@ -2,11 +2,12 @@ import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 export interface IUserDataAccess {
     getUserAuthenticationData(email: string): Promise<IGetUserAuthenticationData | undefined>;
-    getUser(userId: number): Promise<IUserServer>;
+    get(userId: number): Promise<IUserServer>;
+    create(email: string, password: string, salt: string, trx?: IDBTransaction): Promise<ICreateUserServer>;
+    patch(userId: number, properties: Partial<{ email: string; status: UserStatus }>, trx?: IDBTransaction): Promise<void>;
     getUserEmail(userId: number): Promise<{ email: string } | undefined>;
-    createUser(email: string, password: string, salt: string, trx?: IDBTransaction): Promise<ICreateUserServer>;
-    updateUserEmail(userId: number, email: string, trx?: IDBTransaction): Promise<boolean>;
 }

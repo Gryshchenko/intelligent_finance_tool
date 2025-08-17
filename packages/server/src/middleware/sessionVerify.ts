@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import SessionService from '../services/session/SessionService';
 import { UserAgentService } from 'src/services/userAgentService/UserAgentService';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
 import Logger from 'helper/logger/Logger';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const _logger = Logger.Of('SessionVerify');
 
@@ -52,6 +53,7 @@ export const sessionVerifyHandler = (
 const sessionVerify = (req: Request, res: Response, next: NextFunction) => {
     sessionVerifyHandler(req, res, next, (errorMsg) => errorHandler(errorMsg, HttpCode.UNAUTHORIZED, req, res));
 };
+
 export const sessionVerifyLogout = (req: Request, res: Response, next: NextFunction) => {
     sessionVerifyHandler(req, res, next, (errorMsg) => () => {
         _logger.error(errorMsg);

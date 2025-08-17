@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken');
 const _logger = Logger.Of('TokenVerify');
 
 const errorHandler = (errorMsg: string, code: number, req: Request, res: Response) => {
-    _logger.info(errorMsg);
+    _logger.error(errorMsg);
     res.status(code).json(ResponseBuilderPreset.getAuthError());
 };
 
@@ -20,7 +20,6 @@ const tokenVerifyHandler = (req: Request, res: Response, next: NextFunction, err
     const token = extractToken(req);
     const userSession = SessionService.extractSessionFromRequest(req);
 
-    console.log(req.session);
     if (!token) {
         errorHandler('Token verification failed: token is null');
         return;
