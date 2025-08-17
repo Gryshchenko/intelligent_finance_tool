@@ -91,7 +91,7 @@ describe('Session Security Test', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.AUTH,
+                    errorCode: ErrorCode.AUTH_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,

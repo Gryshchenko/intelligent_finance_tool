@@ -196,7 +196,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.AMOUNT_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_AMOUNT_ERROR }],
             status: ResponseStatusType.INTERNAL,
         });
     });

@@ -9,6 +9,6 @@ export class ResponseBuilderPreset {
     }
 
     public static getAuthError(): IResponse {
-        return new ResponseBuilder().setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH }).build();
+        return new ResponseBuilder().setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH_ERROR }).build();
     }
 }

@@ -26,7 +26,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
             if (!userForCheck) {
                 throw new ValidationError({
                     message: 'User not found or invalid credentials provided',
-                    errorCode: ErrorCode.AUTH,
+                    errorCode: ErrorCode.AUTH_ERROR,
                 });
             }
 
@@ -50,7 +50,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
         if (!jwtSecret) {
             throw new CustomError({
                 message: 'JWT secret is not configured',
-                errorCode: ErrorCode.AUTH,
+                errorCode: ErrorCode.AUTH_ERROR,
                 statusCode: HttpCode.INTERNAL_SERVER_ERROR,
             });
         }

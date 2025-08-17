@@ -51,7 +51,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         res.status(408).send(
             new ResponseBuilder()
                 .setStatus(ResponseStatusType.INTERNAL)
-                .setError({ errorCode: ErrorCode.REQUEST_TIMEOUT })
+                .setError({ errorCode: ErrorCode.REQUEST_TIMEOUT_ERROR })
                 .build(),
         );
     });

@@ -58,7 +58,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.LOCALE_INVALID,
+                    errorCode: ErrorCode.LOCALE_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -74,7 +74,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -90,7 +90,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -106,7 +106,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -122,7 +122,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -138,7 +138,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -155,7 +155,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.EMAIL_INVALID,
+                    errorCode: ErrorCode.EMAIL_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -171,7 +171,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -187,7 +187,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -203,7 +203,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -220,7 +220,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -237,10 +237,10 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
                 {
-                    errorCode: ErrorCode.PASSWORD_INVALID,
+                    errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -281,7 +281,7 @@ describe('POST /register/signup', () => {
             data: {},
             errors: [
                 {
-                    errorCode: ErrorCode.SIGNUP_USER_ALREADY_EXIST,
+                    errorCode: ErrorCode.SIGNUP_USER_ALREADY_EXISTS_ERROR,
                 },
             ],
             status: ResponseStatusType.INTERNAL,

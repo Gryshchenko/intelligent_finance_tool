@@ -291,7 +291,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
         if (Utils.isNull(trxInProcess)) {
             throw new CustomError({
                 message: 'Transaction not initiated. User could not be created',
-                errorCode: ErrorCode.SIGNUP_TRANSACTION,
+                errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
                 statusCode: HttpCode.INTERNAL_SERVER_ERROR,
             });
         }

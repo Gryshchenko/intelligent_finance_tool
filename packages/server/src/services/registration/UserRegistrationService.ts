@@ -114,14 +114,14 @@ export default class UserRegistrationService extends LoggerBase {
             if (otherUser) {
                 throw new ValidationError({
                     message: 'A user with this email already exists',
-                    errorCode: ErrorCode.SIGNUP_USER_ALREADY_EXIST,
+                    errorCode: ErrorCode.SIGNUP_USER_ALREADY_EXISTS_ERROR,
                 });
             }
             const trxInProcess = uow.getTransaction();
             if (Utils.isNull(trxInProcess)) {
                 throw new CustomError({
                     message: 'Transaction not initiated. User could not be created',
-                    errorCode: ErrorCode.SIGNUP_TRANSACTION,
+                    errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
                     statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }
@@ -159,7 +159,7 @@ export default class UserRegistrationService extends LoggerBase {
                     throw new CustomError({
                         message: 'User profile creation failed during the registration process.',
                         statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-                        errorCode: ErrorCode.SIGNUP_PROFILE_NOT_CREATED,
+                        errorCode: ErrorCode.SIGNUP_PROFILE_NOT_CREATED_ERROR,
                     });
                 }
                 await this.balanceService.post(user.userId, { amount: 0, currencyCode: currencyCode }, trx);
@@ -195,7 +195,7 @@ export default class UserRegistrationService extends LoggerBase {
             if (Utils.isNull(trxInProcess)) {
                 throw new CustomError({
                     message: "Transaction not initiated. User email can't not be confirmed",
-                    errorCode: ErrorCode.SIGNUP_TRANSACTION,
+                    errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
                     statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }
@@ -243,7 +243,7 @@ export default class UserRegistrationService extends LoggerBase {
             ]);
             return true;
         } catch (e) {
-            this._logger.info(`Failed create initial user data error: ${e}`, ErrorCode.SIGNUP_CREATE_INITIAL_DATA);
+            this._logger.info(`Failed create initial user data error: ${e}`, ErrorCode.SIGNUP_CREATE_INITIAL_DATA_ERROR);
             throw e;
         }
     }

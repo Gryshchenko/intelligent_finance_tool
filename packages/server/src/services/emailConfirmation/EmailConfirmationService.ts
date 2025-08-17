@@ -70,7 +70,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         } catch (e) {
             throw new CustomError({
                 message: `Cant send mail by provider reason : ${JSON.stringify(e)}`,
-                errorCode: ErrorCode.EMAIL_CANT_SEND,
+                errorCode: ErrorCode.EMAIL_CANNOT_SEND_ERROR,
             });
         }
     }
@@ -129,7 +129,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         if (Utils.isObjectEmpty(userConfirmationData as unknown as Record<string, unknown>)) {
             throw new ValidationError({
                 message: `No confirmation found for userId ${userId} with email ${email}`,
-                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR,
                 statusCode: HttpCode.NOT_FOUND,
             });
         }
@@ -138,21 +138,21 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         if (userConfirmationDataInWork.confirmed) {
             throw new ValidationError({
                 message: `Confirmation code already confirmed for ${userId} with email ${email}`,
-                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_DONE,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_DONE_ERROR,
                 statusCode: HttpCode.BAD_REQUEST,
             });
         }
         if (timeManager.isFirstDateLessThanSecond(userConfirmationDataInWork?.expiresAt, timeManager.getCurrentTime())) {
             throw new ValidationError({
                 message: `Confirmation code expired for ${userId} with email ${email}`,
-                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_EXPIRED,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_EXPIRED_ERROR,
                 statusCode: HttpCode.BAD_REQUEST,
             });
         }
         if (userConfirmationDataInWork.confirmationCode !== confirmationCode) {
             throw new ValidationError({
                 message: `Confirmation code not same for ${userId} with email ${email}`,
-                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR,
                 statusCode: HttpCode.BAD_REQUEST,
             });
         }
@@ -171,7 +171,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         if (userConfirmationData?.confirmed) {
             throw new ValidationError({
                 message: 'Send confirmation failed due mail already confirmed',
-                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_DONE,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_DONE_ERROR,
             });
         }
     }
@@ -180,7 +180,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         if (!timeManager.isFirstDateLessThanSecond(payload?.expiresAt, timeManager.getCurrentTime())) {
             throw new ValidationError({
                 message: 'Sending confirmation mail failed, mail already send',
-                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SEND,
+                errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SENT_ERROR,
                 payload: {
                     nextAt: payload.expiresAt,
                 },

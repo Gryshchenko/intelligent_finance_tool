@@ -138,13 +138,13 @@ export const transactionConvertValidationMessageToErrorCode = (path: string): Er
             return ErrorCode.TRANSACTION_TYPE_ID_ERROR;
         }
         case 'amount': {
-            return ErrorCode.AMOUNT_ERROR;
+            return ErrorCode.TRANSACTION_AMOUNT_ERROR;
         }
         case 'description': {
-            return ErrorCode.DESCRIPTION_ERROR;
+            return ErrorCode.TRANSACTION_DESCRIPTION_ERROR;
         }
         case 'createAt': {
-            return ErrorCode.CREATE_DATE_ERROR;
+            return ErrorCode.TRANSACTION_CREATE_DATE_ERROR;
         }
         default: {
             return ErrorCode.TRANSACTION_ERROR;

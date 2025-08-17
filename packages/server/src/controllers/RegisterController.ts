@@ -72,7 +72,7 @@ export class RegisterController {
             );
         } catch (e: unknown) {
             RegisterController.logger.error(`Signup confirm mail failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_VERIFICATION_FAILED);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_VERIFICATION_FAILED_ERROR);
         }
     }
 }

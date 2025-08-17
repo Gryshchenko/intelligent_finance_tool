@@ -10,10 +10,10 @@ const accountConvertValidationMessageToErrorCode = (path: string): ErrorCode => 
             return ErrorCode.CURRENCY_ID_ERROR;
         }
         case 'accountName': {
-            return ErrorCode.ACCOUNT_NAME;
+            return ErrorCode.ACCOUNT_NAME_ERROR;
         }
         case 'amount': {
-            return ErrorCode.AMOUNT_ERROR;
+            return ErrorCode.TRANSACTION_AMOUNT_ERROR;
         }
         default: {
             return ErrorCode.ACCOUNT_ERROR;

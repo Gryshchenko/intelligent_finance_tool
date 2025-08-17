@@ -77,7 +77,7 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             } else {
                 throw new ValidationError({
                     message: `No confirmation found for userId ${userId} with email ${email}`,
-                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID,
+                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR,
                     statusCode: HttpCode.NOT_FOUND,
                 });
             }

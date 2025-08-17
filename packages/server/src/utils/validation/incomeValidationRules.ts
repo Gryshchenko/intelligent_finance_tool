@@ -10,7 +10,7 @@ const incomeConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
             return ErrorCode.CURRENCY_ID_ERROR;
         }
         case 'incomeName': {
-            return ErrorCode.INCOME_NAME;
+            return ErrorCode.INCOME_NAME_ERROR;
         }
         default: {
             return ErrorCode.INCOME_ERROR;

@@ -20,7 +20,7 @@ export default class UserServiceUtils {
         try {
             const result = await argon2.verify(dbPassword, userPassword);
             if (!result) {
-                throw new ValidationError({ message: 'Password verification failed', errorCode: ErrorCode.AUTH });
+                throw new ValidationError({ message: 'Password verification failed', errorCode: ErrorCode.AUTH_ERROR });
             }
             return result;
         } catch (e) {

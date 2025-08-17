@@ -102,13 +102,13 @@ export const convertErrorNameToErrorCode = (path: string): ErrorCode => {
         case 'profileId':
             return ErrorCode.PROFILE_ERROR;
         case 'locale':
-            return ErrorCode.LOCALE_INVALID;
+            return ErrorCode.LOCALE_INVALID_ERROR;
         case 'code':
-            return ErrorCode.EMAIL_VERIFICATION_CODE_INVALID;
+            return ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR;
         case 'email':
-            return ErrorCode.EMAIL_INVALID;
+            return ErrorCode.EMAIL_INVALID_ERROR;
         case 'password':
-            return ErrorCode.PASSWORD_INVALID;
+            return ErrorCode.PASSWORD_INVALID_ERROR;
         default:
             return ErrorCode.UNKNOWN_ERROR;
     }

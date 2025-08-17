@@ -15,7 +15,7 @@ const userIdVerify = (req: Request, res: Response, next: NextFunction) => {
         _logger.error('UserId verified failed');
         return res
             .status(HttpCode.FORBIDDEN)
-            .json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH }).build());
+            .json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH_ERROR }).build());
     }
     _logger.info('UserId verified successfully');
     next();
