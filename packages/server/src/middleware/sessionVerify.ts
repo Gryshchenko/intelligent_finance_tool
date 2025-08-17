@@ -5,7 +5,6 @@ import { UserAgentService } from 'src/services/userAgentService/UserAgentService
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
 import Logger from 'helper/logger/Logger';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const _logger = Logger.Of('SessionVerify');
 
