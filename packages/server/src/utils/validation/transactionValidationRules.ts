@@ -1,13 +1,25 @@
 import { createSignupValidationRules } from 'src/utils/validation/routesInputValidation';
-import { body, CustomValidator } from 'express-validator';
+import { body } from 'express-validator';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ValidationError } from '../errors/ValidationError';
 import { TransactionType } from 'types/TransactionType';
 import Utils from '../Utils';
 
-const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
-    const { accountId, incomeId, categoryId, transactionTypeId, targetAccountId } = req.body;
-
+const baseAtLeastOneFieldRequired = ({
+    accountId,
+    incomeId,
+    categoryId,
+    transactionTypeId,
+    targetAccountId,
+    path,
+}: {
+    accountId: number;
+    incomeId: number;
+    categoryId: number;
+    transactionTypeId: number;
+    targetAccountId: number;
+    path: string;
+}) => {
     const validationMap: Record<
         TransactionType,
         { expectFields: Map<string, unknown>; notExpectFields: Map<string, unknown>; errorCode: ErrorCode; message: string }
@@ -15,19 +27,19 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
         [TransactionType.Income]: {
             expectFields: new Map().set('incomeId', incomeId).set('accountId', accountId),
             notExpectFields: new Map().set('categoryId', categoryId),
-            errorCode: ErrorCode.INCOME_ID_ERROR,
+            errorCode: ErrorCode.INCOME_ERROR,
             message: 'accountId and incomeId are required; categoryId should not be present.',
         },
         [TransactionType.Expense]: {
             expectFields: new Map().set('categoryId', categoryId).set('accountId', accountId),
             notExpectFields: new Map().set('incomeId', incomeId),
-            errorCode: ErrorCode.CATEGORY_ID_ERROR,
+            errorCode: ErrorCode.CATEGORY_ERROR,
             message: 'accountId and categoryId are required; incomeId should not be present.',
         },
         [TransactionType.Transafer]: {
             expectFields: new Map().set('accountId', accountId).set('targetAccountId', targetAccountId),
             notExpectFields: new Map().set('incomeId', incomeId).set('categoryId', categoryId),
-            errorCode: ErrorCode.ACCOUNT_ID_ERROR,
+            errorCode: ErrorCode.ACCOUNT_ERROR,
             message: 'accountId is required; incomeId and categoryId should not be present.',
         },
     };
@@ -37,7 +49,7 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
     if (!validation) {
         throw new ValidationError({
             message: `Invalid transaction type at '${path}'`,
-            errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR,
+            errorCode: ErrorCode.TRANSACTION_ERROR,
         });
     }
 
@@ -63,7 +75,19 @@ const atLeastOneFieldRequired: CustomValidator = (value, { req, path }) => {
 };
 
 const createTransactionValidationRules = [
-    body('transactionTypeId').custom(atLeastOneFieldRequired).bail(),
+    body('transaction')
+        .custom((_, { req }) => {
+            const { accountId, incomeId, categoryId, transactionTypeId, targetAccountId } = req.body;
+            return baseAtLeastOneFieldRequired({
+                accountId,
+                incomeId,
+                categoryId,
+                transactionTypeId,
+                targetAccountId,
+                path: 'transaction',
+            });
+        })
+        .bail(),
     ...createSignupValidationRules('currencyId', 'number', { optional: true }),
     ...createSignupValidationRules('transactionTypeId', 'number', {}),
     ...createSignupValidationRules('amount', 'number', {}),
@@ -120,31 +144,31 @@ const patchTransactionValidationRules = [
 export const transactionConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
     switch (path) {
         case 'targetAccountId': {
-            return ErrorCode.TARGET_ACCOUNT_ID_ERROR;
+            return ErrorCode.ACCOUNT_ERROR;
         }
         case 'accountId': {
-            return ErrorCode.ACCOUNT_ID_ERROR;
+            return ErrorCode.ACCOUNT_ERROR;
         }
         case 'incomeId': {
-            return ErrorCode.INCOME_ID_ERROR;
+            return ErrorCode.INCOME_ERROR;
         }
         case 'categoryId': {
-            return ErrorCode.CATEGORY_ID_ERROR;
+            return ErrorCode.CATEGORY_ERROR;
         }
         case 'currencyId': {
-            return ErrorCode.CURRENCY_ID_ERROR;
+            return ErrorCode.CURRENCY_ERROR;
         }
         case 'transactionTypeId': {
-            return ErrorCode.TRANSACTION_TYPE_ID_ERROR;
+            return ErrorCode.TRANSACTION_ERROR;
         }
         case 'amount': {
-            return ErrorCode.TRANSACTION_AMOUNT_ERROR;
+            return ErrorCode.TRANSACTION_ERROR;
         }
         case 'description': {
-            return ErrorCode.TRANSACTION_DESCRIPTION_ERROR;
+            return ErrorCode.TRANSACTION_ERROR;
         }
         case 'createAt': {
-            return ErrorCode.TRANSACTION_CREATE_DATE_ERROR;
+            return ErrorCode.TRANSACTION_ERROR;
         }
         default: {
             return ErrorCode.TRANSACTION_ERROR;

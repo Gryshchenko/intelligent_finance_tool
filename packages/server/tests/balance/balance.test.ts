@@ -42,7 +42,11 @@ describe('POST /balance', () => {
         });
         userIds.push(userId);
 
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+        const overview = await agent
+            .get(`/user/${userId}/overview/`)
+            .set('authorization', authorization)
+            .send({})
+            .expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, incomes },
@@ -85,7 +89,11 @@ describe('POST /balance', () => {
             databaseConnection,
         });
         userIds.push(userId);
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+        const overview = await agent
+            .get(`/user/${userId}/overview/`)
+            .set('authorization', authorization)
+            .send({})
+            .expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, categories },
@@ -136,7 +144,11 @@ describe('POST /balance', () => {
             } = await agent.get(`/user/${id}/balance`).set('authorization', authorization).send({}).expect(HttpCode.OK);
             return balance;
         };
-        const overview = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+        const overview = await agent
+            .get(`/user/${userId}/overview/`)
+            .set('authorization', authorization)
+            .send({})
+            .expect(HttpCode.OK);
         const {
             body: {
                 data: { accounts, incomes },

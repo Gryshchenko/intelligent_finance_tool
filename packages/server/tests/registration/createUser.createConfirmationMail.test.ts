@@ -1,9 +1,4 @@
-import {
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { generateRandomEmail, generateRandomName, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';

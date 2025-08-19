@@ -61,7 +61,11 @@ describe('POST /transaction/create - transfare', () => {
 
             const {
                 body: { data: accountBefor },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+            } = await agent
+                .get(`/user/${userId}/account/${accountId}`)
+                .set('authorization', authorization)
+                .send({})
+                .expect(HttpCode.OK);
 
             const {
                 body: { data: targetAccountBefor },
@@ -84,7 +88,11 @@ describe('POST /transaction/create - transfare', () => {
                 .expect(HttpCode.CREATED);
             const {
                 body: { data: accountAfter },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+            } = await agent
+                .get(`/user/${userId}/account/${accountId}`)
+                .set('authorization', authorization)
+                .send({})
+                .expect(HttpCode.OK);
             const {
                 body: { data: targetAccountAfter },
             } = await agent
@@ -125,7 +133,13 @@ describe('POST /transaction/create - transfare', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [
+                {
+                    errorCode: ErrorCode.TRANSACTION_ERROR,
+                    msg: expect.any(String),
+                    payload: expect.any(Object),
+                },
+            ],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -150,7 +164,14 @@ describe('POST /transaction/create - transfare', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [
+                {
+                    errorCode: ErrorCode.TRANSACTION_ERROR,
+
+                    msg: expect.any(String),
+                    payload: expect.any(Object),
+                },
+            ],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -175,7 +196,7 @@ describe('POST /transaction/create - transfare', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -201,7 +222,7 @@ describe('POST /transaction/create - transfare', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_AMOUNT_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -229,7 +250,7 @@ describe('POST /transaction/create - transfare', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY, payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });

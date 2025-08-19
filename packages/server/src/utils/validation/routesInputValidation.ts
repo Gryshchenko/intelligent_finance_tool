@@ -89,6 +89,11 @@ export default function routesInputValidation(
                 Logger.Of('routesInputValidation').error(`field: ${field} msg: ${value.msg}`);
                 return {
                     errorCode: converter(field),
+                    msg: value.msg,
+                    payload: {
+                        field,
+                        reason: 'invalid',
+                    },
                 };
             }),
         );

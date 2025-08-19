@@ -1,4 +1,4 @@
-import { IError } from 'interfaces/IError';
+import { IError } from 'tenpercent/shared/src/interfaces/IError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
@@ -28,7 +28,7 @@ export class BaseError extends Error {
     public getErrorCode(): ErrorCode {
         return this.errorCode;
     }
-    private getPayload(): Record<string, unknown> | undefined {
+    public getPayload(): Record<string, unknown> | undefined {
         return this.payload;
     }
 }

@@ -14,5 +14,8 @@ export function generateErrorResponse(
     const statusCode =
         error instanceof BaseError ? (error?.getStatusCode() ?? HttpCode.INTERNAL_SERVER_ERROR) : HttpCode.INTERNAL_SERVER_ERROR;
     const errorCode = error instanceof BaseError ? (error.getErrorCode() ?? defaultErrorCode) : defaultErrorCode;
-    return res.status(statusCode).json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setError({ errorCode }).build());
+    const payload = error instanceof BaseError ? (error?.getPayload() ?? undefined) : undefined;
+    return res
+        .status(statusCode)
+        .json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setError({ errorCode, payload }).build());
 }

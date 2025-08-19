@@ -11,7 +11,7 @@ describe('Error Classes', () => {
     const errorData = {
         message: 'Test error',
         statusCode: HttpCode.BAD_REQUEST,
-        errorCode: ErrorCode.TRANSACTION_AMOUNT_ERROR,
+        errorCode: ErrorCode.TRANSACTION_ERROR,
     };
 
     it('should create a CustomError instance correctly', () => {

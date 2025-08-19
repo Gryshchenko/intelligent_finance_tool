@@ -4,16 +4,16 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 const accountConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
     switch (path) {
         case 'status': {
-            return ErrorCode.ACCOUNT_STATUS_ERROR;
+            return ErrorCode.ACCOUNT_ERROR;
         }
         case 'currencyId': {
-            return ErrorCode.CURRENCY_ID_ERROR;
+            return ErrorCode.CURRENCY_ERROR;
         }
         case 'accountName': {
-            return ErrorCode.ACCOUNT_NAME_ERROR;
+            return ErrorCode.ACCOUNT_ERROR;
         }
         case 'amount': {
-            return ErrorCode.TRANSACTION_AMOUNT_ERROR;
+            return ErrorCode.TRANSACTION_ERROR;
         }
         default: {
             return ErrorCode.ACCOUNT_ERROR;

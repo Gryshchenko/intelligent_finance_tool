@@ -59,6 +59,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.LOCALE_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'locale',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -75,6 +80,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -91,6 +101,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -107,6 +122,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -123,6 +143,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -139,6 +164,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -156,6 +186,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.EMAIL_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'email',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -172,6 +207,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -188,6 +228,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -204,6 +249,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -221,6 +271,11 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,
@@ -238,9 +293,19 @@ describe('POST /register/signup', () => {
             errors: [
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
                 {
                     errorCode: ErrorCode.PASSWORD_INVALID_ERROR,
+                    msg: expect.any(String),
+                    payload: {
+                        field: 'password',
+                        reason: 'invalid',
+                    },
                 },
             ],
             status: ResponseStatusType.INTERNAL,

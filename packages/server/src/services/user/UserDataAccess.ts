@@ -149,8 +149,12 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
             } else {
                 throw new ValidationError({
                     message: `No found for userId: ${userId}`,
-                    errorCode: ErrorCode.USER_ID_ERROR,
+                    errorCode: ErrorCode.USER_ERROR,
                     statusCode: HttpCode.NOT_FOUND,
+                    payload: {
+                        field: 'userId',
+                        reason: 'not_found',
+                    },
                 });
             }
         } catch (e) {

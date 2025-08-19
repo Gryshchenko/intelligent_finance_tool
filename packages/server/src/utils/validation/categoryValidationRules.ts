@@ -4,13 +4,13 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 const categoryConvertValidationMessageToErrorCode = (path: string): ErrorCode => {
     switch (path) {
         case 'status': {
-            return ErrorCode.INCOME_STATUS_ERROR;
+            return ErrorCode.INCOME_ERROR;
         }
         case 'currencyId': {
-            return ErrorCode.CURRENCY_ID_ERROR;
+            return ErrorCode.CURRENCY_ERROR;
         }
         case 'categoryName': {
-            return ErrorCode.CATEGORY_NAME_ERROR;
+            return ErrorCode.CATEGORY_ERROR;
         }
         default: {
             return ErrorCode.CATEGORY_ERROR;

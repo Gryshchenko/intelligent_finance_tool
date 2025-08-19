@@ -1,8 +1,4 @@
-import {
-    createUser,
-    deleteUserAfterTest,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
@@ -81,7 +77,11 @@ describe('Category', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent.post(`/user/${userId}/category/`).set('authorization', authorization).send(data).expect(HttpCode.BAD_REQUEST);
+            await agent
+                .post(`/user/${userId}/category/`)
+                .set('authorization', authorization)
+                .send(data)
+                .expect(HttpCode.BAD_REQUEST);
         }
     });
     it(`PATCH - update category`, async () => {
@@ -154,7 +154,10 @@ describe('Category', () => {
                 })
                 .expect(HttpCode.BAD_REQUEST);
         }
-        await agent.patch(`/user/${userId}/category/${obj[0].id}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .patch(`/user/${userId}/category/${obj[0].id}`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
     });
     it(`unknown properties`, async () => {
         const agent = request.agent(app);
@@ -176,7 +179,10 @@ describe('Category', () => {
             })
             .expect(HttpCode.BAD_REQUEST);
         await agent.post(`/user/${userId}/category/`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
-        await agent.post(`/user/${userId}/category/?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .post(`/user/${userId}/category/?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
         await agent
             .get(`/user/${userId}/category/${21}`)
             .set('authorization', authorization)
@@ -184,7 +190,10 @@ describe('Category', () => {
                 something: 200,
             })
             .expect(HttpCode.NOT_FOUND);
-        await agent.get(`/user/${userId}/category/${21}?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .get(`/user/${userId}/category/${21}?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
     });
     it(`DELETE - delete category`, async () => {
         const agent = request.agent(app);
@@ -265,9 +274,15 @@ describe('Category', () => {
             await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
         for (const id of ids) {
-            await agent.delete(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
+            await agent
+                .delete(`/user/${userId}/transaction/${id}`)
+                .set('authorization', authorization)
+                .expect(HttpCode.NO_CONTENT);
         }
-        await agent.delete(`/user/${userId}/category/${categoryId}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
+        await agent
+            .delete(`/user/${userId}/category/${categoryId}`)
+            .set('authorization', authorization)
+            .expect(HttpCode.NO_CONTENT);
         for (const id of ids) {
             await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NOT_FOUND);
         }

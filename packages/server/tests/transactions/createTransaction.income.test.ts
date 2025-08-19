@@ -59,7 +59,11 @@ describe('POST /transaction/create - income', () => {
 
             const {
                 body: { data: accountBefor },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+            } = await agent
+                .get(`/user/${userId}/account/${accountId}`)
+                .set('authorization', authorization)
+                .send({})
+                .expect(HttpCode.OK);
 
             const response = await agent
                 .post(`/user/${userId}/transaction/`)
@@ -75,7 +79,11 @@ describe('POST /transaction/create - income', () => {
                 .expect(HttpCode.CREATED);
             const {
                 body: { data: accountAfter },
-            } = await agent.get(`/user/${userId}/account/${accountId}`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+            } = await agent
+                .get(`/user/${userId}/account/${accountId}`)
+                .set('authorization', authorization)
+                .send({})
+                .expect(HttpCode.OK);
             expect(Number((accountBefor.amount + num).toFixed(2))).toStrictEqual(accountAfter.amount);
             expect(response.body).toStrictEqual({
                 data: {
@@ -116,7 +124,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -143,7 +151,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -169,7 +177,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_TYPE_ID_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -196,7 +204,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.TRANSACTION_AMOUNT_ERROR }],
+            errors: [{ errorCode: ErrorCode.TRANSACTION_ERROR, msg: expect.any(String), payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });
@@ -224,7 +232,7 @@ describe('POST /transaction/create - income', () => {
 
         expect(response.body).toStrictEqual({
             data: {},
-            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY, payload: expect.any(Object) }],
             status: ResponseStatusType.INTERNAL,
         });
     });

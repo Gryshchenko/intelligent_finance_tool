@@ -1,8 +1,4 @@
-import {
-    createUser,
-    deleteUserAfterTest,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
@@ -80,7 +76,11 @@ describe('Income', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent.post(`/user/${userId}/income/`).set('authorization', authorization).send(data).expect(HttpCode.BAD_REQUEST);
+            await agent
+                .post(`/user/${userId}/income/`)
+                .set('authorization', authorization)
+                .send(data)
+                .expect(HttpCode.BAD_REQUEST);
         }
     });
     it(`PATCH - update income`, async () => {
@@ -175,7 +175,10 @@ describe('Income', () => {
             })
             .expect(HttpCode.BAD_REQUEST);
         await agent.post(`/user/${userId}/income/`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
-        await agent.post(`/user/${userId}/income/?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .post(`/user/${userId}/income/?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
         await agent
             .get(`/user/${userId}/income/${21}`)
             .set('authorization', authorization)
@@ -183,7 +186,10 @@ describe('Income', () => {
                 something: 200,
             })
             .expect(HttpCode.NOT_FOUND);
-        await agent.get(`/user/${userId}/income/${21}?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .get(`/user/${userId}/income/${21}?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
     });
     it(`DELETE - delete income`, async () => {
         const agent = request.agent(app);
@@ -264,7 +270,10 @@ describe('Income', () => {
             await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
         for (const id of ids) {
-            await agent.delete(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
+            await agent
+                .delete(`/user/${userId}/transaction/${id}`)
+                .set('authorization', authorization)
+                .expect(HttpCode.NO_CONTENT);
         }
         await agent.delete(`/user/${userId}/income/${incomeId}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
         for (const id of ids) {

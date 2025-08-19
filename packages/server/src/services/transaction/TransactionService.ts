@@ -193,7 +193,11 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 if (!targetAccountId) {
                     throw new ValidationError({
                         message: 'Target account is required for transfer transaction',
-                        errorCode: ErrorCode.TARGET_ACCOUNT_ID_ERROR,
+                        errorCode: ErrorCode.ACCOUNT_ERROR,
+                        payload: {
+                            field: 'targetAccountId',
+                            reason: 'not_found',
+                        },
                     });
                 }
 
@@ -291,7 +295,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
         if (Utils.isNull(trxInProcess)) {
             throw new CustomError({
                 message: 'Transaction not initiated. User could not be created',
-                errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
+                errorCode: ErrorCode.TRANSACTION_ERROR,
                 statusCode: HttpCode.INTERNAL_SERVER_ERROR,
             });
         }

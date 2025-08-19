@@ -18,7 +18,6 @@ const en = {
     3000: "We hit a snag during sign‑up.", // SIGNUP_CATCH_ERROR
     3001: "We couldn’t finish setting up your account.", // SIGNUP_CREATE_INITIAL_DATA_ERROR
     3002: "Looks like you already have an account with us.", // SIGNUP_USER_ALREADY_EXISTS_ERROR
-    3003: "Sign‑up didn’t go through completely.", // SIGNUP_TRANSACTION_ERROR
     3004: "We couldn’t create your profile.", // SIGNUP_PROFILE_NOT_CREATED_ERROR
 
     3100: "That code doesn’t look correct.", // EMAIL_VERIFICATION_CODE_INVALID_ERROR
@@ -33,7 +32,7 @@ const en = {
     4002: "Your profile isn’t loading right now.", // PROFILE_ERROR
     4003: "We couldn’t load your overview.", // OVERVIEW_ERROR
 
-    5000: "Something went wrong with the transaction.", // TRANSACTION_ERROR
+    5000: "Sign‑up didn’t go through completely.", // TRANSACTION_ERROR
     5001: "We can’t find that account.", // ACCOUNT_ID_ERROR
     5002: "We can’t find that income record.", // INCOME_ID_ERROR
     5003: "We can’t find that category.", // CATEGORY_ID_ERROR

@@ -121,7 +121,7 @@ export default class UserRegistrationService extends LoggerBase {
             if (Utils.isNull(trxInProcess)) {
                 throw new CustomError({
                     message: 'Transaction not initiated. User could not be created',
-                    errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
+                    errorCode: ErrorCode.TRANSACTION_ERROR,
                     statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }
@@ -195,7 +195,7 @@ export default class UserRegistrationService extends LoggerBase {
             if (Utils.isNull(trxInProcess)) {
                 throw new CustomError({
                     message: "Transaction not initiated. User email can't not be confirmed",
-                    errorCode: ErrorCode.SIGNUP_TRANSACTION_ERROR,
+                    errorCode: ErrorCode.TRANSACTION_ERROR,
                     statusCode: HttpCode.INTERNAL_SERVER_ERROR,
                 });
             }

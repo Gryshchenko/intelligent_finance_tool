@@ -1,4 +1,4 @@
-import { IError } from 'interfaces/IError';
+import { IError } from 'tenpercent/shared/src/interfaces/IError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { BaseError } from './BaseError';
 

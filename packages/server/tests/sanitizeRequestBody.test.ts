@@ -28,7 +28,14 @@ describe('sanitizeRequestBody function', () => {
         expect(res.json).toHaveBeenCalledWith({
             status: ResponseStatusType.INTERNAL,
             data: {},
-            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            errors: [
+                {
+                    errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+                    payload: {
+                        fields: 'age',
+                    },
+                },
+            ],
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -55,7 +62,14 @@ describe('sanitizeRequestBody function', () => {
         expect(res.json).toHaveBeenCalledWith({
             status: ResponseStatusType.INTERNAL,
             data: {},
-            errors: [{ errorCode: ErrorCode.UNEXPECTED_PROPERTY }],
+            errors: [
+                {
+                    errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+                    payload: {
+                        fields: 'age,city',
+                    },
+                },
+            ],
         });
         expect(next).not.toHaveBeenCalled();
     });

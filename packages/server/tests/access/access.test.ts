@@ -1,8 +1,4 @@
-import {
-    createUser,
-    deleteUserAfterTest,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
@@ -96,6 +92,9 @@ describe('Access control', () => {
 
         await agent.get(`/user/${userAId}/balance`).set('authorization', authB).expect(HttpCode.FORBIDDEN);
 
-        await agent.delete(`/user/${userBId}/transaction/${transactionId}`).set('authorization', authB).expect(HttpCode.NOT_FOUND);
+        await agent
+            .delete(`/user/${userBId}/transaction/${transactionId}`)
+            .set('authorization', authB)
+            .expect(HttpCode.NOT_FOUND);
     });
 });

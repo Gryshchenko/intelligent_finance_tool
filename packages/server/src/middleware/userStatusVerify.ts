@@ -14,14 +14,12 @@ const userStatusVerify = (requiredStatus: UserStatus) => (req: Request, res: Res
     if (requiredStatus !== userFromSession.status) {
         const responseBuilder = new ResponseBuilder();
         _logger.error(`User status verification failed, access with status: ${userFromSession.status} not allowed`);
-        return res
-            .status(HttpCode.FORBIDDEN)
-            .json(
-                responseBuilder
-                    .setStatus(ResponseStatusType.INTERNAL)
-                    .setError({ errorCode: ErrorCode.USER_STATUS_ERROR })
-                    .build(),
-            );
+        return res.status(HttpCode.FORBIDDEN).json(
+            responseBuilder
+                .setStatus(ResponseStatusType.INTERNAL)
+                .setError({ errorCode: ErrorCode.USER_ERROR, payload: { field: 'userStatus', reason: 'not-found' } })
+                .build(),
+        );
     }
     _logger.info('User status verified successfully');
     next();

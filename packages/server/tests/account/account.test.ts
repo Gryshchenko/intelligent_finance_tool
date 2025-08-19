@@ -98,7 +98,11 @@ describe('Account', () => {
                     'sdfsdfsdkjfdskfjhdsfkdsfhsdkfjhdsfkjdshfkdsfhdskfjhdskfjdshfdsjkfhdskjfhdsjkhfjkdshfjkhsdfjkdsjhfdjksfdshfjkdsfhdskfjhdsjkfjhdsfhkj',
             },
         ]) {
-            await agent.post(`/user/${userId}/account/`).set('authorization', authorization).send(data).expect(HttpCode.BAD_REQUEST);
+            await agent
+                .post(`/user/${userId}/account/`)
+                .set('authorization', authorization)
+                .send(data)
+                .expect(HttpCode.BAD_REQUEST);
         }
     });
     it(`PATCH - update account`, async () => {
@@ -177,7 +181,10 @@ describe('Account', () => {
                 })
                 .expect(HttpCode.BAD_REQUEST);
         }
-        await agent.patch(`/user/${userId}/account/${obj[0].id}`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .patch(`/user/${userId}/account/${obj[0].id}`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
     });
     it(`unknown properties`, async () => {
         const agent = request.agent(app);
@@ -198,7 +205,10 @@ describe('Account', () => {
             })
             .expect(HttpCode.BAD_REQUEST);
         await agent.post(`/user/${userId}/account/`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
-        await agent.post(`/user/${userId}/account/?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .post(`/user/${userId}/account/?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
         await agent
             .get(`/user/${userId}/account/${21}`)
             .set('authorization', authorization)
@@ -206,7 +216,10 @@ describe('Account', () => {
                 something: 200,
             })
             .expect(HttpCode.NOT_FOUND);
-        await agent.get(`/user/${userId}/account/${21}?something=200`).set('authorization', authorization).expect(HttpCode.BAD_REQUEST);
+        await agent
+            .get(`/user/${userId}/account/${21}?something=200`)
+            .set('authorization', authorization)
+            .expect(HttpCode.BAD_REQUEST);
     });
     it(`DELETE - delete account - hide`, async () => {
         const agent = request.agent(app);
@@ -356,7 +369,10 @@ describe('Account', () => {
         for (const id of ids) {
             await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.OK);
         }
-        await agent.delete(`/user/${userId}/account/${accountId}`).set('authorization', authorization).expect(HttpCode.NO_CONTENT);
+        await agent
+            .delete(`/user/${userId}/account/${accountId}`)
+            .set('authorization', authorization)
+            .expect(HttpCode.NO_CONTENT);
         for (const id of ids) {
             await agent.get(`/user/${userId}/transaction/${id}`).set('authorization', authorization).expect(HttpCode.NOT_FOUND);
         }

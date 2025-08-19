@@ -14,6 +14,9 @@ export const sanitizeRequestBody = (allowedFields: string[]) => (req: Request, r
                 .setStatus(ResponseStatusType.INTERNAL)
                 .setError({
                     errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+                    payload: {
+                        fields: extraFields.join(','),
+                    },
                 })
                 .build(),
         );

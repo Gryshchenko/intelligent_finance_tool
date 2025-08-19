@@ -182,7 +182,8 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
                 message: 'Sending confirmation mail failed, mail already send',
                 errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SENT_ERROR,
                 payload: {
-                    nextAt: payload.expiresAt,
+                    field: 'expiresAt',
+                    reason: payload.expiresAt,
                 },
             });
         }
