@@ -7,6 +7,7 @@ import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfileP
 import { DBError } from 'src/utils/errors/DBError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
+import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
 
 export default class ProfileDataService extends LoggerBase implements IProfileDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -46,7 +47,9 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
                     'profiles.currencyId',
                     'profiles.additionalInfo',
                     'profiles.locale',
-                    'email_confirmations.confirmed as mailConfirmed',
+                    query.raw(
+                        `CASE WHEN email_confirmations.status = ${EmailConfirmationStatusType.Confirmed} THEN true ELSE false END as "mailConfirmed"`,
+                    ),
                 )
                 .innerJoin('email_confirmations', 'profiles.userId', 'email_confirmations.userId')
                 .where({ 'profiles.userId': userId })

@@ -1,8 +1,10 @@
+import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+
 export interface IEmailConfirmationData {
     confirmationId: number;
     userId: number;
     email: string;
     confirmationCode: number;
-    confirmed: boolean;
     expiresAt: Date;
+    status: EmailConfirmationStatusType;
 }

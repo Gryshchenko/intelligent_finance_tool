@@ -353,7 +353,7 @@ describe('POST /register/signup', () => {
         });
     });
 
-    const testCases = ['aa-AA'];
+    const testCases = [LanguageType.US, LanguageType.FR, LanguageType.DK, LanguageType.DE, 'aa-AA'];
     testCases.forEach((locale) => {
         it(`check users accounts, incomes, category for locale: ${locale}`, async () => {
             const databaseConnection = new DatabaseConnection(config);
@@ -437,7 +437,7 @@ describe('POST /register/signup', () => {
                 status: ResponseStatusType.OK,
                 data: {
                     publicName: publicName,
-                    mailConfirmed: profile.confirmed,
+                    mailConfirmed: true,
                     profileId: profile.profileId,
                     currencyId: profile.currencyId,
                     locale: profile.locale,

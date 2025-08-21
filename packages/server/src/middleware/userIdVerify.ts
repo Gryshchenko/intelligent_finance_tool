@@ -5,12 +5,17 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
+import Utils from 'src/utils/Utils';
 
 const _logger = Logger.Of('UserIdVerify');
 
 const userIdVerify = (req: Request, res: Response, next: NextFunction) => {
     const userFromSession = req.session.user as IUserSession;
-    if (parseInt(req.params.userId) !== userFromSession.userId) {
+    if (
+        Utils.isNull(req.params?.userId) ||
+        Utils.isNull(userFromSession?.userId) ||
+        parseInt(req.params?.userId) !== userFromSession?.userId
+    ) {
         const responseBuilder = new ResponseBuilder();
         _logger.error('UserId verified failed');
         return res

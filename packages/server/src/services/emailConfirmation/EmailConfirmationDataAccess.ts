@@ -9,6 +9,8 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 
@@ -51,25 +53,26 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
     public async patchUserConfirmation(
         userId: number,
         email: string,
+        confirmationId: number,
         properties: Record<string, unknown>,
         trx?: IDBTransaction,
     ): Promise<void> {
         const allowedProperties = {
-            confirmationCode: Number(properties.confirmationCode),
+            confirmationCode: properties.confirmationCode,
             expiresAt: properties.expiresAt as Date,
-            confirmed: properties.confirmed,
+            status: properties.status,
         };
         this._logger.info(`Patch confirmation for userId ${userId} with email ${email}`, {
             confirmationCode: String(allowedProperties.confirmationCode).slice(0, 2),
         });
 
         try {
-            const allowedKeys = ['expiresAt', 'confirmationCode', 'confirmed'];
+            const allowedKeys = ['expiresAt', 'confirmationCode', 'status'];
             validateAllowedProperties(allowedProperties, allowedKeys);
             const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();
             const data = await query<IEmailConfirmationData>('email_confirmations')
-                .where({ userId, email })
+                .where({ userId, email, confirmationId: confirmationId })
                 .update(properestForUpdate);
 
             if (data) {
@@ -77,7 +80,7 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             } else {
                 throw new ValidationError({
                     message: `No confirmation found for userId ${userId} with email ${email}`,
-                    errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR,
+                    errorCode: ErrorCode.EMAIL_CONFIRMATION_ERROR,
                     statusCode: HttpCode.NOT_FOUND,
                 });
             }
@@ -99,7 +102,7 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
             const data = await this._db
                 .engine()<IEmailConfirmationData>('email_confirmations')
                 .where({ userId, email })
-                .select(['confirmationId', 'userId', 'email', 'confirmationCode', 'confirmed', 'expiresAt'])
+                .select(['confirmationId', 'userId', 'email', 'confirmationCode', 'expiresAt', 'status'])
                 .first();
             if (data) {
                 this._logger.info(`Successfully fetched confirmation for userId ${userId} with email ${email}`);
@@ -120,15 +123,16 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
     }
 
     public async createUserConfirmation(
+        userId: number,
+        email: string,
         payload: {
-            userId: number;
             confirmationCode: number;
-            email: string;
             expiresAt: Date;
+            status: EmailConfirmationStatusType;
         },
         trx?: IDBTransaction,
     ): Promise<IEmailConfirmationData> {
-        const { userId, confirmationCode, email, expiresAt } = payload;
+        const { confirmationCode, expiresAt, status } = payload;
         this._logger.info(
             `Creating confirmation for userId ${userId} with email ${email} and code ${String(confirmationCode).slice(0, 2)}`,
         );
@@ -136,8 +140,8 @@ export default class EmailConfirmationDataAccess extends LoggerBase implements I
         try {
             const query = trx || this._db.engine();
             const data = await query<IEmailConfirmationData>('email_confirmations').insert(
-                { email, userId, confirmationCode, expiresAt },
-                ['confirmationId', 'userId', 'email', 'confirmationCode', 'confirmed', 'expiresAt'],
+                { email, userId, confirmationCode, expiresAt, status },
+                ['confirmationId', 'userId', 'email', 'confirmationCode', 'expiresAt', 'status'],
             );
 
             this._logger.info(`Successfully created confirmation for userId ${userId} with email ${email}`);

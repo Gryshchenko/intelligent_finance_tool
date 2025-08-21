@@ -5,6 +5,7 @@ import config from '../src/config/dbConfig';
 import { Agent } from 'supertest';
 import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const crypto = require('crypto');
 
@@ -101,15 +102,16 @@ export const createUser = async ({
     expect(profileBefore.status).toStrictEqual(HttpCode.FORBIDDEN);
 
     expect(confirm.confirmationCode).toEqual(expect.any(Number));
-    expect(confirm.confirmed).toBe(false);
+    expect(confirm.status).toBe(EmailConfirmationStatusType.Pending);
+    console.log(confirm.confirmationCode);
     const confirmMailResponse = await agent
-        .post(`/register/signup/${userId}/confirm-mail`)
+        .post(`/register/signup/${userId}/email-confirmation/verify`)
         .set('authorization', header['authorization'])
         .send({ confirmationCode: confirm.confirmationCode });
 
     expect(confirmMailResponse.status).toBe(HttpCode.NO_CONTENT);
     const confirmAfter = await databaseConnection.engine()('email_confirmations').select('*').where({ userId, email }).first();
-    expect(confirmAfter.confirmed).toBe(true);
+    expect(confirmAfter.status).toBe(EmailConfirmationStatusType.Confirmed);
     expect(confirmAfter.email).toStrictEqual(email);
     expect(confirm.confirmationCode).toStrictEqual(confirmAfter.confirmationCode);
     const userAfter = await agent.get(`/user/${userId}`).set('authorization', header['authorization']);

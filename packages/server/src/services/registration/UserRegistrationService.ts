@@ -153,7 +153,7 @@ export default class UserRegistrationService extends LoggerBase {
                         },
                         trx,
                     ),
-                    await this.emailConfirmationService.createConfirmationMail(user.userId, user.email, trx),
+                    await this.emailConfirmationService.createEmailConfirmation(user.userId, user.email, trx),
                 ]);
                 if (Utils.isNull(response[1]?.profileId)) {
                     throw new CustomError({
@@ -166,7 +166,7 @@ export default class UserRegistrationService extends LoggerBase {
                 const profile = response[1] as IProfile;
                 await this.createInitialDataForNewUser(user.userId, profile, trx);
                 await uow.commit();
-                this.emailConfirmationService.sendConfirmationMail(user.userId, user.email).catch((e) => {
+                this.emailConfirmationService.sendConfirmationEmail(user.userId, user.email, response[2]).catch((e) => {
                     this._logger.error(
                         `User creation confirmation mail send failed due reason: ${(e as { message: string }).message}`,
                     );
@@ -200,7 +200,7 @@ export default class UserRegistrationService extends LoggerBase {
                 });
             }
             const trx = trxInProcess as unknown as IDBTransaction;
-            await this.emailConfirmationService.confirmUserMail(userId, email, code, trx);
+            await this.emailConfirmationService.confirmEmail(userId, email, code, trx);
             await this.userService.patch(userId, { status: UserStatus.ACTIVE }, trx);
             await uow.commit();
         } catch (e) {

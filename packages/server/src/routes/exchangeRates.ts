@@ -4,13 +4,12 @@ import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { ExchangeRateController } from 'controllers/ExchangeRateController';
 import tokenVerify from 'middleware/tokenVerify';
 import sessionVerify from 'middleware/sessionVerify';
-import userRouter from 'routes/user';
 import userStatusVerify from 'middleware/userStatusVerify';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const exchangeRates = express.Router({ mergeParams: true });
 
-userRouter.use(tokenVerify, sessionVerify, userStatusVerify(UserStatus.ACTIVE));
+exchangeRates.use(tokenVerify, sessionVerify, userStatusVerify(UserStatus.ACTIVE));
 
 exchangeRates.get(
     '/',

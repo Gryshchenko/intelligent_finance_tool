@@ -109,7 +109,7 @@ export const convertErrorNameToErrorCode = (path: string): ErrorCode => {
         case 'locale':
             return ErrorCode.LOCALE_INVALID_ERROR;
         case 'code':
-            return ErrorCode.EMAIL_VERIFICATION_CODE_INVALID_ERROR;
+            return ErrorCode.EMAIL_CONFIRMATION_ERROR;
         case 'email':
             return ErrorCode.EMAIL_INVALID_ERROR;
         case 'password':

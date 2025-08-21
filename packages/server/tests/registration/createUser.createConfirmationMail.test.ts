@@ -29,19 +29,6 @@ afterEach(() => {
     jest.restoreAllMocks();
 });
 
-jest.mock('../../src/services/emailConfirmation/EmailConfirmationService', () => {
-    return {
-        __esModule: true,
-        default: jest.fn().mockImplementation(() => {
-            return {
-                createConfirmationMail: jest
-                    .fn()
-                    .mockImplementation(() => Promise.reject(new Error('cant create confirmation mail'))),
-            };
-        }),
-    };
-});
-
 describe('transaction POST /register/signup', () => {
     it('check DB transaction on crash createConfirmationMail', async () => {
         const mail = generateRandomEmail();
