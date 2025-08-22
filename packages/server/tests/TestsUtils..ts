@@ -62,7 +62,7 @@ export function generateRandomPassword(len = Math.floor(generateSecureRandom() *
     return password;
 }
 
-export async function deleteUserAfterTest(id: string, db: IDatabaseConnection) {
+export async function deleteUserAfterTest(id: number, db: IDatabaseConnection) {
     await db.engine()('transactions').delete().where({ userId: id });
     await db.engine()('accounts').delete().where({ userId: id });
     await db.engine()('incomes').delete().where({ userId: id });
@@ -74,6 +74,30 @@ export async function deleteUserAfterTest(id: string, db: IDatabaseConnection) {
     await db.engine()('balance').delete().where({ userId: id });
     await db.engine()('users').delete().where({ userId: id });
 }
+
+const createUserBase = async ({
+    agent,
+    password = generateRandomPassword(),
+    email = generateRandomEmail(),
+    publicName = generateRandomName(),
+    locale = LanguageType.US,
+}: {
+    agent: Agent;
+    password?: string;
+    email?: string;
+    locale?: LanguageType;
+    publicName?: string;
+}): Promise<{ userId: number; authorization: string }> => {
+    const { body, header } = await agent.post('/register/signup').send({ email, password, locale, publicName });
+    const {
+        data: { userId },
+    } = body;
+    expect(userId).toEqual(expect.any(Number));
+    return {
+        userId,
+        authorization: header['authorization'],
+    };
+};
 
 export const createUser = async ({
     agent,
@@ -89,24 +113,26 @@ export const createUser = async ({
     locale?: LanguageType;
     publicName?: string;
     databaseConnection?: IDatabaseConnection;
-}): Promise<{ userId: string; authorization: string }> => {
-    const { body, header } = await agent.post('/register/signup').send({ email, password, locale, publicName });
-    const {
-        data: { userId },
-    } = body;
+}): Promise<{ userId: number; authorization: string }> => {
+    const { userId, authorization } = await createUserBase({
+        agent,
+        password,
+        email,
+        publicName,
+        locale,
+    });
     expect(userId).toEqual(expect.any(Number));
     const confirm = await databaseConnection.engine()('email_confirmations').select('*').where({ userId, email }).first();
-    const userBefore = await agent.get(`/user/${userId}`).set('authorization', header['authorization']);
-    const profileBefore = await agent.get(`/user/${userId}/profile`).set('authorization', header['authorization']);
+    const userBefore = await agent.get(`/user/${userId}`).set('authorization', authorization);
+    const profileBefore = await agent.get(`/user/${userId}/profile`).set('authorization', authorization);
     expect(userBefore.status).toStrictEqual(HttpCode.FORBIDDEN);
     expect(profileBefore.status).toStrictEqual(HttpCode.FORBIDDEN);
 
     expect(confirm.confirmationCode).toEqual(expect.any(Number));
     expect(confirm.status).toBe(EmailConfirmationStatusType.Pending);
-    console.log(confirm.confirmationCode);
     const confirmMailResponse = await agent
         .post(`/register/signup/${userId}/email-confirmation/verify`)
-        .set('authorization', header['authorization'])
+        .set('authorization', authorization)
         .send({ confirmationCode: confirm.confirmationCode });
 
     expect(confirmMailResponse.status).toBe(HttpCode.NO_CONTENT);
@@ -114,8 +140,8 @@ export const createUser = async ({
     expect(confirmAfter.status).toBe(EmailConfirmationStatusType.Confirmed);
     expect(confirmAfter.email).toStrictEqual(email);
     expect(confirm.confirmationCode).toStrictEqual(confirmAfter.confirmationCode);
-    const userAfter = await agent.get(`/user/${userId}`).set('authorization', header['authorization']);
-    const profile = await agent.get(`/user/${userId}/profile`).set('authorization', header['authorization']);
+    const userAfter = await agent.get(`/user/${userId}`).set('authorization', authorization);
+    const profile = await agent.get(`/user/${userId}/profile`).set('authorization', authorization);
     expect(profile.body.data).toStrictEqual({
         profileId: expect.any(Number),
         publicName,
@@ -130,6 +156,32 @@ export const createUser = async ({
     });
     return {
         userId,
-        authorization: header['authorization'],
+        authorization,
+    };
+};
+
+export const createUserNotVerify = async ({
+    agent,
+    password = generateRandomPassword(),
+    email = generateRandomEmail(),
+    publicName = generateRandomName(),
+    locale = LanguageType.US,
+}: {
+    agent: Agent;
+    password?: string;
+    email?: string;
+    locale?: LanguageType;
+    publicName?: string;
+}): Promise<{ userId: number; authorization: string }> => {
+    const { userId, authorization } = await createUserBase({
+        agent,
+        password,
+        email,
+        publicName,
+        locale,
+    });
+    return {
+        userId,
+        authorization,
     };
 };

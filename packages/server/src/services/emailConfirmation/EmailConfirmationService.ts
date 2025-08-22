@@ -126,7 +126,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
             userConfirmationData = await this.createEmailConfirmation(userId, email);
         }
         const userConfirmationDataInWork = userConfirmationData as IEmailConfirmationData;
-        await this.validateConfirmation(userConfirmationDataInWork, { requirePending: true });
+        await this.validateConfirmation(userConfirmationDataInWork, { requirePending: true, checkIsExpired: false });
 
         const timeManager = new TimeManagerUTC();
         timeManager.addTime(...CONFIRMATION_MAIL_EXPIRED_TIME);
@@ -156,7 +156,11 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
             });
         }
         const userConfirmationDataInWork = userConfirmationData as IEmailConfirmationData;
-        await this.validateConfirmation(userConfirmationDataInWork, { requirePending: true, checkCode: confirmationCode });
+        await this.validateConfirmation(userConfirmationDataInWork, {
+            requirePending: true,
+            checkCode: confirmationCode,
+            checkIsExpired: true,
+        });
         await this.emailConfirmationDataAccess.patchUserConfirmation(
             userId,
             email,
@@ -175,14 +179,16 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         return await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
     }
 
-    private createExpiredCodeError(expiresAt: Date): ValidationError {
+    private createExpiredCodeError(): ValidationError {
         return new ValidationError({
-            message: 'Sending confirmation mail failed, mail already send',
-            errorCode: ErrorCode.EMAIL_VERIFICATION_ALREADY_SENT_ERROR,
-            payload: {
-                field: 'expiresAt',
-                reason: expiresAt,
-            },
+            message: 'Sending confirmation mail failed, code expired',
+            errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_EXPIRED_ERROR,
+        });
+    }
+    private createNotExpiredCodeError(): ValidationError {
+        return new ValidationError({
+            message: 'Sending confirmation mail failed, code not expired',
+            errorCode: ErrorCode.EMAIL_VERIFICATION_CODE_STILL_ACTIVE_ERROR,
         });
     }
 
@@ -217,6 +223,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         options: {
             requirePending?: boolean;
             checkCode?: number;
+            checkIsExpired?: boolean;
         } = {},
     ): Promise<void> {
         this.assertNotConfirmed(payload);
@@ -228,8 +235,11 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         if (typeof options.checkCode === 'number') {
             this.assertCodeValid(payload, options.checkCode);
         }
-
-        this.assertNotExpired(payload);
+        if (options.checkIsExpired) {
+            this.assertExpired(payload);
+        } else if (options.checkIsExpired === false) {
+            this.assertNotExpired(payload);
+        }
     }
     private assertNotConfirmed(payload: IEmailConfirmationData): void {
         if (payload?.status === EmailConfirmationStatusType.Confirmed) {
@@ -251,8 +261,15 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
 
     private assertNotExpired(payload: IEmailConfirmationData): void {
         const timeManager = new TimeManagerUTC();
+        if (timeManager.isFirstDateLessThanSecond(timeManager.getCurrentTime(), payload?.expiresAt)) {
+            throw this.createNotExpiredCodeError();
+        }
+    }
+
+    private assertExpired(payload: IEmailConfirmationData): void {
+        const timeManager = new TimeManagerUTC();
         if (timeManager.isFirstDateLessThanSecond(payload?.expiresAt, timeManager.getCurrentTime())) {
-            throw this.createExpiredCodeError(payload.expiresAt);
+            throw this.createExpiredCodeError();
         }
     }
     // public async requestEmailChange(userId: number, newEmail: string, trx?: IDBTransaction): Promise<void> {

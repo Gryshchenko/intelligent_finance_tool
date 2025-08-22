@@ -2,57 +2,42 @@ import demoEn from "./demo-en"
 
 const en = {
   errorCode: {
-    0: "We couldn't save your info. Please try again.", // CANT_STORE_DATA
-    1: "Hmm… something you entered doesn’t look right.", // UNEXPECTED_PROPERTY
-    2: "Something went wrong on our side.", // UNKNOWN_ERROR
-    3: "That took too long. Let’s give it another try.", // REQUEST_TIMEOUT_ERROR
+    CANT_STORE_DATA: "We couldn't save your info. Please try again.",
+    UNEXPECTED_PROPERTY: "Hmm… something you entered doesn’t look right.",
+    UNKNOWN_ERROR: "Something went wrong on our side.",
+    REQUEST_TIMEOUT_ERROR: "That took too long. Let’s give it another try.",
 
-    1000: "Please double‑check your email address.", // EMAIL_INVALID_ERROR
-    1001: "That name doesn’t seem right.", // NAME_INVALID_ERROR
-    1002: "Your password needs a quick update.", // PASSWORD_INVALID_ERROR
-    1003: "This language or region isn’t supported yet.", // LOCALE_INVALID_ERROR
+    EMAIL_INVALID_ERROR: "Please double-check your email address.",
+    NAME_INVALID_ERROR: "That name doesn’t seem right.",
+    PASSWORD_INVALID_ERROR: "Your password needs a quick update.",
+    LOCALE_INVALID_ERROR: "This language or region isn’t supported yet.",
 
-    2000: "Your sign‑in details don’t match.", // CREDENTIALS_ERROR
-    2001: "Sign in to keep going.", // AUTH_ERROR
+    CREDENTIALS_ERROR: "Your sign-in details don’t match.",
+    AUTH_ERROR: "Sign in to keep going.",
 
-    3000: "We hit a snag during sign‑up.", // SIGNUP_CATCH_ERROR
-    3001: "We couldn’t finish setting up your account.", // SIGNUP_CREATE_INITIAL_DATA_ERROR
-    3002: "Looks like you already have an account with us.", // SIGNUP_USER_ALREADY_EXISTS_ERROR
-    3004: "We couldn’t create your profile.", // SIGNUP_PROFILE_NOT_CREATED_ERROR
+    SIGNUP_CATCH_ERROR: "We hit a snag during sign-up.",
+    SIGNUP_CREATE_INITIAL_DATA_ERROR: "We couldn’t finish setting up your account.",
+    SIGNUP_USER_ALREADY_EXISTS_ERROR: "Looks like you already have an account with us.",
+    SIGNUP_PROFILE_NOT_CREATED_ERROR: "We couldn’t create your profile.",
 
-    3100: "That code doesn’t look correct.", // EMAIL_VERIFICATION_CODE_INVALID_ERROR
-    3101: "We’ve already sent you a verification email.", // EMAIL_VERIFICATION_ALREADY_SENT_ERROR
-    3102: "Your email is already confirmed.", // EMAIL_VERIFICATION_ALREADY_DONE_ERROR
-    3103: "We couldn’t send the verification email.", // EMAIL_CANNOT_SEND_ERROR
-    3104: "That verification code has expired.", // EMAIL_VERIFICATION_CODE_EXPIRED_ERROR
-    3105: "Email verification didn’t work.", // EMAIL_VERIFICATION_FAILED_ERROR
+    EMAIL_VERIFICATION_CODE_STILL_ACTIVE_ERROR: "You already have an active verification code.",
+    EMAIL_VERIFICATION_ALREADY_DONE_ERROR: "Your email is already confirmed.",
+    EMAIL_CANNOT_SEND_ERROR: "We couldn’t send the verification email.",
+    EMAIL_VERIFICATION_CODE_EXPIRED_ERROR: "That verification code has expired.",
+    EMAIL_VERIFICATION_FAILED_ERROR: "Email verification didn’t work.",
 
-    4000: "We couldn’t start your session.", // SESSION_CREATE_ERROR
-    4001: "We couldn’t log you out properly.", // SESSION_DESTROY_ERROR
-    4002: "Your profile isn’t loading right now.", // PROFILE_ERROR
-    4003: "We couldn’t load your overview.", // OVERVIEW_ERROR
+    SESSION_CREATE_ERROR: "We couldn’t start your session.",
+    SESSION_DESTROY_ERROR: "We couldn’t log you out properly.",
+    PROFILE_ERROR: "Your profile isn’t loading right now.",
+    OVERVIEW_ERROR: "We couldn’t load your overview.",
 
-    5000: "Sign‑up didn’t go through completely.", // TRANSACTION_ERROR
-    5001: "We can’t find that account.", // ACCOUNT_ID_ERROR
-    5002: "We can’t find that income record.", // INCOME_ID_ERROR
-    5003: "We can’t find that category.", // CATEGORY_ID_ERROR
-    5004: "We can’t find that currency.", // CURRENCY_ID_ERROR
-    5005: "We don’t recognize that transaction type.", // TRANSACTION_TYPE_ID_ERROR
-    5006: "The amount doesn’t look right.", // TRANSACTION_AMOUNT_ERROR
-    5007: "This description doesn’t look valid.", // TRANSACTION_DESCRIPTION_ERROR
-    5008: "That date doesn’t seem right.", // TRANSACTION_CREATE_DATE_ERROR
-    5009: "We can’t find the destination account.", // TARGET_ACCOUNT_ID_ERROR
-    5010: "We couldn’t access that account.", // ACCOUNT_ERROR
-    5011: "That account name isn’t valid.", // ACCOUNT_NAME_ERROR
-    5012: "This account can’t be used right now.", // ACCOUNT_STATUS_ERROR
-    5013: "This income can’t be used right now.", // INCOME_STATUS_ERROR
-    5014: "We couldn’t process that income.", // INCOME_ERROR
-    5015: "That income name isn’t valid.", // INCOME_NAME_ERROR
-    5016: "We couldn’t process that category.", // CATEGORY_ERROR
-    5017: "That category name isn’t valid.", // CATEGORY_NAME_ERROR
-    5018: "We couldn’t process that currency.", // CURRENCY_ERROR
-    5019: "We can’t find that user.", // USER_ID_ERROR
-    5020: "This user can’t be used right now.", // USER_STATUS_ERROR
+    TRANSACTION_ERROR: "Something went wrong with the transaction.",
+    ACCOUNT_ERROR: "There was a problem accessing your account.",
+    INCOME_ERROR: "We couldn’t process your income data.",
+    CATEGORY_ERROR: "We couldn’t process your category data.",
+    CURRENCY_ERROR: "We couldn’t process your currency data.",
+    USER_ERROR: "We couldn’t process your user data.",
+    EMAIL_CONFIRMATION_ERROR: "We couldn’t confirm your email.",
   },
   validation: {
     required: "Field cannot be empty",

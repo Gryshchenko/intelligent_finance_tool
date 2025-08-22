@@ -1,11 +1,4 @@
-import {
-    createUser,
-    deleteUserAfterTest,
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomPassword,
-    generateSecureRandom,
-} from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { TransactionType } from '../../src/types/TransactionType';
@@ -21,7 +14,7 @@ const app = require('../../src/app');
 
 let server: never;
 
-let userIds: string[] = [];
+let userIds: number[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);

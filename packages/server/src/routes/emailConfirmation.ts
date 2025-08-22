@@ -13,7 +13,7 @@ const emailConfirmationRouter = express.Router({ mergeParams: true });
 
 emailConfirmationRouter.use(tokenVerify, sessionVerify, userIdVerify, userStatusVerify(UserStatus.NO_VERIFIED));
 
-emailConfirmationRouter.get('/resend', validateQuery({}), routesInputValidation([]), EmailConfirmationController.resend);
+emailConfirmationRouter.post('/resend', validateQuery({}), routesInputValidation([]), EmailConfirmationController.resend);
 
 emailConfirmationRouter.post(
     '/verify',

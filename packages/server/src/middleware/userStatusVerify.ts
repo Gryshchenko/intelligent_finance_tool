@@ -13,7 +13,6 @@ const _logger = Logger.Of('UserStatusVerify');
 const userStatusVerify = (requiredStatus: UserStatus) => (req: Request, res: Response, next: NextFunction) => {
     const userFromSession = req.session.user as IUserSession;
     if (Utils.isNull(userFromSession?.status) || requiredStatus !== userFromSession.status) {
-        console.log(requiredStatus, userFromSession?.status);
         const responseBuilder = new ResponseBuilder();
         _logger.error(`User status verification failed, access with status: ${userFromSession.status} not allowed`);
         return res.status(HttpCode.FORBIDDEN).json(

@@ -27,7 +27,7 @@ const app = require('../../src/app');
 
 let server: never;
 
-const userIds: string[] = [];
+const userIds: number[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);

@@ -13,7 +13,7 @@ const app = require('../../src/app');
 
 let server: never;
 
-let userIds: string[] = [];
+let userIds: number[] = [];
 
 beforeAll(() => {
     const port = Math.floor(generateSecureRandom() * (65535 - 1024) + 1024);
@@ -136,7 +136,7 @@ describe('POST /balance', () => {
             databaseConnection,
         });
         userIds.push(userId);
-        const getBalance = async (id: string) => {
+        const getBalance = async (id: number) => {
             const {
                 body: {
                     data: { balance },
@@ -241,12 +241,12 @@ describe('POST /balance', () => {
                 .expect(HttpCode.NOT_FOUND);
         };
 
-        const getBalance = async (userId: string, auth: string) => {
+        const getBalance = async (userId: number, auth: string) => {
             const res = await agent.get(`/user/${userId}/balance`).set('authorization', auth).expect(HttpCode.OK);
             return Number(res.body.data.balance);
         };
 
-        const createAccount = async (userId: string, currencyId: string, currency: string, auth: string) => {
+        const createAccount = async (userId: number, currencyId: string, currency: string, auth: string) => {
             const res = await agent
                 .post(`/user/${userId}/account/`)
                 .set('authorization', auth)
@@ -258,7 +258,7 @@ describe('POST /balance', () => {
                 .expect(HttpCode.OK);
             return res.body.data;
         };
-        const createAccountFailed = async (userId: string, currencyId: string, currency: string, auth: string) => {
+        const createAccountFailed = async (userId: number, currencyId: string, currency: string, auth: string) => {
             return await agent
                 .post(`/user/${userId}/account/`)
                 .set('authorization', auth)
