@@ -8,10 +8,11 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import { IResponse } from "tenpercent/shared/src/interfaces/IResponse"
 import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
+import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import Config from "@/config"
 
-import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
+import { GeneralApiProblem, GeneralApiProblemKind, getGeneralApiProblem } from "./apiProblem"
 import type { ApiConfig } from "./types"
 
 /**
@@ -44,37 +45,75 @@ export class Api {
     })
   }
 
-  async doSignUpConfirmation(body: { confirmationCode: string; userId: string }): Promise<
+  async doSignUpEmailResend(body: { userId: number }): Promise<
     | {
-        kind: "ok"
-        data: IResponse<IUserClient | undefined> | undefined
+        kind: GeneralApiProblemKind.Ok
         token: string | undefined
       }
     | GeneralApiProblem
   > {
-    // make the api call
-    const response: ApiResponse<IResponse<IUserClient | undefined>> = await this.apisauce.patch(
-      `/${body.userId}/profile`,
-      {
-        confirmationCode: body.confirmationCode,
-      },
+    const response: ApiResponse<IResponse<IUserClient | undefined>> = await this.apisauce.post(
+      `/register/signup/${body.userId}/email-confirmation/resend`,
     )
 
-    // the typical ways to die when calling an api
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
     }
 
-    // transform the data into the format we are expecting
     try {
-      const data = response.data
-      return { kind: "ok", data }
+      return { kind: GeneralApiProblemKind.NoContent, token: response.headers?.authorization }
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
       }
-      return { kind: "bad-data" }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: null,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+  async doSignUpEmailVerify(body: { confirmationCode: string; userId: number }): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        token: string | undefined
+      }
+    | GeneralApiProblem
+  > {
+    const response: ApiResponse<IResponse<IUserClient | undefined>> = await this.apisauce.post(
+      `/register/signup/${body.userId}/email-confirmation/verify`,
+      {
+        confirmationCode: body.confirmationCode,
+      },
+    )
+
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    try {
+      return { kind: GeneralApiProblemKind.NoContent, token: response.headers?.authorization }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: null,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
     }
   }
   async doSignUp(body: {
@@ -84,37 +123,109 @@ export class Api {
     locale: string
   }): Promise<
     | {
-        kind: "ok"
-        data: IResponse<IUserClient | undefined> | undefined
+        kind: GeneralApiProblemKind.Ok
+        data: { userId: number } | undefined
         token: string | undefined
       }
     | GeneralApiProblem
   > {
-    // make the api call
-    const response: ApiResponse<IResponse<IUserClient | undefined>> = await this.apisauce.post(
+    const response: ApiResponse<IResponse<{ userId: number }>> = await this.apisauce.post(
       `/register/signup`,
       body,
     )
-    console.log(response)
-
-    // the typical ways to die when calling an api
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
     }
-
-    // transform the data into the format we are expecting
     try {
-      const data = response.data
-      return { kind: "ok", data, token: response.headers?.authorization }
+      const data = response.data?.data
+      return { kind: GeneralApiProblemKind.Ok, data, token: response.headers?.authorization }
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
       }
-      return { kind: "bad-data" }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: null,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+  async doLogin(body: { password: string; email: string }): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: IUserClient | undefined
+        token: string | undefined
+      }
+    | GeneralApiProblem
+  > {
+    const response: ApiResponse<IResponse<IUserClient>> = await this.apisauce.post(
+      `/auth/login`,
+      body,
+    )
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    try {
+      const data = response.data?.data
+      return { kind: GeneralApiProblemKind.Ok, data, token: response.headers?.authorization }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: null,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+  async doTokenVerify(body: { token: string }): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: IUserClient | undefined
+        token: string | undefined
+      }
+    | GeneralApiProblem
+  > {
+    const response: ApiResponse<IResponse<IUserClient>> = await this.apisauce.post(
+      `/auth/login`,
+      body,
+    )
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    try {
+      const data = response.data?.data
+      return { kind: GeneralApiProblemKind.Ok, data, token: response.headers?.authorization }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: null,
+        errors: [
+          {
+            errorCode: ErrorCode.AUTH_ERROR,
+          },
+        ],
+      }
     }
   }
 }
 
-// Singleton instance of the API for convenience
 export const api = new Api()

@@ -1,16 +1,18 @@
 import express from 'express';
 
 import routesInputValidation from '../utils/validation/routesInputValidation';
-import { tokenVerifyLogout } from 'middleware/tokenVerify';
+import tokenVerify from 'middleware/tokenVerify';
 import loginValidationRules from 'src/utils/validation/loginValidationRules';
-import { sessionVerifyLogout } from 'middleware/sessionVerify';
+import sessionVerify from 'middleware/sessionVerify';
 import { AuthController } from 'src/controllers/AuthController';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
 import { validateQuery } from 'src/utils/validation/validateQuery';
 
 const router = express.Router();
 
-router.post('/logout', validateQuery({}), tokenVerifyLogout, sessionVerifyLogout, AuthController.logout);
+router.post('/logout', validateQuery({}), sessionVerify, tokenVerify, routesInputValidation([]), AuthController.logout);
+
+router.post('/verify', validateQuery({}), tokenVerify, sessionVerify, routesInputValidation([]), AuthController.verify);
 
 router.post(
     '/login',

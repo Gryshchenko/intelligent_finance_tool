@@ -1,61 +1,98 @@
-import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
+import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
+import { Checkbox } from "@/components/Toggle/Checkbox"
 import { useAuth } from "@/context/AuthContext"
+import { TxKeyPath } from "@/i18n"
+import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
+import AlertService from "@/services/AlertService"
+import { api } from "@/services/api"
+import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { validateEmail, validatePassword } from "@/utils/validation"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
 export const LoginScreen: FC<LoginScreenProps> = (_props) => {
   const authPasswordInput = useRef<TextInput>(null)
   const { navigation } = _props
-
-  const [authPassword, setAuthPassword] = useState("")
-  const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [attemptsCount, setAttemptsCount] = useState(0)
-  const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
+  const [authPassword, setAuthPassword] = useState<string>("")
+  const [authEmail, setAuthEmail] = useState<string>("")
+  const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState<boolean>(true)
+  const [attemptsCount, setAttemptsCount] = useState<number>(0)
+  const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
+  const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
+  const { setAuth, isPasswordSaveCheckbox, setIsPasswordSaveCheckbox } = useAuth()
 
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
 
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("ignite@infinite.red")
-    setAuthPassword("ign1teIsAwes0m3")
-  }, [setAuthEmail])
-
-  const error = isSubmitted ? validationError : ""
-
   function signUp() {
     navigation.navigate({ name: "SignUp", params: undefined })
   }
 
-  function login() {
-    setIsSubmitted(true)
+  async function login() {
+    const emailErr = validateEmail(authEmail)
+    const passwordErr = validatePassword(authPassword)
+
+    setEmailError(emailErr)
+    setPasswordError(passwordErr)
+
+    if (emailErr || passwordErr) {
+      return
+    }
     setAttemptsCount(attemptsCount + 1)
+    if (!authEmail) {
+      AlertService.error(translate("validation:email"), translate("common:error"))
+      return
+    }
+    if (!authPassword) {
+      AlertService.error(translate("validation:passwordRequirements"), translate("common:error"))
+      return
+    }
+    if (emailError) return
+    if (passwordError) return
 
-    if (validationError) return
+    const response = await api.doLogin({
+      password: authPassword as string,
+      email: authEmail as string,
+    })
 
-    // Make a request to your server to get an authentication token.
-    // If successful, reset the fields and set the token.
-    setIsSubmitted(false)
-    setAuthPassword("")
-    setAuthEmail("")
-
-    // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
+    if (response.kind === GeneralApiProblemKind.Ok) {
+      if (!response.token) {
+        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        return
+      }
+      const { email, userId, status } = response.data as IUserClient
+      await setAuth({
+        email,
+        status,
+        userId,
+        token: response.token,
+      })
+      setAuthPassword("")
+    } else {
+      switch (response.kind) {
+        case GeneralApiProblemKind.BadData: {
+          AlertService.error(translate("errorCode:CREDENTIALS_ERROR"), translate("common:error"))
+          break
+        }
+        default: {
+          AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        }
+      }
+    }
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -88,7 +125,12 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
 
       <TextField
         value={authEmail}
-        onChangeText={setAuthEmail}
+        onChangeText={(email) => {
+          if (emailError) {
+            setEmailError(validateEmail(email))
+          }
+          setAuthEmail(email)
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="email"
@@ -96,15 +138,20 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
         keyboardType="email-address"
         labelTx="common:emailFieldLabel"
         placeholderTx="common:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helperTx={emailError}
+        status={emailError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
 
       <TextField
         ref={authPasswordInput}
         value={authPassword}
-        onChangeText={setAuthPassword}
+        onChangeText={(password) => {
+          if (passwordError) {
+            setPasswordError(validatePassword(password))
+          }
+          setAuthPassword(password)
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="password"
@@ -113,7 +160,16 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
         labelTx="common:passwordFieldLabel"
         placeholderTx="common:passwordFieldPlaceholder"
         onSubmitEditing={login}
+        helperTx={passwordError}
+        status={passwordError ? "error" : undefined}
         RightAccessory={PasswordRightAccessory}
+      />
+
+      <Checkbox
+        labelTx="loginScreen:rememberMe"
+        helperTx="loginScreen:rememberMeHelper"
+        value={isPasswordSaveCheckbox}
+        onPress={() => setIsPasswordSaveCheckbox(!isPasswordSaveCheckbox)}
       />
 
       <Button

@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
-      "@assets/*": ["./assets/*"]
+      "@assets/*": ["./assets/*"],
+      "@types/*": ["./types/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"]
   },

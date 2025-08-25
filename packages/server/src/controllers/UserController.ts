@@ -23,8 +23,8 @@ export class UserController {
                     .build(),
             );
         } catch (e: unknown) {
-            UserController.logger.error(`Fetch profile failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.PROFILE_ERROR);
+            UserController.logger.error(`Fetch user failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.USER_ERROR);
         }
     }
 }

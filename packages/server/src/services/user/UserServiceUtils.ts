@@ -1,6 +1,5 @@
 import { IUserServer } from 'interfaces/IUserServer';
 import { IUser } from 'interfaces/IUser';
-import { IUserClient } from 'interfaces/IUserClient';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import Logger from 'helper/logger/Logger';
 
@@ -8,6 +7,7 @@ import argon2 from 'argon2';
 
 import cryptoModule from 'crypto';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { IUserClient } from 'tenpercent/shared/src/interfaces/IUserClient';
 
 const _logger = Logger.Of('UserServiceUtils');
 

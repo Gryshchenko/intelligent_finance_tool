@@ -4,6 +4,7 @@ export enum ErrorCode {
     UNEXPECTED_PROPERTY = 1,
     UNKNOWN_ERROR = 2,
     REQUEST_TIMEOUT_ERROR = 3,
+    CLIENT_UNKNOWN_ERROR = 4,
 
     // 1000–1999: Data validation
     EMAIL_INVALID_ERROR = 1000,
@@ -14,6 +15,7 @@ export enum ErrorCode {
     // 2000–2999: Authorization / Login
     CREDENTIALS_ERROR = 2000,
     AUTH_ERROR = 2001,
+    TOKEN_EXPIRED_ERROR = 2002,
 
     // 3000–3999: Registration
     SIGNUP_CATCH_ERROR = 3000,

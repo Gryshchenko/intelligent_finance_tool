@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
-import https from 'https';
-// import http from 'http';
-import fs from 'fs';
-import path from 'path';
+// import https from 'https';
+import http from 'http';
+// import fs from 'fs';
+// import path from 'path';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
@@ -34,10 +34,10 @@ const port = getConfig().appPort ?? 3000;
 passportSetup(passport);
 swaggerInit(app);
 
-const privateKey = fs.readFileSync(path.join(__dirname, 'localhost.key'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf8');
+// const privateKey = fs.readFileSync(path.join(__dirname, 'localhost.key'), 'utf8');
+// const certificate = fs.readFileSync(path.join(__dirname, 'localhost.cert'), 'utf8');
 
-const credentials: { key: string; cert: string } = { key: privateKey, cert: certificate };
+// const credentials: { key: string; cert: string } = { key: privateKey, cert: certificate };
 
 if (process.env.NODE_ENV !== 'test') {
     const limiter = rateLimit({
@@ -76,7 +76,8 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
 });
 
-const httpsServer = https.createServer(credentials, app);
+// const httpsServer = https.createServer(credentials, app);
+const httpsServer = http.createServer(app);
 
 if (process.env.NODE_ENV !== 'test') {
     httpsServer.listen(port, async () => {

@@ -36,7 +36,7 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
   const route = state.routes[state.index ?? 0]
 
   // Found the active route -- return the name
-  if (!route.state) return route.name as keyof AppStackParamList
+  if (!route.state) return route.name as keyof AppStackParamList as string
 
   // Recursive call to deal with nested routers
   return getActiveRouteName(route.state as NavigationState<AppStackParamList>)

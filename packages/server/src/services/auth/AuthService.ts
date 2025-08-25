@@ -56,6 +56,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
         }
 
         return jwt.sign({ userId, role }, jwtSecret, {
+            algorithm: 'HS384',
             expiresIn: '12h',
             issuer: getConfig().jwtIssuer,
             audience: getConfig().jwtAudience,

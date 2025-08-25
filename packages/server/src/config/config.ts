@@ -18,9 +18,12 @@ interface IConfig {
     dbCACert: string;
     ssSecret: string;
     ssName: string;
+    ssPrefix: string;
     jwtSecret: string;
     jwtIssuer: string;
     jwtAudience: string;
+    jwtAlgorithm: string;
+    jwtExpiresIn: string;
     redisHost: string;
     redisPort: string;
     mailNotReply: string;
@@ -41,10 +44,13 @@ export function getConfig(): IConfig {
         dbHost: (process.env.TEST_DB_HOST ?? process.env.DB_HOST) as string,
         dbCACert: caCert,
         ssSecret: (process.env.TEST_SS_SECRET ?? process.env.SS_SECRET) as string,
+        ssPrefix: (process.env.TEST_SS_PERFIX ?? process.env.SS_PERFIX) as string,
         ssName: (process.env.TEST_SS_NAME ?? process.env.SS_NAME) as string,
         jwtSecret: (process.env.TEST_JWT_SECRET ?? process.env.JWT_SECRET) as string,
         jwtIssuer: (process.env.TEST_JWT_ISSUER ?? process.env.JWT_ISSUER) as string,
         jwtAudience: (process.env.TEST_JWT_AUDIENCE ?? process.env.JWT_AUDIENCE) as string,
+        jwtAlgorithm: (process.env.TEST_JWT_ALGORITHM ?? process.env.JWT_ALGORITHM) as string,
+        jwtExpiresIn: (process.env.TEST_JWT_EXPIRES_IN ?? process.env.JWT_EXPIRES_IN) as string,
         redisHost: (process.env.TEST_REDIS_HOST ?? process.env.REDIS_HOST) as string,
         redisPort: (process.env.TEST_REDIS_PORT ?? process.env.REDIS_PORT) as string,
         rateProviderAPI: (process.env.TEST_RATE_PROVIDER_API ?? process.env.RATE_PROVIDER_API) as string,

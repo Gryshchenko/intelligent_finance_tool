@@ -10,9 +10,7 @@ const _logger = Logger.Of('SessionVerify');
 
 const errorHandler = (errorMsg: string, code: number, req: Request, res: Response) => {
     _logger.info(errorMsg);
-    SessionService.deleteSession(req, res, () => {
-        res.status(code).json(ResponseBuilderPreset.getAuthError());
-    });
+    res.status(code).json(ResponseBuilderPreset.getAuthError());
 };
 export const sessionVerifyHandler = (
     req: Request,
@@ -51,13 +49,6 @@ export const sessionVerifyHandler = (
 
 const sessionVerify = (req: Request, res: Response, next: NextFunction) => {
     sessionVerifyHandler(req, res, next, (errorMsg) => errorHandler(errorMsg, HttpCode.UNAUTHORIZED, req, res));
-};
-
-export const sessionVerifyLogout = (req: Request, res: Response, next: NextFunction) => {
-    sessionVerifyHandler(req, res, next, (errorMsg) => () => {
-        _logger.error(errorMsg);
-        res.status(HttpCode.CREATED).json(ResponseBuilderPreset.getSuccess());
-    });
 };
 
 export default sessionVerify;

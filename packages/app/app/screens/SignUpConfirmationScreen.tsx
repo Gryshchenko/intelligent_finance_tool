@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import { TextStyle, ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
@@ -9,31 +9,26 @@ import { useAuth } from "@/context/AuthContext"
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
+import AlertService from "@/services/AlertService"
 import { api } from "@/services/api"
+import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { useHeader } from "@/utils/useHeader"
+import { validateCode } from "@/utils/validation"
 
 interface SignUpConfirmationScreenProps extends AppStackScreenProps<"SignUpConfirmation"> {}
 
 export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_props) => {
   const [confirmationCode, setConfirmationCode] = useState<string>("")
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  // const [attemptsCount, setAttemptsCount] = useState(0)
+  const [validationCodeError, setValidationCodeError] = useState<TxKeyPath | undefined>()
   const [isResendDisabled, setIsResendDisabled] = useState(false)
   const [resendTimer, setResendTimer] = useState(60)
-  const [remainingAttempts, setRemainingAttempts] = useState(10)
+  // const [remainingAttempts, setRemainingAttempts] = useState(10)
+  const { updateAuthToken, userId } = useAuth()
 
   const { themed } = useAppTheme()
   const { logout } = useAuth()
-
-  const validationCodeError = useMemo(() => {
-    if (!confirmationCode) return "signUpConfirmation.validation.required"
-    if (!/^[0-9]{8}$/.test(confirmationCode)) return "signUpConfirmation.validation.exactLength"
-    return ""
-  }, [confirmationCode]) as TxKeyPath
-
-  const errorMessage = isSubmitted ? translate(validationCodeError) : ""
 
   useHeader(
     {
@@ -42,6 +37,7 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
     },
     [logout],
   )
+
   useEffect(() => {
     let timer: NodeJS.Timeout
     if (isResendDisabled && resendTimer > 0) {
@@ -53,40 +49,69 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
     return () => clearTimeout(timer)
   }, [isResendDisabled, resendTimer])
 
-  async function signUp() {
-    setIsSubmitted(true)
-    if (errorMessage) return
+  async function verify() {
+    if (!userId) {
+      AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+      return
+    }
+    const codeErr = validateCode(confirmationCode)
 
-    const response = await api.doSignUpConfirmation({
+    setValidationCodeError(codeErr)
+    if (codeErr) {
+      return
+    }
+
+    const response = await api.doSignUpEmailVerify({
+      userId,
       confirmationCode,
     })
 
-    if (response.kind === "ok") {
-      setIsSubmitted(false)
+    if (response.kind === GeneralApiProblemKind.Ok) {
+      if (!response.token) {
+        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        return
+      }
+      await updateAuthToken(response.token)
     } else {
       console.error(`Error confirming email: ${JSON.stringify(response)}`)
-      alert(translate("signUpConfirmation:confirmError"))
+      AlertService.error(translate("common:error"), translate("signUpConfirmation:confirmError"))
     }
   }
 
-  async function resendCode() {
-    if (remainingAttempts <= 0) {
-      alert(translate("signUpConfirmation:limitReached" as TxKeyPath))
+  async function resend() {
+    // if (remainingAttempts <= 0) {
+    //   AlertService.info(
+    //     translate("common:info"),
+    //     translate("signUpConfirmation:limitReached" as TxKeyPath),
+    //   )
+    //   return
+    // }
+    if (!userId) {
+      AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
       return
     }
 
     try {
-      const response = await api.doSignUpConfirmation({ confirmationCode })
+      const response = await api.doSignUpEmailResend({ userId })
       if (response.kind === "ok") {
-        alert(translate("signUpConfirmation.codeSent" as TxKeyPath))
+        AlertService.info(
+          translate("common:info"),
+          translate("signUpConfirmation.codeSent" as TxKeyPath),
+        )
         setIsResendDisabled(true)
-        setRemainingAttempts((prev) => prev - 1)
+        // setRemainingAttempts((prev) => prev - 1)
       } else {
-        alert(translate("signUpConfirmation.sendError" as TxKeyPath))
+        AlertService.error(
+          translate("common:error"),
+          translate("signUpConfirmation.sendError" as TxKeyPath),
+        )
       }
     } catch (error) {
-      console.error(error)
-      alert(translate("signUpConfirmation.sendError" as TxKeyPath))
+      console.log(error)
+      AlertService.error(
+        translate("common:error"),
+        translate("signUpConfirmation.sendError" as TxKeyPath),
+      )
     }
   }
   return (
@@ -105,15 +130,20 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
 
       <TextField
         value={confirmationCode}
-        onChangeText={setConfirmationCode}
+        onChangeText={(code) => {
+          if (validationCodeError) {
+            setValidationCodeError(validateCode(code))
+          }
+          setConfirmationCode(code)
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="numeric"
         labelTx="common:confirmationCodeFieldLabel"
         placeholderTx="common:confirmationCodeFieldPlaceholder"
-        helper={errorMessage}
-        status={errorMessage ? "error" : undefined}
+        helperTx={validationCodeError}
+        status={validationCodeError ? "error" : undefined}
         maxLength={8}
       />
 
@@ -122,7 +152,7 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
         tx="signUpConfirmation:confirmButton"
         style={themed($tapButton)}
         preset="reversed"
-        onPress={signUp}
+        onPress={verify}
       />
 
       <Button
@@ -130,15 +160,15 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
         txOptions={isResendDisabled ? { seconds: resendTimer } : undefined}
         style={themed($tapButton)}
         preset="default"
-        onPress={resendCode}
+        onPress={resend}
         disabled={isResendDisabled}
       />
 
-      <Text
-        tx="signUpConfirmation:remainingAttempts"
-        txOptions={{ remaining: remainingAttempts }}
-        style={themed($tapButton)}
-      />
+      {/*<Text*/}
+      {/*  tx="signUpConfirmation:remainingAttempts"*/}
+      {/*  txOptions={{ remaining: remainingAttempts }}*/}
+      {/*  style={themed($tapButton)}*/}
+      {/*/>*/}
     </Screen>
   )
 }

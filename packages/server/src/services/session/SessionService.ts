@@ -8,6 +8,7 @@ import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
 import { UserAgentService } from 'src/services/userAgentService/UserAgentService';
 import Logger from 'helper/logger/Logger';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
 const session = require('express-session');
 const redis = require('redis');
@@ -27,7 +28,7 @@ export default class SessionService {
                 _logger.error(`Error deleting session: ${err.message}`);
                 const responseBuilder = new ResponseBuilder();
 
-                res.status(400).json(
+                res.status(HttpCode.BAD_REQUEST).json(
                     responseBuilder
                         .setStatus(ResponseStatusType.INTERNAL)
                         .setError({
@@ -125,7 +126,7 @@ export default class SessionService {
 
         const redisStore = new RedisStore({
             client: redisClient,
-            prefix: 'myapp:',
+            prefix: getConfig().ssPrefix,
         });
 
         redisClient.on('error', (err: string) => {
@@ -140,11 +141,11 @@ export default class SessionService {
             name: getConfig().ssName,
             resave: false,
             saveUninitialized: false,
-            cookie: {
-                secure: process.env.ENV === 'production',
-                httpOnly: true,
-                maxAge: 1000 * 60 * 60,
-            },
+            // cookie: {
+            //     secure: process.env.ENV === 'production',
+            //     httpOnly: true,
+            //     maxAge: 1000 * 60 * 60,
+            // },
         });
     }
 
@@ -165,7 +166,7 @@ export default class SessionService {
         req.session.regenerate((err) => {
             if (err) {
                 logger.error(`Session regeneration error: ${err}`);
-                res.status(400).json(
+                res.status(HttpCode.BAD_REQUEST).json(
                     responseBuilder
                         .setStatus(ResponseStatusType.INTERNAL)
                         .setError({ errorCode: ErrorCode.SESSION_CREATE_ERROR })
@@ -181,7 +182,7 @@ export default class SessionService {
                 req,
                 handleError: (error: string) => {
                     logger.error(`Session regenerate error: ${error}`);
-                    res.status(400).json(
+                    res.status(HttpCode.BAD_REQUEST).json(
                         responseBuilder
                             .setStatus(ResponseStatusType.INTERNAL)
                             .setError({ errorCode: ErrorCode.SESSION_CREATE_ERROR })

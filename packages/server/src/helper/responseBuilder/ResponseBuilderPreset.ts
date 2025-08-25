@@ -11,4 +11,10 @@ export class ResponseBuilderPreset {
     public static getAuthError(): IResponse {
         return new ResponseBuilder().setStatus(ResponseStatusType.INTERNAL).setError({ errorCode: ErrorCode.AUTH_ERROR }).build();
     }
+    public static getTokenExpired(): IResponse {
+        return new ResponseBuilder()
+            .setStatus(ResponseStatusType.INTERNAL)
+            .setError({ errorCode: ErrorCode.TOKEN_EXPIRED_ERROR })
+            .build();
+    }
 }

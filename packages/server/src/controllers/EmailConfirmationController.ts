@@ -54,4 +54,25 @@ export class EmailConfirmationController {
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_CONFIRMATION_ERROR);
         }
     }
+    public static async get(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const userId = Number(req.session.user?.userId);
+            const email = String(req.session.user?.email);
+            const response = await EmailConfirmationServiceBuilder.build().getEmailConfirmation(userId, email);
+            res.status(HttpCode.NO_CONTENT).json(
+                responseBuilder
+                    .setStatus(ResponseStatusType.OK)
+                    .setData({
+                        confirmationId: response?.confirmationId,
+                        expiresAt: response?.expiresAt,
+                        status: response?.status,
+                    })
+                    .build(),
+            );
+        } catch (e: unknown) {
+            EmailConfirmationController.logger.error(` failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_CONFIRMATION_ERROR);
+        }
+    }
 }

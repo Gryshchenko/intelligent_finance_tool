@@ -1,6 +1,7 @@
-import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
+import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
@@ -11,59 +12,46 @@ import { useAuth } from "@/context/AuthContext"
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
+import AlertService from "@/services/AlertService"
 import { api } from "@/services/api"
+import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
-
-import { ValidationTypes } from "../../types/ValidationTypes"
+import { validateEmail, validatePublicName, validatePassword } from "@/utils/validation"
 
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
 export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
-  const { navigation } = _props
   const authPasswordInput = useRef<TextInput>(null)
 
   const [authPassword, setAuthPassword] = useState<string>("")
   const [publicName, setPublicName] = useState<string>("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
-  const { authEmail, setAuthEmail, validationError, setAuthToken } = useAuth()
-
-  const validationNameError = useMemo(() => {
-    if (!/^[a-zA-Z0-9]{3,50}$/.test(publicName)) return ValidationTypes.NAME
-    return ""
-  }, [publicName]) as TxKeyPath
-  const validationPasswordError = useMemo(() => {
-    if (!authPassword || authPassword.length < 6) return ValidationTypes.MIN_LENGTH
-    if (!/[A-Z]/.test(authPassword)) return ValidationTypes.PASSWORD_UPPERCASE
-    if (!/[a-z]/.test(authPassword)) return ValidationTypes.PASSWORD_LOWERCASE
-    if (!/[0-9]/.test(authPassword)) return ValidationTypes.PASSWORD_NUMBER
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(authPassword)) return ValidationTypes.PASSWORD_SPECIAL
-
-    return ""
-  }, [authPassword]) as TxKeyPath
+  const [authEmail, setAuthEmail] = useState<string>("")
+  const [publicNameError, setPublicNameError] = useState<TxKeyPath | undefined>()
+  const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
+  const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
+  const { setAuth } = useAuth()
 
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
 
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    // setAuthEmail("ignite@infinite.red")
-    // setAuthPassword("ign1teIsAwes0m3")
-  }, [setAuthEmail])
-
-  const errorEmail = isSubmitted ? translate(validationError) : ""
-  const errorPass = isSubmitted ? translate(validationPasswordError) : ""
-  const errorName = isSubmitted ? translate(validationNameError) : ""
-
   async function signUp() {
-    setIsSubmitted(true)
+    const emailErr = validateEmail(authEmail)
+    const passwordErr = validatePassword(authPassword)
+    const publicNameError = validatePublicName(publicName)
+
+    setPublicNameError(publicNameError)
+    setEmailError(emailErr)
+    setPasswordError(passwordErr)
+
+    if (emailErr || passwordErr || publicNameError) {
+      return
+    }
     setAttemptsCount(attemptsCount + 1)
-    if (validationError || validationPasswordError || validationPasswordError) return
 
     const response = await api.doSignUp({
       password: authPassword as string,
@@ -71,15 +59,25 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
       publicName: publicName as string,
       locale: "en-US",
     })
-    if (response.kind === "ok") {
-      setIsSubmitted(false)
+    if (response.kind === GeneralApiProblemKind.Ok) {
+      if (!response.token) {
+        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        return
+      }
+      const { email, userId, status } = response.data as IUserClient
+      await setAuth({
+        email,
+        status,
+        userId,
+        token: response.token,
+      })
       setAuthPassword("")
-      setAuthEmail("")
-
-      setAuthToken(response.token)
-      navigation.navigate({ name: "SignUpConfirmation", params: undefined })
     } else {
-      console.error(`Error fetching episodes: ${JSON.stringify(response)}`)
+      switch (response.kind) {
+        case GeneralApiProblemKind.BadData: {
+          break
+        }
+      }
     }
   }
 
@@ -117,8 +115,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
         keyboardType="default"
         labelTx="common:publicNameFieldLabel"
         placeholderTx="common:publicNameFieldPlaceholder"
-        helper={errorName}
-        status={errorName ? "error" : undefined}
+        helperTx={publicNameError}
+        status={publicNameError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
       <TextField
@@ -131,8 +129,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
         keyboardType="email-address"
         labelTx="common:emailFieldLabel"
         placeholderTx="common:emailFieldPlaceholder"
-        helper={errorEmail}
-        status={errorEmail ? "error" : undefined}
+        helperTx={emailError}
+        status={emailError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
 
@@ -144,8 +142,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
         autoCapitalize="none"
         autoComplete="password"
         autoCorrect={false}
-        helper={errorPass}
-        status={errorPass ? "error" : undefined}
+        helperTx={passwordError}
+        status={passwordError ? "error" : undefined}
         secureTextEntry={isAuthPasswordHidden}
         labelTx="common:passwordFieldLabel"
         placeholderTx="common:passwordFieldPlaceholder"

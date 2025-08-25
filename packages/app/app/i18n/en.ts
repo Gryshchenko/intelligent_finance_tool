@@ -40,14 +40,17 @@ const en = {
     EMAIL_CONFIRMATION_ERROR: "We couldn’t confirm your email.",
   },
   validation: {
+    maxLength: "This field cannot be longer than 50 characters.",
     required: "Field cannot be empty",
-    minLength: "Must be at least {{num}} characters",
     email: "Invalid email format",
     name: "Invalid name format must contain only numbers or alphabet characters.",
+    passwordMinLength: "Must be at least 5 characters",
     passwordUppercase: "Password must contain at least one uppercase letter",
     passwordLowercase: "Password must contain at least one lowercase letter",
     passwordNumber: "Password must contain at least one number",
     passwordSpecial: "Password must contain at least one special character (e.g., !@#$%)",
+    passwordRequirements:
+      "Your password must include an uppercase letter, a lowercase letter, a number, and a special character (e.g., !@#$%).",
   },
   signUpConfirmation: {
     title: "Confirm your email",
@@ -72,7 +75,10 @@ const en = {
     success: "Your email has been successfully confirmed.",
   },
   common: {
-    ok: "OK!",
+    error: "Error",
+    info: "Info",
+    warning: "Warning",
+    ok: "OK",
     cancel: "Cancel",
     back: "Back",
     logOut: "Log Out",
@@ -116,6 +122,8 @@ const en = {
       "Enter your details below to unlock top secret info. You'll never guess what we've got waiting. Or maybe you will; it's not rocket science here.",
     hint: "Hint: you can use any email address and your favorite password :)",
     tapToLogIn: "Tap to log in!",
+    rememberMe: "Remember me",
+    rememberMeHelper: "For your convenience, keep this box checked to stay signed in",
   },
   signUpScreen: {
     enterDetails: "",

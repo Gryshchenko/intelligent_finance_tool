@@ -11,13 +11,28 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
+import { IUserSession } from 'interfaces/IUserSession';
 
 export class AuthController {
     private static readonly logger = Logger.Of('AuthController');
+    public static async verify(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        const session = req.session.user as IUserSession;
+        res.status(HttpCode.OK).json(
+            responseBuilder
+                .setStatus(ResponseStatusType.OK)
+                .setData({
+                    userId: session.userId,
+                    email: session.email,
+                    status: session.status,
+                })
+                .build(),
+        );
+    }
     public static async logout(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         SessionService.deleteSession(req, res, () => {
-            res.status(201).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
+            res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
         });
     }
     public static async login(req: Request, res: Response) {
