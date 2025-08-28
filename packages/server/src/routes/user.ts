@@ -1,5 +1,4 @@
 import express from 'express';
-import sessionVerify from '../middleware/sessionVerify';
 import tokenVerify from '../middleware/tokenVerify';
 import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import overview from 'src/routes/overview';
@@ -19,7 +18,7 @@ import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 const userRouter = express.Router({ mergeParams: true });
 
-userRouter.use(tokenVerify, sessionVerify, userStatusVerify(UserStatus.ACTIVE));
+userRouter.use(tokenVerify, userStatusVerify(UserStatus.ACTIVE));
 
 userRouter.get(
     '/:userId',

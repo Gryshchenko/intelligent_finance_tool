@@ -3,38 +3,102 @@ import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import Logger from 'helper/logger/Logger';
 import { validationResult } from 'express-validator';
 import AuthServiceBuilder from 'services/auth/AuthServiceBuilder';
-import SessionService from 'services/session/SessionService';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import UserServiceUtils from 'services/user/UserServiceUtils';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { extractToken } from 'tenpercent/shared/src/utils/extractToken';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
-import { IUserSession } from 'interfaces/IUserSession';
+import { IUser } from 'interfaces/IUser';
+import { CustomError } from 'src/utils/errors/CustomError';
+import { RoleType } from 'tenpercent/shared/src/types/RoleType';
 
 export class AuthController {
     private static readonly logger = Logger.Of('AuthController');
+
     public static async verify(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
-        const session = req.session.user as IUserSession;
-        res.status(HttpCode.OK).json(
-            responseBuilder
-                .setStatus(ResponseStatusType.OK)
-                .setData({
-                    userId: session.userId,
-                    email: session.email,
-                    status: session.status,
-                })
-                .build(),
-        );
+        try {
+            const session = req.user as IUser;
+            if (!session || !session.userId) {
+                throw new ValidationError({
+                    message: 'User in JWT session not found',
+                    statusCode: HttpCode.UNAUTHORIZED,
+                    errorCode: ErrorCode.AUTH_ERROR,
+                });
+            }
+            res.status(HttpCode.OK).json(
+                responseBuilder
+                    .setStatus(ResponseStatusType.OK)
+                    .setData({
+                        userId: session.userId,
+                        email: session.email,
+                        status: session.status,
+                    })
+                    .build(),
+            );
+        } catch (e) {
+            AuthController.logger.info(`Verify failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);
+        }
     }
+
+    public static async refresh(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const token = extractToken(req.headers.authorization);
+            const user = req.user;
+            const userId = user?.userId;
+            if (!userId) {
+                throw new ValidationError({
+                    message: 'UserId in JWT session not found',
+                    statusCode: HttpCode.UNAUTHORIZED,
+                    errorCode: ErrorCode.AUTH_ERROR,
+                });
+            }
+            if (!token) {
+                throw new ValidationError({
+                    message: 'Token not provided',
+                    statusCode: HttpCode.UNAUTHORIZED,
+                    errorCode: ErrorCode.AUTH_ERROR,
+                });
+            }
+            const newToken = await AuthServiceBuilder.build().refresh(userId, RoleType.Default);
+            res.setHeader('Authorization', `Bearer ${newToken}`);
+            res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
+        } catch (e) {
+            AuthController.logger.info(`Verify failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);
+        }
+    }
+
     public static async logout(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
-        SessionService.deleteSession(req, res, () => {
-            res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
-        });
+        try {
+            const token = extractToken(req.headers.authorization);
+            if (!token) {
+                return generateErrorResponse(
+                    res,
+                    responseBuilder,
+                    new CustomError({
+                        message: 'Token not provided',
+                        statusCode: HttpCode.UNAUTHORIZED,
+                        errorCode: ErrorCode.AUTH_ERROR,
+                    }),
+                    ErrorCode.AUTH_ERROR,
+                );
+            }
+
+            await AuthServiceBuilder.build().logout(token as string);
+            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
+        } catch (e) {
+            AuthController.logger.info(`Logout failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);
+        }
     }
+
     public static async login(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
@@ -43,14 +107,13 @@ export class AuthController {
                 throw new ValidationError({ message: 'login validation error' });
             }
             const { user, token } = await AuthServiceBuilder.build().login(req.body.email, req.body.password);
-            SessionService.handleSessionRegeneration(req, res, user, token, AuthController.logger, responseBuilder, () => {
-                res.status(HttpCode.OK).json(
-                    responseBuilder
-                        .setStatus(ResponseStatusType.OK)
-                        .setData(UserServiceUtils.convertServerUserToClientUser(user))
-                        .build(),
-                );
-            });
+            res.setHeader('Authorization', `Bearer ${token}`);
+            res.status(HttpCode.OK).json(
+                responseBuilder
+                    .setStatus(ResponseStatusType.OK)
+                    .setData(UserServiceUtils.convertServerUserToClientUser(user))
+                    .build(),
+            );
         } catch (e: unknown) {
             AuthController.logger.error(`Use login failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);

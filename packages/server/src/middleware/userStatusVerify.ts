@@ -1,17 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import Logger from 'helper/logger/Logger';
-import { IUserSession } from 'interfaces/IUserSession';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import Utils from 'src/utils/Utils';
+import { IUser } from 'interfaces/IUser';
 
 const _logger = Logger.Of('UserStatusVerify');
 
 const userStatusVerify = (requiredStatus: UserStatus) => (req: Request, res: Response, next: NextFunction) => {
-    const userFromSession = req.session.user as IUserSession;
+    const userFromSession = req.user as IUser;
     if (Utils.isNull(userFromSession?.status) || requiredStatus !== userFromSession.status) {
         const responseBuilder = new ResponseBuilder();
         _logger.error(`User status verification failed, access with status: ${userFromSession.status} not allowed`);

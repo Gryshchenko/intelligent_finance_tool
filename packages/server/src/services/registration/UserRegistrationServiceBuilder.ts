@@ -14,6 +14,7 @@ import MailService from 'services/mail/MailService';
 import MailTemplateService from 'services/mailTamplate/MailTemplateService';
 import EmailConfirmationService from 'services/emailConfirmation/EmailConfirmationService';
 import BalanceServiceBuilder from 'services/balance/BalanceServiceBuilder';
+import { KeyValueStoreBuilder } from 'src/repositories/keyValueStore/KeyValueStoreBuilder';
 
 export default class UserRegistrationServiceBuilder {
     public static build() {
@@ -30,6 +31,7 @@ export default class UserRegistrationServiceBuilder {
             profileService: ProfileServiceBuilder.build(),
             currencyService: CurrencyServiceBuilder.build(),
             balanceService: BalanceServiceBuilder.build(),
+            keyValueStore: KeyValueStoreBuilder.build(),
             emailConfirmationService: new EmailConfirmationService(
                 new EmailConfirmationDataAccess(databaseConnection),
                 new MailService(),

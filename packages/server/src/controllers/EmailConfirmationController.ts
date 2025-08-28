@@ -7,8 +7,6 @@ import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import EmailConfirmationServiceBuilder from 'services/emailConfirmation/EmailConfirmationServiceBuilder';
-import SessionService from 'services/session/SessionService';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
 export class EmailConfirmationController {
     private static readonly logger = Logger.Of('EmailConfirmationController');
@@ -17,25 +15,10 @@ export class EmailConfirmationController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { confirmationCode } = req.body;
-            const userId = Number(req.session.user?.userId);
-            const email = String(req.session.user?.email);
-            const token = String(req.session.user?.token);
+            const userId = Number(req.user?.userId);
+            const email = String(req.user?.email);
             await EmailConfirmationServiceBuilder.build().confirmEmail(userId, email, Number(confirmationCode));
-            SessionService.handleSessionRegeneration(
-                req,
-                res,
-                {
-                    userId,
-                    email,
-                    status: UserStatus.ACTIVE,
-                },
-                token,
-                EmailConfirmationController.logger,
-                responseBuilder,
-                () => {
-                    res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(null).build());
-                },
-            );
+            res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(null).build());
         } catch (e: unknown) {
             EmailConfirmationController.logger.error(` failed due reason: ${(e as { message: string }).message}`);
             generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.EMAIL_CONFIRMATION_ERROR);
@@ -45,8 +28,8 @@ export class EmailConfirmationController {
     public static async resend(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const userId = Number(req.session.user?.userId);
-            const email = String(req.session.user?.email);
+            const userId = Number(req.user?.userId);
+            const email = String(req.user?.email);
             await EmailConfirmationServiceBuilder.build().resendConfirmationEmail(userId, email);
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(null).build());
         } catch (e: unknown) {
@@ -57,8 +40,8 @@ export class EmailConfirmationController {
     public static async get(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const userId = Number(req.session.user?.userId);
-            const email = String(req.session.user?.email);
+            const userId = Number(req.user?.userId);
+            const email = String(req.user?.email);
             const response = await EmailConfirmationServiceBuilder.build().getEmailConfirmation(userId, email);
             res.status(HttpCode.NO_CONTENT).json(
                 responseBuilder

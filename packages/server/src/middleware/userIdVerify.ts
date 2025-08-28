@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import Logger from 'helper/logger/Logger';
-import { IUserSession } from 'interfaces/IUserSession';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
@@ -10,7 +9,7 @@ import Utils from 'src/utils/Utils';
 const _logger = Logger.Of('UserIdVerify');
 
 const userIdVerify = (req: Request, res: Response, next: NextFunction) => {
-    const userFromSession = req.session.user as IUserSession;
+    const userFromSession = req.user;
     if (
         Utils.isNull(req.params?.userId) ||
         Utils.isNull(userFromSession?.userId) ||

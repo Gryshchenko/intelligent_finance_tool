@@ -29,6 +29,8 @@ import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { IKeyValueStore, KeyValueStoreKeys } from 'src/repositories/keyValueStore/KeyValueStore';
+import { getConfig } from 'src/config/config';
 
 interface IDefaultData {
     group: string;
@@ -62,6 +64,8 @@ export default class UserRegistrationService extends LoggerBase {
 
     protected balanceService: IBalanceService;
 
+    protected keyValueStore: IKeyValueStore;
+
     protected db: IDatabaseConnection;
 
     constructor(services: {
@@ -77,6 +81,7 @@ export default class UserRegistrationService extends LoggerBase {
         userRoleService: IUserRoleService;
         currencyService: ICurrencyService;
         balanceService: IBalanceService;
+        keyValueStore: IKeyValueStore;
         db: IDatabaseConnection;
     }) {
         super();
@@ -92,6 +97,7 @@ export default class UserRegistrationService extends LoggerBase {
         this.userRoleService = services.userRoleService;
         this.currencyService = services.currencyService;
         this.balanceService = services.balanceService;
+        this.keyValueStore = services.keyValueStore;
         this.db = services.db;
     }
 
@@ -172,6 +178,8 @@ export default class UserRegistrationService extends LoggerBase {
                     );
                 });
                 const readyUser = await this.userService.get(user.userId);
+                await this.keyValueStore.connect();
+                await this.keyValueStore.set(KeyValueStoreKeys.TokenShort, newToken, getConfig().jwtExpiresInSec);
                 return { user: readyUser, token: newToken };
             }
             throw new CustomError({

@@ -1,8 +1,13 @@
 import 'express-session';
-import { IUserSession } from 'interfaces/IUserSession';
+import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 
-declare module 'express-session' {
-    export interface SessionData {
-        user: IUserSession;
+
+declare global {
+    namespace Express {
+        interface User {
+            userId: number;
+            email: string;
+            status: UserStatus;
+        }
     }
 }

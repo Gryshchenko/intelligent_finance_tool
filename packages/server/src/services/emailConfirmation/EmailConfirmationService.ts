@@ -156,6 +156,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
             });
         }
         const userConfirmationDataInWork = userConfirmationData as IEmailConfirmationData;
+        console.log(userConfirmationDataInWork);
         await this.validateConfirmation(userConfirmationDataInWork, {
             requirePending: true,
             checkCode: confirmationCode,

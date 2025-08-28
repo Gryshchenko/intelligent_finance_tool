@@ -21,7 +21,7 @@ export class IncomeController {
         const responseBuilder = new ResponseBuilder();
         try {
             const incomeId = Number(req.params?.incomeId);
-            const income = await IncomeServiceBuilder.build().get(req.session.user?.userId as number, incomeId);
+            const income = await IncomeServiceBuilder.build().get(req.user?.userId as number, incomeId);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(income).build());
         } catch (e: unknown) {
             IncomeController.logger.error(`Get income failed due reason: ${(e as { message: string }).message}`);
@@ -31,7 +31,7 @@ export class IncomeController {
     public static async gets(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const income = await IncomeServiceBuilder.build().gets(req.session.user?.userId as number);
+            const income = await IncomeServiceBuilder.build().gets(req.user?.userId as number);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(income).build());
         } catch (e: unknown) {
             IncomeController.logger.error(`Create accounts failed due reason: ${(e as { message: string }).message}`);
@@ -42,7 +42,7 @@ export class IncomeController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { incomeName, currencyId } = req.body;
-            const income = await IncomeServiceBuilder.build().create(req.session.user?.userId as number, {
+            const income = await IncomeServiceBuilder.build().create(req.user?.userId as number, {
                 incomeName,
                 currencyId,
             });
@@ -57,7 +57,7 @@ export class IncomeController {
         const db: IDatabaseConnection = DatabaseConnectionBuilder.build();
         const uow = new UnitOfWork(db);
         try {
-            const userId = Number(req.session.user?.userId);
+            const userId = Number(req.user?.userId);
             const incomeId = Number(req.params?.incomeId);
             const incomeService = IncomeServiceBuilder.build(db);
             const transactionService = TransactionServiceBuilder.build(db);
@@ -88,7 +88,7 @@ export class IncomeController {
             if (Utils.isEmpty(incomeName) && Utils.isNull(status)) {
                 throw new ValidationError({ message: 'Path income failed due reason: empty body' });
             }
-            await IncomeServiceBuilder.build().patch(req.session.user?.userId as number, incomeId, {
+            await IncomeServiceBuilder.build().patch(req.user?.userId as number, incomeId, {
                 incomeName,
                 status,
             });

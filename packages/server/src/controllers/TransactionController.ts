@@ -17,7 +17,7 @@ export class TransactionController {
         const responseBuilder = new ResponseBuilder();
         try {
             await TransactionServiceBuilder.build().deleteTransaction(
-                req.session.user?.userId as number,
+                req.user?.userId as number,
                 Number(req.params.transactionId),
             );
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
@@ -30,7 +30,7 @@ export class TransactionController {
         const responseBuilder = new ResponseBuilder();
         try {
             const transaction = await TransactionServiceBuilder.build().getTransaction(
-                req.session.user?.userId as number,
+                req.user?.userId as number,
                 Number(req.params.transactionId),
             );
             if (Utils.isNull(transaction) || Utils.isObjectEmpty(transaction as unknown as Record<string, unknown>)) {
@@ -67,7 +67,7 @@ export class TransactionController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { data, limit, cursor } = await TransactionServiceBuilder.build().getTransactions({
-                userId: req.session.user?.userId as number,
+                userId: req.user?.userId as number,
                 limit: Number(req.query.limit),
                 cursor: Number(req.query.cursor),
             });
@@ -130,7 +130,7 @@ export class TransactionController {
                 transactionTypeId,
                 amount,
                 description,
-                userId: req.session.user?.userId as number,
+                userId: req.user?.userId as number,
                 createAt,
                 targetAccountId,
             });
@@ -147,7 +147,7 @@ export class TransactionController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { accountId, incomeId, categoryId, amount, description, createAt, targetAccountId } = req.body;
-            await TransactionServiceBuilder.build().patchTransaction(req.session.user?.userId as number, {
+            await TransactionServiceBuilder.build().patchTransaction(req.user?.userId as number, {
                 transactionId: Number(req.params.transactionId),
                 accountId,
                 incomeId,

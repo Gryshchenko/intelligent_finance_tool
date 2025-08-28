@@ -21,7 +21,7 @@ export class CategoryController {
         const responseBuilder = new ResponseBuilder();
         try {
             const categoryId = Number(req.params?.categoryId);
-            const category = await CategoryServiceBuilder.build().get(req.session.user?.userId as number, categoryId);
+            const category = await CategoryServiceBuilder.build().get(req.user?.userId as number, categoryId);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(category).build());
         } catch (e: unknown) {
             CategoryController.logger.error(`Get category failed due reason: ${(e as { message: string }).message}`);
@@ -31,7 +31,7 @@ export class CategoryController {
     public static async gets(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const category = await CategoryServiceBuilder.build().gets(req.session.user?.userId as number);
+            const category = await CategoryServiceBuilder.build().gets(req.user?.userId as number);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(category).build());
         } catch (e: unknown) {
             CategoryController.logger.error(`Create categories failed due reason: ${(e as { message: string }).message}`);
@@ -42,7 +42,7 @@ export class CategoryController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { categoryName, currencyId } = req.body;
-            const category = await CategoryServiceBuilder.build().create(req.session.user?.userId as number, {
+            const category = await CategoryServiceBuilder.build().create(req.user?.userId as number, {
                 categoryName,
                 currencyId,
             });
@@ -57,7 +57,7 @@ export class CategoryController {
         const db: IDatabaseConnection = DatabaseConnectionBuilder.build();
         const uow = new UnitOfWork(db);
         try {
-            const userId = Number(req.session.user?.userId);
+            const userId = Number(req.user?.userId);
             const categoryId = Number(req.params?.categoryId);
             const categoryService = CategoryServiceBuilder.build(db);
             const transactionService = TransactionServiceBuilder.build(db);
@@ -88,7 +88,7 @@ export class CategoryController {
             if (Utils.isEmpty(categoryName) && Utils.isNull(status)) {
                 throw new ValidationError({ message: 'Path category failed due reason: empty body' });
             }
-            await CategoryServiceBuilder.build().patch(req.session.user?.userId as number, categoryId, {
+            await CategoryServiceBuilder.build().patch(req.user?.userId as number, categoryId, {
                 categoryName,
                 status,
             });

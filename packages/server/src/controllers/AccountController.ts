@@ -17,7 +17,7 @@ export class AccountController {
         const responseBuilder = new ResponseBuilder();
         try {
             const accountId = Number(req.params?.accountId);
-            const account = await AccountServiceBuilder.build().getAccount(req.session.user?.userId as number, accountId);
+            const account = await AccountServiceBuilder.build().getAccount(req.user?.userId as number, accountId);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
         } catch (e: unknown) {
             AccountController.logger.error(`Get account failed due reason: ${(e as { message: string }).message}`);
@@ -27,7 +27,7 @@ export class AccountController {
     public static async gets(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const account = await AccountServiceBuilder.build().getAccounts(req.session.user?.userId as number);
+            const account = await AccountServiceBuilder.build().getAccounts(req.user?.userId as number);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(account).build());
         } catch (e: unknown) {
             AccountController.logger.error(`Create accounts failed due reason: ${(e as { message: string }).message}`);
@@ -38,7 +38,7 @@ export class AccountController {
         const responseBuilder = new ResponseBuilder();
         try {
             const { accountName, amount, currencyId } = req.body;
-            const account = await AccountOrchestrationServiceBuilder.build().create(req.session.user?.userId as number, {
+            const account = await AccountOrchestrationServiceBuilder.build().create(req.user?.userId as number, {
                 accountName,
                 amount,
                 currencyId,
@@ -52,7 +52,7 @@ export class AccountController {
     public static async delete(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const userId = Number(req.session.user?.userId);
+            const userId = Number(req.user?.userId);
             const accountId = Number(req.params?.accountId);
             await AccountOrchestrationServiceBuilder.build().delete(userId, accountId);
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());
@@ -69,7 +69,7 @@ export class AccountController {
             if (Utils.isEmpty(accountName) && Utils.isNull(amount) && Utils.isNull(status)) {
                 throw new ValidationError({ message: 'Path account failed due reason: empty body' });
             }
-            await AccountOrchestrationServiceBuilder.build().patch(req.session.user?.userId as number, accountId, {
+            await AccountOrchestrationServiceBuilder.build().patch(req.user?.userId as number, accountId, {
                 accountName,
                 amount,
                 status,

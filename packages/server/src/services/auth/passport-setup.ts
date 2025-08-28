@@ -5,9 +5,10 @@ import { Strategy as JwtStrategy, StrategyOptionsWithRequest, VerifiedCallback }
 import UserServiceBuilder from 'src/services/user/UserServiceBuilder';
 
 import { ExtractJwt } from 'passport-jwt';
-import { Algorithm } from 'jsonwebtoken';
+import { Algorithm, JwtPayload } from 'jsonwebtoken';
+import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 
-interface JwtPayload {
+export interface JwtPayloadCustom extends JwtPayload {
     sub: string;
     email?: string;
     iat?: number;
@@ -25,17 +26,16 @@ const options: StrategyOptionsWithRequest = {
 
 const passportSetup = (passport: PassportStatic) => {
     const userService = UserServiceBuilder.build();
-
     passport.use(
-        new JwtStrategy(options, async (req, jwt_payload: JwtPayload, done: VerifiedCallback) => {
+        new JwtStrategy(options, async (req, jwt_payload: JwtPayloadCustom, done: VerifiedCallback) => {
             try {
                 const user = await userService.get(parseInt(jwt_payload.sub, 10));
                 if (user?.userId) {
                     return done(null, user);
                 }
-                return done(null, false, { message: 'USER_NOT_FOUND' });
+                return done(null, false, { errorCode: ErrorCode.TOKEN_PAYLOAD_ERROR });
             } catch (error) {
-                return done(error, false, { message: 'DB_ERROR' });
+                return done(error, false, { message: ErrorCode.TOKEN_INVALID_ERROR });
             }
         }),
     );

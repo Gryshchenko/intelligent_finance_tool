@@ -13,7 +13,7 @@ export class BalanceController {
     public static async get(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const userId = Number(req.session.user?.userId);
+            const userId = Number(req.user?.userId);
             const balance = await BalanceServiceBuilder.build().get(userId);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(balance).build());
         } catch (e: unknown) {

@@ -10,6 +10,7 @@ import {
 import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
 import { UserStatus } from "tenpercent/shared/src/interfaces/UserStatus"
 import Utils from "tenpercent/shared/src/Utils"
+import { extractToken } from "tenpercent/shared/src/utils/extractToken"
 
 import { api } from "@/services/api"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
@@ -83,7 +84,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
         return
       }
 
-      const token = credentials.key.slice(6)
+      const token = credentials.key
       const response = await api.doTokenVerify({ token })
       if (response.kind === GeneralApiProblemKind.Ok) {
         const { userId, email, status } = response.data as IUserClient
@@ -112,7 +113,8 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
 
   const updateAuthToken = useCallback(
     async (newToken: string | null) => {
-      if (!newToken) {
+      const token = extractToken(newToken as string)
+      if (!token) {
         console.error("Update auth token update failed, new token empty")
         return
       }
@@ -121,7 +123,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
         return
       }
       const secureStorage = await createStorage()
-      await secureStorage.save(SecureStorageKey.Auth, newToken, authEmail)
+      await secureStorage.save(SecureStorageKey.Auth, token, authEmail)
     },
     [authEmail],
   )
@@ -129,8 +131,9 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   const setAuth = useCallback(
     async ({ token, email, status, userId }: SetAuth) => {
       const secureStorage = await createStorage()
+      const tokenInWork = extractToken(token as string)
 
-      if (!token || !email || !status || !userId) {
+      if (!tokenInWork || !email || !status || !userId) {
         await secureStorage.remove(SecureStorageKey.Auth)
         setIsAuthenticated(false)
         return
@@ -145,7 +148,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
       setAuthEmail(email)
       setUserStatus(status)
       setUserId(userId)
-      await secureStorage.save(SecureStorageKey.Auth, token, email)
+      await secureStorage.save(SecureStorageKey.Auth, tokenInWork, email)
       setIsAuthenticated(true)
     },
     [handleUserStatus],

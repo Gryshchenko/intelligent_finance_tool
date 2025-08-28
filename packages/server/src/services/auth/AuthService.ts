@@ -10,14 +10,35 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 
-import jwt from 'jsonwebtoken';
+import jwt, { Algorithm, DecodeOptions, JwtPayload } from 'jsonwebtoken';
+import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
+import { JwtPayloadCustom } from 'services/auth/passport-setup';
+import { Time } from 'src/utils/time/Time';
+import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
 
 export default class AuthService extends LoggerBase implements IAuthService {
     protected userService: IUserService;
 
-    constructor(services: { userService: IUserService }) {
+    constructor(services: { userService: IUserService; keyValueStore: IKeyValueStore }) {
         super();
         this.userService = services.userService;
+    }
+    async refresh(userId: number, role: RoleType): Promise<string> {
+        return AuthService.createJWToken(userId, role);
+    }
+    async logout(token: string): Promise<void> {
+        const decoded = AuthService.decode(jwt.decode, token);
+        if (!decoded?.exp) {
+            throw new CustomError({
+                message: 'Token has no expiration',
+                statusCode: HttpCode.UNAUTHORIZED,
+                errorCode: ErrorCode.TOKEN_EXPIRED_ERROR,
+            });
+        }
+        const nowSec = Time.getSeconds();
+        if (decoded.exp > nowSec) {
+            await TokenBlacklistBuilder.build().blacklistToken(token);
+        }
     }
 
     async login(email: string, password: string): Promise<{ user: IUser; token: string }> {
@@ -56,16 +77,26 @@ export default class AuthService extends LoggerBase implements IAuthService {
         }
 
         return jwt.sign({ userId, role }, jwtSecret, {
-            algorithm: 'HS384',
-            expiresIn: '12h',
+            algorithm: getConfig().jwtAlgorithm as unknown as Algorithm,
+            expiresIn: getConfig().jwtExpiresIn,
             issuer: getConfig().jwtIssuer,
             audience: getConfig().jwtAudience,
+            subject: String(userId),
         });
     }
 
-    public static tokenNeedsRefresh(expirationTime: number) {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const timeLeft = expirationTime - currentTime;
-        return timeLeft < 10 * 60;
+    public static decode(
+        decodeImpl: (token: string, options?: DecodeOptions) => null | JwtPayload | string,
+        token: string,
+    ): JwtPayloadCustom | null {
+        if (!token) return null;
+
+        const decoded = decodeImpl(token) as JwtPayloadCustom | null;
+
+        if (!decoded || typeof decoded !== 'object') return null;
+
+        if (!decoded.sub) return null;
+
+        return decoded;
     }
 }
