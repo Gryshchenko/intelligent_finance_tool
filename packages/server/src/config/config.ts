@@ -17,11 +17,12 @@ interface IConfig {
     dbHost: string;
     dbCACert: string;
     jwtSecret: string;
+    jwtLongSecret: string;
     jwtIssuer: string;
     jwtAudience: string;
     jwtAlgorithm: string;
     jwtExpiresIn: string;
-    jwtExpiresInSec: number;
+    jwtLongExpiresIn: string;
     redisHost: string;
     redisPort: string;
     redisPassword: string;
@@ -45,11 +46,12 @@ export function getConfig(): IConfig {
         dbHost: (process.env.TEST_DB_HOST ?? process.env.DB_HOST) as string,
         dbCACert: caCert,
         jwtSecret: (process.env.TEST_JWT_SECRET ?? process.env.JWT_SECRET) as string,
+        jwtLongSecret: (process.env.TEST_JWT_LONG_SECRET ?? process.env.JWT_LONG_SECRET) as string,
         jwtIssuer: (process.env.TEST_JWT_ISSUER ?? process.env.JWT_ISSUER) as string,
         jwtAudience: (process.env.TEST_JWT_AUDIENCE ?? process.env.JWT_AUDIENCE) as string,
         jwtAlgorithm: (process.env.TEST_JWT_ALGORITHM ?? process.env.JWT_ALGORITHM) as string,
         jwtExpiresIn: (process.env.TEST_JWT_EXPIRES_IN ?? process.env.JWT_EXPIRES_IN) as string,
-        jwtExpiresInSec: Number(process.env.TEST_JWT_EXPIRES_SEC ?? process.env.JWT_EXPIRES_SEC) as number,
+        jwtLongExpiresIn: (process.env.TEST_JWT_LONG_EXPIRES_IN ?? process.env.JWT_LONG_EXPIRES_IN) as string,
         redisHost: (process.env.TEST_REDIS_HOST ?? process.env.REDIS_HOST) as string,
         redisPort: (process.env.TEST_REDIS_PORT ?? process.env.REDIS_PORT) as string,
         redisPassword: (process.env.TEST_REDIS_PASSWORD ?? process.env.REDIS_PASSWORD) as string,

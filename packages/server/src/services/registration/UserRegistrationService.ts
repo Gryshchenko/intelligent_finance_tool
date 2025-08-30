@@ -29,7 +29,7 @@ import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
-import { IKeyValueStore, KeyValueStoreKeys } from 'src/repositories/keyValueStore/KeyValueStore';
+import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { getConfig } from 'src/config/config';
 
 interface IDefaultData {
@@ -110,7 +110,7 @@ export default class UserRegistrationService extends LoggerBase {
         password: string,
         localeFromUser: LanguageType = LanguageType.US,
         publicName: string,
-    ): Promise<{ user: IUser; token: string }> {
+    ): Promise<{ user: IUser; token: string; longToken: string }> {
         const uow = new UnitOfWork(this.db);
 
         try {
@@ -144,9 +144,6 @@ export default class UserRegistrationService extends LoggerBase {
                     });
                 }
                 await Translations.load(locale, TranslationLoaderImpl.instance());
-                this._logger.info('Starting token creation.');
-                const newToken = AuthService.createJWToken(user.userId, RoleType.Default);
-                this._logger.info('Token created successfully.');
 
                 const response = await Promise.all([
                     await this.userRoleService.createUserRole(user.userId, RoleType.Default, trx),
@@ -178,9 +175,21 @@ export default class UserRegistrationService extends LoggerBase {
                     );
                 });
                 const readyUser = await this.userService.get(user.userId);
-                await this.keyValueStore.connect();
-                await this.keyValueStore.set(KeyValueStoreKeys.TokenShort, newToken, getConfig().jwtExpiresInSec);
-                return { user: readyUser, token: newToken };
+                this._logger.info('Starting token creation.');
+                const token = AuthService.createJWToken(
+                    user.userId,
+                    RoleType.Default,
+                    getConfig().jwtSecret,
+                    getConfig().jwtExpiresIn,
+                );
+                const longToken = AuthService.createJWToken(
+                    user.userId,
+                    RoleType.Default,
+                    getConfig().jwtLongSecret,
+                    getConfig().jwtLongExpiresIn,
+                );
+                this._logger.info('Token created successfully.');
+                return { user: readyUser, token, longToken };
             }
             throw new CustomError({
                 message: 'User could not be created due to an unknown error.',

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
 import Logger from 'helper/logger/Logger';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
@@ -8,8 +8,58 @@ import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusTy
 import { extractToken } from 'tenpercent/shared/src/utils/extractToken';
 import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import jwt, { Algorithm } from 'jsonwebtoken';
+import { getConfig } from 'src/config/config';
+import { JwtPayloadCustom } from 'services/auth/passport-setup';
+import { ValidationError } from 'src/utils/errors/ValidationError';
 
 const _logger = Logger.Of('TokenVerify');
+
+export const tokenLongVerify = (req: Request, res: Response, next: NextFunction) => {
+    const buildError = (message: string) => {
+        throw new ValidationError({
+            message,
+            errorCode: ErrorCode.TOKEN_LONG_INVALID_ERROR,
+            statusCode: HttpCode.BAD_REQUEST,
+        });
+    };
+
+    try {
+        const token = String(req.body?.token);
+        const userId = req.params?.userId;
+        if (!token || !userId) {
+            buildError(`Token or userID invalid - userID: ${userId}`);
+        }
+        const payload = jwt.verify(token, getConfig().jwtLongSecret, {
+            algorithms: [getConfig().jwtAlgorithm as Algorithm],
+            issuer: getConfig().jwtIssuer,
+            audience: getConfig().jwtAudience,
+            subject: String(userId),
+        }) as JwtPayloadCustom;
+
+        if (payload.sub !== String(userId)) {
+            buildError(`Token sub not same as userId`);
+        }
+        req.user = {
+            userId: Number(userId),
+        };
+
+        _logger?.info('Token long pass validation');
+        return next();
+    } catch (e: unknown) {
+        const responseBuilder = new ResponseBuilder();
+        _logger.info(`Token long failed due reason: ${(e as { message: string }).message}`);
+        return res
+            .status(HttpCode.BAD_REQUEST)
+            .json(
+                responseBuilder
+                    .setStatus(ResponseStatusType.INTERNAL)
+                    .setError({ errorCode: ErrorCode.TOKEN_LONG_INVALID_ERROR })
+                    .build(),
+            )
+            .end();
+    }
+};
 
 export const tokenVerify = async (req: Request, res: Response, next: NextFunction) => {
     const responseBuilder = new ResponseBuilder();
@@ -75,6 +125,7 @@ export const tokenVerify = async (req: Request, res: Response, next: NextFunctio
             }
 
             req.user = user;
+            _logger.info('Token regular pass validation');
             return next();
         },
     )(req, res, next);

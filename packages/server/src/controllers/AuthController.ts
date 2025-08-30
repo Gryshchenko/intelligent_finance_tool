@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import Logger from 'helper/logger/Logger';
-import { validationResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import AuthServiceBuilder from 'services/auth/AuthServiceBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import UserServiceUtils from 'services/user/UserServiceUtils';
@@ -41,36 +41,21 @@ export class AuthController {
             );
         } catch (e) {
             AuthController.logger.info(`Verify failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TOKEN_INVALID_ERROR);
         }
     }
 
     public static async refresh(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const token = extractToken(req.headers.authorization);
+            const token = String(req.body.token);
             const user = req.user;
-            const userId = user?.userId;
-            if (!userId) {
-                throw new ValidationError({
-                    message: 'UserId in JWT session not found',
-                    statusCode: HttpCode.UNAUTHORIZED,
-                    errorCode: ErrorCode.AUTH_ERROR,
-                });
-            }
-            if (!token) {
-                throw new ValidationError({
-                    message: 'Token not provided',
-                    statusCode: HttpCode.UNAUTHORIZED,
-                    errorCode: ErrorCode.AUTH_ERROR,
-                });
-            }
-            const newToken = await AuthServiceBuilder.build().refresh(userId, RoleType.Default);
-            res.setHeader('Authorization', `Bearer ${newToken}`);
-            res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
+            const userId = Number(user?.userId);
+            const newToken = await AuthServiceBuilder.build().refresh(token, userId, RoleType.Default);
+            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({ token: newToken }).build());
         } catch (e) {
             AuthController.logger.info(`Verify failed due reason: ${(e as { message: string }).message}`);
-            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.AUTH_ERROR);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.TOKEN_LONG_INVALID_ERROR);
         }
     }
 
@@ -79,16 +64,11 @@ export class AuthController {
         try {
             const token = extractToken(req.headers.authorization);
             if (!token) {
-                return generateErrorResponse(
-                    res,
-                    responseBuilder,
-                    new CustomError({
-                        message: 'Token not provided',
-                        statusCode: HttpCode.UNAUTHORIZED,
-                        errorCode: ErrorCode.AUTH_ERROR,
-                    }),
-                    ErrorCode.AUTH_ERROR,
-                );
+                throw new CustomError({
+                    message: 'Token not provided',
+                    statusCode: HttpCode.UNAUTHORIZED,
+                    errorCode: ErrorCode.TOKEN_INVALID_ERROR,
+                });
             }
 
             await AuthServiceBuilder.build().logout(token as string);
@@ -106,12 +86,12 @@ export class AuthController {
             if (!errors.isEmpty()) {
                 throw new ValidationError({ message: 'login validation error' });
             }
-            const { user, token } = await AuthServiceBuilder.build().login(req.body.email, req.body.password);
+            const { user, token, longToken } = await AuthServiceBuilder.build().login(req.body.email, req.body.password);
             res.setHeader('Authorization', `Bearer ${token}`);
             res.status(HttpCode.OK).json(
                 responseBuilder
                     .setStatus(ResponseStatusType.OK)
-                    .setData(UserServiceUtils.convertServerUserToClientUser(user))
+                    .setData({ ...UserServiceUtils.convertServerUserToClientUser(user), token: longToken })
                     .build(),
             );
         } catch (e: unknown) {

@@ -22,12 +22,12 @@ export class RegisterController {
                 req.body.locale,
                 req.body.publicName,
             );
-            const { user, token } = response;
+            const { user, token, longToken } = response;
             res.setHeader('Authorization', `Bearer ${token}`);
             res.status(HttpCode.OK).json(
                 responseBuilder
                     .setStatus(ResponseStatusType.OK)
-                    .setData({ userId: user.userId, email: user.email, status: UserStatus.NO_VERIFIED })
+                    .setData({ userId: user.userId, email: user.email, status: UserStatus.NO_VERIFIED, token: longToken })
                     .build(),
             );
         } catch (e: unknown) {

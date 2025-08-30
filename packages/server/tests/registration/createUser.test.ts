@@ -323,6 +323,9 @@ describe('POST /register/signup', () => {
         expect(response.body).toStrictEqual({
             status: ResponseStatusType.OK,
             data: {
+                email: mail,
+                status: UserStatus.NO_VERIFIED,
+                token: expect.any(String),
                 userId: expect.any(Number),
             },
             errors: [],

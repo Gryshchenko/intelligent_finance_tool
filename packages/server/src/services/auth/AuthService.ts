@@ -15,6 +15,7 @@ import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { JwtPayloadCustom } from 'services/auth/passport-setup';
 import { Time } from 'src/utils/time/Time';
 import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
+import Utils from 'src/utils/Utils';
 
 export default class AuthService extends LoggerBase implements IAuthService {
     protected userService: IUserService;
@@ -23,15 +24,32 @@ export default class AuthService extends LoggerBase implements IAuthService {
         super();
         this.userService = services.userService;
     }
-    async refresh(userId: number, role: RoleType): Promise<string> {
-        return AuthService.createJWToken(userId, role);
+    async refresh(token: string | undefined, userId: number | undefined, role: RoleType): Promise<string> {
+        const throwError = (message: string) => {
+            throw new CustomError({
+                message,
+                statusCode: HttpCode.BAD_REQUEST,
+                errorCode: ErrorCode.TOKEN_INVALID_ERROR,
+            });
+        };
+        if (Utils.isEmpty(token as string)) {
+            throwError('Token empty');
+        }
+        if (!userId || !role) {
+            throwError(`userId: ${userId} or role: ${role} - empty`);
+        }
+        const decoded = AuthService.decode(jwt.decode, token as string);
+        if (!decoded?.exp) {
+            throwError('Token has no expiration');
+        }
+        return AuthService.createJWToken(userId as number, role, getConfig().jwtLongSecret, getConfig().jwtLongExpiresIn);
     }
     async logout(token: string): Promise<void> {
         const decoded = AuthService.decode(jwt.decode, token);
         if (!decoded?.exp) {
             throw new CustomError({
                 message: 'Token has no expiration',
-                statusCode: HttpCode.UNAUTHORIZED,
+                statusCode: HttpCode.BAD_REQUEST,
                 errorCode: ErrorCode.TOKEN_EXPIRED_ERROR,
             });
         }
@@ -41,7 +59,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
         }
     }
 
-    async login(email: string, password: string): Promise<{ user: IUser; token: string }> {
+    async login(email: string, password: string): Promise<{ user: IUser; token: string; longToken: string }> {
         try {
             const userForCheck = await this.userService.getUserAuthenticationData(email);
             if (!userForCheck) {
@@ -58,16 +76,26 @@ export default class AuthService extends LoggerBase implements IAuthService {
             this._logger.info('Password verification successful');
 
             const user = await this.userService.get(userForCheck.userId);
-            const token = AuthService.createJWToken(user.userId, RoleType.Default);
-            return { user, token };
+            const token = AuthService.createJWToken(
+                user.userId,
+                RoleType.Default,
+                getConfig().jwtSecret,
+                getConfig().jwtExpiresIn,
+            );
+            const longToken = AuthService.createJWToken(
+                user.userId,
+                RoleType.Default,
+                getConfig().jwtLongSecret,
+                getConfig().jwtLongExpiresIn,
+            );
+            return { user, token, longToken };
         } catch (e) {
             this._logger.info(`Password verification failed due reason: ${(e as { message: string }).message}`);
             throw e;
         }
     }
 
-    public static createJWToken(userId: number, role: RoleType): string {
-        const jwtSecret = getConfig().jwtSecret;
+    public static createJWToken(userId: number, role: RoleType, jwtSecret: string, expiresIn: string): string {
         if (!jwtSecret) {
             throw new CustomError({
                 message: 'JWT secret is not configured',
@@ -78,7 +106,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
 
         return jwt.sign({ userId, role }, jwtSecret, {
             algorithm: getConfig().jwtAlgorithm as unknown as Algorithm,
-            expiresIn: getConfig().jwtExpiresIn,
+            expiresIn,
             issuer: getConfig().jwtIssuer,
             audience: getConfig().jwtAudience,
             subject: String(userId),

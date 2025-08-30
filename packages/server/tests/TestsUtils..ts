@@ -87,15 +87,18 @@ const createUserBase = async ({
     email?: string;
     locale?: LanguageType;
     publicName?: string;
-}): Promise<{ userId: number; authorization: string }> => {
+}): Promise<{ userId: number; authorization: string; longToken: string }> => {
     const { body, header } = await agent.post('/register/signup').send({ email, password, locale, publicName });
     const {
-        data: { userId },
+        data: { userId, token },
     } = body;
     expect(userId).toEqual(expect.any(Number));
+    expect(token).toEqual(expect.any(String));
+    expect(header['authorization']).toEqual(expect.any(String));
     return {
         userId,
         authorization: header['authorization'],
+        longToken: token,
     };
 };
 
@@ -113,8 +116,8 @@ export const createUser = async ({
     locale?: LanguageType;
     publicName?: string;
     databaseConnection?: IDatabaseConnection;
-}): Promise<{ userId: number; authorization: string }> => {
-    const { userId, authorization } = await createUserBase({
+}): Promise<{ userId: number; authorization: string; longToken: string }> => {
+    const { userId, authorization, longToken } = await createUserBase({
         agent,
         password,
         email,
@@ -157,6 +160,7 @@ export const createUser = async ({
     return {
         userId,
         authorization,
+        longToken,
     };
 };
 

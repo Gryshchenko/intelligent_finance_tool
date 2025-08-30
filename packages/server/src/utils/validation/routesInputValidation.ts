@@ -104,6 +104,8 @@ export default function routesInputValidation(
 
 export const convertErrorNameToErrorCode = (path: string): ErrorCode => {
     switch (path) {
+        case 'token':
+            return ErrorCode.TOKEN_LONG_INVALID_ERROR;
         case 'profileId':
             return ErrorCode.PROFILE_ERROR;
         case 'locale':
