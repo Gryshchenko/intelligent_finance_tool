@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import Logger from 'helper/logger/Logger';
-import { body, validationResult } from 'express-validator';
+import { validationResult } from 'express-validator';
 import AuthServiceBuilder from 'services/auth/AuthServiceBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import UserServiceUtils from 'services/user/UserServiceUtils';
@@ -52,6 +52,7 @@ export class AuthController {
             const user = req.user;
             const userId = Number(user?.userId);
             const newToken = await AuthServiceBuilder.build().refresh(token, userId, RoleType.Default);
+            res.setHeader('Authorization', `Bearer ${newToken}`);
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({ token: newToken }).build());
         } catch (e) {
             AuthController.logger.info(`Verify failed due reason: ${(e as { message: string }).message}`);
@@ -72,6 +73,7 @@ export class AuthController {
             }
 
             await AuthServiceBuilder.build().logout(token as string);
+            AuthController.logger.info('Logout successful');
             res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).build());
         } catch (e) {
             AuthController.logger.info(`Logout failed due reason: ${(e as { message: string }).message}`);
@@ -91,7 +93,7 @@ export class AuthController {
             res.status(HttpCode.OK).json(
                 responseBuilder
                     .setStatus(ResponseStatusType.OK)
-                    .setData({ ...UserServiceUtils.convertServerUserToClientUser(user), token: longToken })
+                    .setData({ ...UserServiceUtils.convertServerUserToClientUser(user, longToken, token) })
                     .build(),
             );
         } catch (e: unknown) {

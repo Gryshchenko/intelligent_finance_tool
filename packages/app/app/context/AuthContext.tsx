@@ -10,170 +10,175 @@ import {
 import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
 import { UserStatus } from "tenpercent/shared/src/interfaces/UserStatus"
 import Utils from "tenpercent/shared/src/Utils"
-import { extractToken } from "tenpercent/shared/src/utils/extractToken"
 
-import { api } from "@/services/api"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { SecureStorageKey } from "@/types/SecureStorageKey"
+import { AuthService } from "@/services/AuthService"
+import { LoginService } from "@/services/LoginService"
 import { StorageKey } from "@/types/StorageKey"
+import { Logger } from "@/utils/logger/Logger"
 import { loadString, saveString } from "@/utils/storage"
-import createStorage from "@/utils/storage/SecureStorage"
-
-interface SetAuth {
-  token: string | null
-  email: string | null
-  status: UserStatus | null
-  userId: number | null
-}
 
 export interface AuthContextType {
   isAuthenticated: boolean
   isUserConfirmed: boolean
-  authEmail?: string | null
-  userId?: number | null
-  userStatus?: UserStatus | null
-  setUserId: (userId: number) => void
-  setAuth: ({ token, email, status, userId }: SetAuth) => Promise<void>
   setIsPasswordSaveCheckbox: (save: boolean) => void
-  updateAuthToken: (newToken: string | null) => Promise<void>
   isPasswordSaveCheckbox: boolean
-  logout: () => Promise<void>
+  doLogout: () => Promise<boolean>
+  doLogin: ({
+    token,
+    email,
+    status,
+    userId,
+    tokenLong,
+  }: {
+    token: string
+    email: string
+    status: UserStatus
+    userId: number
+    tokenLong: string
+  }) => Promise<boolean>
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
 
 export interface AuthProviderProps {}
 
+const _logger = Logger.Of("AuthContext")
+
 export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [isUserConfirmed, setIsUserConfirmed] = useState<boolean>(false)
-  const [, setAuthToken] = useState<string | null>(null)
-  const [authEmail, setAuthEmail] = useState<string | null>(null)
-  const [userId, setUserId] = useState<number | null>(null)
-  const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
   const [isPasswordSaveCheckbox, setIsPasswordSave] = useState<boolean>(false)
-
-  const handleUserStatus = useCallback((status: UserStatus) => {
-    switch (status) {
-      case UserStatus.INACTIVE:
-        setIsAuthenticated(false)
-        return false
-      case UserStatus.NO_VERIFIED:
-        setIsUserConfirmed(false)
-        break
-      case UserStatus.ACTIVE:
-        setIsUserConfirmed(true)
-        break
-    }
-    return true
-  }, [])
 
   useEffect(() => {
     ;(async () => {
-      const secureStorage = await createStorage()
-      const saved = loadString(StorageKey.SavePassword)
-      const isPassword: boolean = saved ? (Utils.parseBoolean(saved) as boolean) : false
-      setIsPasswordSave(isPassword)
+      try {
+        const authService = new AuthService()
+        const saved = loadString(StorageKey.isSavePassword)
+        const isPassword: boolean = saved ? (Utils.parseBoolean(saved) as boolean) : false
+        setIsPasswordSave(isPassword)
 
-      if (!isPassword) return
+        if (!isPassword) return
 
-      const credentials = await secureStorage.get(SecureStorageKey.Auth)
-      if (!credentials?.key) {
-        setIsAuthenticated(false)
-        await secureStorage.remove(SecureStorageKey.Auth)
-        return
-      }
-
-      const token = credentials.key
-      const response = await api.doTokenVerify({ token })
-      if (response.kind === GeneralApiProblemKind.Ok) {
-        const { userId, email, status } = response.data as IUserClient
-        const proceed = handleUserStatus(status)
-        if (!proceed) {
-          await secureStorage.remove(SecureStorageKey.Auth)
-          return
+        const user = await authService.getCredentialFromSecureStore()
+        if (!user) {
+          throw new Error("User object empty")
         }
 
-        setUserId(userId)
-        setUserStatus(status)
-        setAuthEmail(email)
-        setIsAuthenticated(true)
-        setAuthToken(token)
-      } else {
+        const { token, userId, tokenLong } = user
+        if (!tokenLong) {
+          throw new Error("Token long empty")
+        }
+        if (!token) {
+          throw new Error("Token empty")
+        }
+
+        if (!userId) {
+          throw new Error("UserId empty")
+        }
+
+        const response = await LoginService.instance().doTokenVerify({ userId, token })
+        if (response.kind === GeneralApiProblemKind.Ok) {
+          const { userId, email, status } = response.data as IUserClient
+          const result = await AuthService.instance().authorize({
+            token,
+            tokenLong,
+            status,
+            userId,
+            email,
+          })
+          if (result) {
+            setIsAuthenticated(true)
+            setIsUserConfirmed(status === UserStatus.ACTIVE)
+          } else {
+            setIsAuthenticated(false)
+            setIsUserConfirmed(false)
+            await AuthService.instance().unauthorize()
+          }
+        } else {
+          await AuthService.instance().unauthorize()
+          await AuthService.instance().cleanCredentialStore()
+          throw new Error(`DoTokenVerify failed:  ${JSON.stringify(response)}`)
+        }
+      } catch (e) {
+        await AuthService.instance().cleanCredentialStore()
         setIsAuthenticated(false)
-        await secureStorage.remove(SecureStorageKey.Auth)
+        await AuthService.instance().unauthorize()
+        _logger.error("Auto authentication failed due reason: ", (e as { message: string }).message)
       }
     })()
-  }, [handleUserStatus])
+  }, [])
 
   const setIsPasswordSaveCheckbox = useCallback((save: boolean) => {
     setIsPasswordSave(save)
-    saveString(StorageKey.SavePassword, String(save))
+    saveString(StorageKey.isSavePassword, String(save))
   }, [])
 
-  const updateAuthToken = useCallback(
-    async (newToken: string | null) => {
-      const token = extractToken(newToken as string)
-      if (!token) {
-        console.error("Update auth token update failed, new token empty")
-        return
-      }
-      if (!authEmail) {
-        console.error("Update auth token update failed, authEmail empty")
-        return
-      }
-      const secureStorage = await createStorage()
-      await secureStorage.save(SecureStorageKey.Auth, token, authEmail)
-    },
-    [authEmail],
-  )
-
-  const setAuth = useCallback(
-    async ({ token, email, status, userId }: SetAuth) => {
-      const secureStorage = await createStorage()
-      const tokenInWork = extractToken(token as string)
-
-      if (!tokenInWork || !email || !status || !userId) {
-        await secureStorage.remove(SecureStorageKey.Auth)
+  const doLogin = useCallback(
+    async ({
+      token,
+      email,
+      status,
+      userId,
+      tokenLong,
+    }: {
+      token: string
+      email: string
+      status: UserStatus
+      userId: number
+      tokenLong: string
+    }): Promise<boolean> => {
+      try {
+        const result = await AuthService.instance().authorize({
+          token,
+          tokenLong,
+          status,
+          userId,
+          email,
+        })
+        if (result) {
+          setIsAuthenticated(true)
+          setIsUserConfirmed(status === UserStatus.ACTIVE)
+          return true
+        } else {
+          setIsAuthenticated(false)
+          setIsUserConfirmed(false)
+          return false
+        }
+      } catch (e) {
+        setIsUserConfirmed(false)
         setIsAuthenticated(false)
-        return
+        _logger.error("Do authentication failed due reason: ", (e as { message: string }).message)
+        return false
       }
-
-      const proceed = handleUserStatus(status)
-      if (!proceed) {
-        await secureStorage.remove(SecureStorageKey.Auth)
-        return
-      }
-
-      setAuthEmail(email)
-      setUserStatus(status)
-      setUserId(userId)
-      await secureStorage.save(SecureStorageKey.Auth, tokenInWork, email)
-      setIsAuthenticated(true)
     },
-    [handleUserStatus],
+    [],
   )
 
-  const logout = useCallback(async () => {
-    await setAuth({ token: null, email: null, status: null, userId: null })
-    setAuthEmail(null)
-    setUserId(null)
-    setUserStatus(null)
-    setIsAuthenticated(false)
-  }, [setAuth])
+  const doLogout = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await LoginService.instance().doLogout()
+      await AuthService.instance().unauthorize()
+      if (response.kind !== GeneralApiProblemKind.Ok) {
+        _logger.error("Do logout failed due reason: ", response.kind)
+        return false
+      }
+      setIsAuthenticated(false)
+      setIsUserConfirmed(false)
+      return true
+    } catch (e) {
+      _logger.error("Do logout failed due reason: ", (e as { message: string }).message)
+      return false
+    }
+  }, [])
 
   const value: AuthContextType = {
     isAuthenticated,
-    isUserConfirmed,
-    authEmail,
-    setAuth,
-    userStatus: userStatus as unknown as UserStatus | null,
-    setUserId,
-    userId,
-    logout,
-    setIsPasswordSaveCheckbox,
     isPasswordSaveCheckbox,
-    updateAuthToken,
+    isUserConfirmed,
+    setIsPasswordSaveCheckbox,
+    doLogin,
+    doLogout,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

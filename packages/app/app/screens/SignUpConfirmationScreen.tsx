@@ -10,8 +10,9 @@ import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import AlertService from "@/services/AlertService"
-import { api } from "@/services/api"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { AuthService } from "@/services/AuthService"
+import { SignupService } from "@/services/SignUpService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { useHeader } from "@/utils/useHeader"
@@ -19,23 +20,22 @@ import { validateCode } from "@/utils/validation"
 
 interface SignUpConfirmationScreenProps extends AppStackScreenProps<"SignUpConfirmation"> {}
 
-export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_props) => {
+export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = () => {
   const [confirmationCode, setConfirmationCode] = useState<string>("")
   const [validationCodeError, setValidationCodeError] = useState<TxKeyPath | undefined>()
   const [isResendDisabled, setIsResendDisabled] = useState(false)
   const [resendTimer, setResendTimer] = useState(60)
   // const [remainingAttempts, setRemainingAttempts] = useState(10)
-  const { updateAuthToken, userId } = useAuth()
 
   const { themed } = useAppTheme()
-  const { logout } = useAuth()
+  const { doLogout } = useAuth()
 
   useHeader(
     {
       rightTx: "common:logOut",
-      onRightPress: logout,
+      onRightPress: doLogout,
     },
-    [logout],
+    [doLogout],
   )
 
   useEffect(() => {
@@ -50,6 +50,7 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
   }, [isResendDisabled, resendTimer])
 
   async function verify() {
+    const userId = AuthService.instance().userId
     if (!userId) {
       AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
       return
@@ -61,24 +62,24 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
       return
     }
 
-    const response = await api.doSignUpEmailVerify({
+    const response = await SignupService.instance().doSignUpEmailVerify({
       userId,
       confirmationCode,
     })
 
-    if (response.kind === GeneralApiProblemKind.Ok) {
-      if (!response.token) {
-        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        return
-      }
-      await updateAuthToken(response.token)
-    } else {
+    if (response.kind !== GeneralApiProblemKind.Ok) {
       console.error(`Error confirming email: ${JSON.stringify(response)}`)
       AlertService.error(translate("common:error"), translate("signUpConfirmation:confirmError"))
     }
   }
 
   async function resend() {
+    const userId = AuthService.instance().userId
+    if (!userId) {
+      AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+      return
+    }
+    await SignupService.instance().doSignUpEmailResend({ userId })
     // if (remainingAttempts <= 0) {
     //   AlertService.info(
     //     translate("common:info"),
@@ -92,7 +93,7 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
     }
 
     try {
-      const response = await api.doSignUpEmailResend({ userId })
+      const response = await SignupService.instance().doSignUpEmailResend({ userId })
       if (response.kind === "ok") {
         AlertService.info(
           translate("common:info"),
@@ -163,12 +164,6 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = (_pro
         onPress={resend}
         disabled={isResendDisabled}
       />
-
-      {/*<Text*/}
-      {/*  tx="signUpConfirmation:remainingAttempts"*/}
-      {/*  txOptions={{ remaining: remainingAttempts }}*/}
-      {/*  style={themed($tapButton)}*/}
-      {/*/>*/}
     </Screen>
   )
 }

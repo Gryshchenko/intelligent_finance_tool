@@ -27,7 +27,13 @@ export class RegisterController {
             res.status(HttpCode.OK).json(
                 responseBuilder
                     .setStatus(ResponseStatusType.OK)
-                    .setData({ userId: user.userId, email: user.email, status: UserStatus.NO_VERIFIED, token: longToken })
+                    .setData({
+                        userId: user.userId,
+                        email: user.email,
+                        status: UserStatus.NO_VERIFIED,
+                        tokenLong: longToken,
+                        token,
+                    })
                     .build(),
             );
         } catch (e: unknown) {

@@ -38,11 +38,13 @@ export default class UserServiceUtils {
         return response;
     }
 
-    public static convertServerUserToClientUser(user: IUser): IUserClient {
+    public static convertServerUserToClientUser(user: IUser, tokenLong: string, token: string): IUserClient {
         return {
             userId: user.userId,
             email: user.email,
             status: user.status,
+            token,
+            tokenLong,
         };
     }
 

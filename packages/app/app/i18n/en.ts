@@ -44,6 +44,7 @@ const en = {
     required: "Field cannot be empty",
     email: "Invalid email format",
     name: "Invalid name format must contain only numbers or alphabet characters.",
+    password: "Invalid password format",
     passwordMinLength: "Must be at least 5 characters",
     passwordUppercase: "Password must contain at least one uppercase letter",
     passwordLowercase: "Password must contain at least one lowercase letter",

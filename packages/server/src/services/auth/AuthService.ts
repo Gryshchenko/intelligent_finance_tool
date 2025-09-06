@@ -42,7 +42,7 @@ export default class AuthService extends LoggerBase implements IAuthService {
         if (!decoded?.exp) {
             throwError('Token has no expiration');
         }
-        return AuthService.createJWToken(userId as number, role, getConfig().jwtLongSecret, getConfig().jwtLongExpiresIn);
+        return AuthService.createJWToken(userId as number, role, getConfig().jwtSecret, getConfig().jwtExpiresIn);
     }
     async logout(token: string): Promise<void> {
         const decoded = AuthService.decode(jwt.decode, token);

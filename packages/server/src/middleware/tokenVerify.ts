@@ -80,15 +80,20 @@ export const tokenVerify = async (req: Request, res: Response, next: NextFunctio
                 .json(
                     responseBuilder
                         .setStatus(ResponseStatusType.INTERNAL)
-                        .setData({ errorCode: ErrorCode.TOKEN_INVALID_ERROR })
+                        .setError({ errorCode: ErrorCode.TOKEN_INVALID_ERROR })
                         .build(),
                 );
         }
     } catch (err) {
         _logger.error('Error checking token blacklist', err);
-        return res
-            .status(HttpCode.SERVICE_UNAVAILABLE)
-            .json(responseBuilder.setStatus(ResponseStatusType.INTERNAL).setData({}).build());
+        return res.status(HttpCode.SERVICE_UNAVAILABLE).json(
+            responseBuilder
+                .setStatus(ResponseStatusType.INTERNAL)
+                .setError({
+                    errorCode: ErrorCode.UNKNOWN_ERROR,
+                })
+                .build(),
+        );
     }
     return passport.authenticate(
         'jwt',
@@ -96,9 +101,14 @@ export const tokenVerify = async (req: Request, res: Response, next: NextFunctio
         (err: unknown, user?: Express.User | false | null, info?: { name: string; message: string }) => {
             if (err) {
                 _logger.error('JWT system error', err);
-                return res
-                    .status(HttpCode.SERVICE_UNAVAILABLE)
-                    .json(new ResponseBuilder().setStatus(ResponseStatusType.INTERNAL).setData({}).build());
+                return res.status(HttpCode.SERVICE_UNAVAILABLE).json(
+                    new ResponseBuilder()
+                        .setStatus(ResponseStatusType.INTERNAL)
+                        .setError({
+                            errorCode: ErrorCode.TOKEN_INVALID_ERROR,
+                        })
+                        .build(),
+                );
             }
             if (!user) {
                 let message = 'Unauthorized';

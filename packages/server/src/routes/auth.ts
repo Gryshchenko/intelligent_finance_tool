@@ -11,7 +11,7 @@ import refreshTokenValidation from 'src/utils/validation/refreshTokenValidationR
 
 const router = express.Router();
 
-router.get('/logout', validateQuery({}), tokenVerify, routesInputValidation([]), AuthController.logout);
+router.post('/logout', validateQuery({}), tokenVerify, routesInputValidation([]), AuthController.logout);
 
 router.post(
     '/:userId/refresh',

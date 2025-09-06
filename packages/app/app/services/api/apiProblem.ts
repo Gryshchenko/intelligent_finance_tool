@@ -22,8 +22,8 @@ export enum GeneralApiProblemKind {
  * A union type describing common API problems.
  */
 export type GeneralApiProblem<T = unknown> =
-  | ({ kind: GeneralApiProblemKind.Ok; token: string | undefined } & IResponse<T>)
-  | { kind: GeneralApiProblemKind.NoContent; token: string | undefined }
+  | ({ kind: GeneralApiProblemKind.Ok } & IResponse<T>)
+  | { kind: GeneralApiProblemKind.NoContent }
   | { kind: GeneralApiProblemKind.Timeout; temporary: true }
   | { kind: GeneralApiProblemKind.CannotConnect; temporary: true }
   | { kind: GeneralApiProblemKind.Server }

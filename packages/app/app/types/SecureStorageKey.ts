@@ -1,3 +1,3 @@
 export enum SecureStorageKey {
-  Auth = "com.tenpercent.token",
+  AuthCredential = "com.tenpercent.credential",
 }

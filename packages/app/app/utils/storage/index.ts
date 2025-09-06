@@ -1,8 +1,6 @@
 import { MMKV } from "react-native-mmkv"
 
-import { SecureStorageKey } from "@/types/SecureStorageKey"
-
-export const storage = new MMKV({ id: SecureStorageKey.Auth })
+export const storage = new MMKV({ id: "ten.percent.app" })
 
 /**
  * Loads a string from storage.

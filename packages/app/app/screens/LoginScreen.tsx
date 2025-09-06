@@ -2,6 +2,7 @@ import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
 import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
+import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
@@ -14,8 +15,8 @@ import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import AlertService from "@/services/AlertService"
-import { api } from "@/services/api"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { LoginService } from "@/services/LoginService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { validateEmail, validatePassword } from "@/utils/validation"
@@ -25,13 +26,13 @@ interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 export const LoginScreen: FC<LoginScreenProps> = (_props) => {
   const authPasswordInput = useRef<TextInput>(null)
   const { navigation } = _props
-  const [authPassword, setAuthPassword] = useState<string>("")
-  const [authEmail, setAuthEmail] = useState<string>("")
+  const [authPassword, setAuthPassword] = useState<string>("t7tDgenv6ed^b^^aaa")
+  const [authEmail, setAuthEmail] = useState<string>("test_ifepj2nb@test.com")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState<boolean>(true)
   const [attemptsCount, setAttemptsCount] = useState<number>(0)
   const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
   const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
-  const { setAuth, isPasswordSaveCheckbox, setIsPasswordSaveCheckbox } = useAuth()
+  const { doLogin, isPasswordSaveCheckbox, setIsPasswordSaveCheckbox } = useAuth()
 
   const {
     themed,
@@ -64,28 +65,52 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
     if (emailError) return
     if (passwordError) return
 
-    const response = await api.doLogin({
+    const response = await LoginService.instance().doLogin({
       password: authPassword as string,
       email: authEmail as string,
     })
 
     if (response.kind === GeneralApiProblemKind.Ok) {
-      if (!response.token) {
-        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        return
-      }
-      const { email, userId, status } = response.data as IUserClient
-      await setAuth({
+      const { email, userId, status, token, tokenLong } = response.data as IUserClient
+      const result = await doLogin({
         email,
         status,
         userId,
-        token: response.token,
+        tokenLong,
+        token,
       })
+      if (!result) {
+        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        return
+      }
       setAuthPassword("")
+      setAuthEmail("")
     } else {
       switch (response.kind) {
         case GeneralApiProblemKind.BadData: {
-          AlertService.error(translate("errorCode:CREDENTIALS_ERROR"), translate("common:error"))
+          response?.errors?.forEach((error) => {
+            switch (error.errorCode) {
+              case ErrorCode.EMAIL_INVALID_ERROR:
+                setEmailError("validation:email")
+                break
+              case ErrorCode.PASSWORD_INVALID_ERROR: {
+                setEmailError("validation:password")
+                break
+              }
+              case ErrorCode.AUTH_ERROR: {
+                AlertService.error(
+                  translate("errorCode:CREDENTIALS_ERROR"),
+                  translate("common:error"),
+                )
+              }
+              default: {
+                AlertService.error(
+                  translate("errorCode:CREDENTIALS_ERROR"),
+                  translate("common:error"),
+                )
+              }
+            }
+          })
           break
         }
         default: {

@@ -13,8 +13,8 @@ import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import AlertService from "@/services/AlertService"
-import { api } from "@/services/api"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { SignupService } from "@/services/SignUpService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { validateEmail, validatePublicName, validatePassword } from "@/utils/validation"
@@ -32,7 +32,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
   const [publicNameError, setPublicNameError] = useState<TxKeyPath | undefined>()
   const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
   const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
-  const { setAuth } = useAuth()
+  const { doLogin } = useAuth()
 
   const {
     themed,
@@ -53,25 +53,28 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
     }
     setAttemptsCount(attemptsCount + 1)
 
-    const response = await api.doSignUp({
+    const response = await SignupService.instance().doSignUp({
       password: authPassword as string,
       email: authEmail as string,
       publicName: publicName as string,
       locale: "en-US",
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
-      if (!response.token) {
-        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        return
-      }
-      const { email, userId, status } = response.data as IUserClient
-      await setAuth({
+      const { email, userId, status, token, tokenLong } = response.data as IUserClient
+      const result = await doLogin({
         email,
         status,
         userId,
-        token: response.token,
+        token,
+        tokenLong,
       })
+      if (!result) {
+        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
+        return
+      }
       setAuthPassword("")
+      setAuthEmail("")
+      setPublicName("")
     } else {
       switch (response.kind) {
         case GeneralApiProblemKind.BadData: {
