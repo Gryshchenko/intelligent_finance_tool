@@ -4,7 +4,6 @@ export enum ErrorCode {
     UNEXPECTED_PROPERTY = 1,
     UNKNOWN_ERROR = 2,
     REQUEST_TIMEOUT_ERROR = 3,
-    CLIENT_UNKNOWN_ERROR = 4,
 
     // 1000–1999: Data validation
     EMAIL_INVALID_ERROR = 1000,
@@ -47,4 +46,8 @@ export enum ErrorCode {
     CURRENCY_ERROR = 5018,
     USER_ERROR = 5019,
     EMAIL_CONFIRMATION_ERROR = 5020,
+
+    // 6000 - 6999 App errors
+    CLIENT_UNKNOWN_ERROR = 6000,
+    CLIENT_AUTH_ERROR = 6001,
 }

@@ -4,6 +4,7 @@ export enum ValidationTypes {
   REQUIRED = "validation:required",
   MAX_LENGTH = "validation:maxLength",
   EMAIL = "validation:email",
+  EMAIL_UNIQUE = "validation:emailAlreadyInUse",
 
   PASSWORD_MIN_LENGTH = "validation:passwordMinLength",
   PASSWORD_UPPERCASE = "validation:passwordUppercase",
@@ -14,6 +15,7 @@ export enum ValidationTypes {
   NAME = "validation:name",
   MIN_LENGTH = "validation:minLength",
 
+  CODE_INVALIDED = "signUpConfirmation:validation.codeInvalided",
   CODE_REQUIRED = "signUpConfirmation:validation.required",
   CODE_NUMBERS_ONLY = "signUpConfirmation:validation.numbersOnly",
 }

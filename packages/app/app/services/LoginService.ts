@@ -14,16 +14,15 @@ export class LoginService extends ApiAbstract {
     return LoginService._instance || (LoginService._instance = new LoginService())
   }
 
-  public async doTokenVerify(body: { userId: number; token: string }): Promise<
+  public async doTokenVerify(body: { userId: number }): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
         data: IUserClient | undefined
-        token: string | undefined
       }
     | GeneralApiProblem
   > {
     try {
-      return await this.authGet(`/auth/${body.userId}/verify`, body.token)
+      return await this.authGet(`/auth/${body.userId}/verify`)
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n}`, e.stack)
@@ -31,7 +30,7 @@ export class LoginService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.AUTH_ERROR,
@@ -50,7 +49,7 @@ export class LoginService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
@@ -75,7 +74,7 @@ export class LoginService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,

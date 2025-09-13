@@ -88,7 +88,10 @@ export class AuthController {
             if (!errors.isEmpty()) {
                 throw new ValidationError({ message: 'login validation error' });
             }
-            const { user, token, longToken } = await AuthServiceBuilder.build().login(req.body.email, req.body.password);
+            const { user, token, longToken } = await AuthServiceBuilder.build().login(
+                req.body.email.toLocaleLowerCase(),
+                req.body.password,
+            );
             res.setHeader('Authorization', `Bearer ${token}`);
             res.status(HttpCode.OK).json(
                 responseBuilder

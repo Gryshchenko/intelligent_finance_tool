@@ -22,7 +22,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
   const { themed, theme } = useAppTheme()
 
   const { navigation } = _props
-  const { logout } = useAuth()
+  const { doLogout } = useAuth()
 
   function goNext() {
     navigation.navigate("Demo", { screen: "DemoShowroom", params: {} })
@@ -31,9 +31,9 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
   useHeader(
     {
       rightTx: "common:logOut",
-      onRightPress: logout,
+      onRightPress: doLogout,
     },
-    [logout],
+    [doLogout],
   )
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])

@@ -2,6 +2,12 @@ import demoEn from "./demo-en"
 
 const en = {
   errorCode: {
+    FORBIDDEN_ERROR: "Access is forbidden.",
+    REJECTED_ERROR: "The request was rejected.",
+    SERVER_ERROR: "A server error occurred.",
+    UNAUTHORIZED_ERROR: "You are not authorized.",
+    NOT_FOUND_ERROR: "The requested resource was not found.",
+    CANNOT_CONNECT_ERROR: "Unable to connect to the server.",
     CANT_STORE_DATA: "We couldn't save your info. Please try again.",
     UNEXPECTED_PROPERTY: "Hmm… something you entered doesn’t look right.",
     UNKNOWN_ERROR: "Something went wrong on our side.",
@@ -40,9 +46,11 @@ const en = {
     EMAIL_CONFIRMATION_ERROR: "We couldn’t confirm your email.",
   },
   validation: {
+    emailAlreadyInUse: "The entered email is already in use.",
     maxLength: "This field cannot be longer than 50 characters.",
     required: "Field cannot be empty",
     email: "Invalid email format",
+    codeInvalided: "Invalid confirmation code",
     name: "Invalid name format must contain only numbers or alphabet characters.",
     password: "Invalid password format",
     passwordMinLength: "Must be at least 5 characters",
@@ -125,6 +133,7 @@ const en = {
     tapToLogIn: "Tap to log in!",
     rememberMe: "Remember me",
     rememberMeHelper: "For your convenience, keep this box checked to stay signed in",
+    reLoginRequired: "For your security, please sign in again.",
   },
   signUpScreen: {
     enterDetails: "",

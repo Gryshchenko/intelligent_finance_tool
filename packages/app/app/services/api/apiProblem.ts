@@ -1,6 +1,12 @@
 import { ApiResponse } from "apisauce"
 import { IResponse } from "tenpercent/shared/src/interfaces/IResponse"
 import { HttpCode } from "tenpercent/shared/src/types/HttpCode"
+import { ResponseStatusType } from "tenpercent/shared/src/types/ResponseStatusType"
+
+import { TxKeyPath } from "@/i18n"
+import { translate } from "@/i18n/translate"
+import AlertService from "@/services/AlertService"
+import { BaseError } from "@/utils/errors/BaseError"
 
 /**
  * Enum representing the possible types of general API problems.
@@ -27,12 +33,12 @@ export type GeneralApiProblem<T = unknown> =
   | { kind: GeneralApiProblemKind.Timeout; temporary: true }
   | { kind: GeneralApiProblemKind.CannotConnect; temporary: true }
   | { kind: GeneralApiProblemKind.Server }
-  | ({ kind: GeneralApiProblemKind.Unauthorized } & IResponse<unknown>)
-  | ({ kind: GeneralApiProblemKind.Forbidden } & IResponse<unknown>)
-  | ({ kind: GeneralApiProblemKind.NotFound } & IResponse<unknown>)
-  | ({ kind: GeneralApiProblemKind.Rejected } & IResponse<unknown>)
+  | ({ kind: GeneralApiProblemKind.Unauthorized } & IResponse<undefined>)
+  | ({ kind: GeneralApiProblemKind.Forbidden } & IResponse<undefined>)
+  | ({ kind: GeneralApiProblemKind.NotFound } & IResponse<undefined>)
+  | ({ kind: GeneralApiProblemKind.Rejected } & IResponse<undefined>)
   | { kind: GeneralApiProblemKind.Unknown; temporary: true }
-  | ({ kind: GeneralApiProblemKind.BadData } & IResponse<unknown>)
+  | ({ kind: GeneralApiProblemKind.BadData } & IResponse<undefined>)
 
 /**
  * Attempts to get a common cause of problems from an api response.
@@ -56,35 +62,35 @@ export function getGeneralApiProblem(response: ApiResponse<IResponse>): GeneralA
         case HttpCode.UNAUTHORIZED:
           return {
             kind: GeneralApiProblemKind.Unauthorized,
-            data: response.data?.data,
+            data: undefined,
             status: response.data?.status,
             errors: response.data?.errors,
           }
         case HttpCode.FORBIDDEN:
           return {
             kind: GeneralApiProblemKind.Forbidden,
-            data: response.data?.data,
+            data: undefined,
             status: response.data?.status,
             errors: response.data?.errors,
           }
         case HttpCode.NOT_FOUND:
           return {
             kind: GeneralApiProblemKind.NotFound,
-            data: response.data?.data,
+            data: undefined,
             status: response.data?.status,
             errors: response.data?.errors,
           }
         case HttpCode.BAD_REQUEST:
           return {
             kind: GeneralApiProblemKind.BadData,
-            data: response.data?.data,
+            data: undefined,
             status: response.data?.status,
             errors: response.data?.errors,
           }
         default:
           return {
             kind: GeneralApiProblemKind.Rejected,
-            data: response.data?.data,
+            data: undefined,
             status: response.data?.status,
             errors: response.data?.errors,
           }
@@ -94,4 +100,45 @@ export function getGeneralApiProblem(response: ApiResponse<IResponse>): GeneralA
   }
 
   return null
+}
+
+export function buildGeneralApiBadData(error: BaseError): GeneralApiProblem {
+  return {
+    kind: GeneralApiProblemKind.BadData,
+    data: undefined,
+    status: ResponseStatusType.APP,
+    errors: [error.build()],
+  }
+}
+
+export function buildGeneralApiBaseHandler(
+  problem: GeneralApiProblem,
+  handler: (text: TxKeyPath) => void = (text: TxKeyPath) => AlertService.error(translate(text)),
+): void {
+  switch (problem.kind) {
+    case GeneralApiProblemKind.Forbidden:
+      handler("errorCode.FORBIDDEN_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.Rejected:
+      handler("errorCode.REJECTED_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.Server:
+      handler("errorCode.SERVER_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.Timeout:
+      handler("errorCode.REQUEST_TIMEOUT_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.Unauthorized:
+      handler("errorCode.UNAUTHORIZED_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.Unknown:
+      handler("errorCode.UNKNOWN_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.NotFound:
+      handler("errorCode.NOT_FOUND_ERROR" as TxKeyPath)
+      break
+    case GeneralApiProblemKind.CannotConnect:
+      handler("errorCode.CANNOT_CONNECT_ERROR" as TxKeyPath)
+      break
+  }
 }

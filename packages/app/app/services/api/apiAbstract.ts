@@ -58,7 +58,7 @@ export abstract class ApiAbstract {
       this._logger.info("Token update on refresh")
       return true
     } catch (e) {
-      this._logger.error("Token refresh failed due reason", e)
+      this._logger.error("Token refresh failed due reason", (e as { message: string }).message)
       return false
     }
   }
@@ -87,15 +87,15 @@ export abstract class ApiAbstract {
       if (isSuccess) {
         continue
       } else {
-        await AuthService.instance().unauthorize()
+        await AuthService.instance().unauthorized()
         break
       }
     }
     return {
       kind: GeneralApiProblemKind.BadData,
-      data: null,
+      data: undefined,
       errors: [{ errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR }],
-      status: ResponseStatusType.INTERNAL,
+      status: ResponseStatusType.APP,
     }
   }
 
@@ -103,12 +103,12 @@ export abstract class ApiAbstract {
     return {
       kind: GeneralApiProblemKind.Unauthorized,
       errors: [{ errorCode: ErrorCode.AUTH_ERROR }],
-      status: ResponseStatusType.INTERNAL,
-      data: null,
+      status: ResponseStatusType.APP,
+      data: undefined,
     }
   }
-  private isAuthTokenExist(): boolean {
-    return AuthService.instance().token !== undefined && AuthService.instance().token !== null
+  private isAuthTokenExist(token: string = AuthService.instance().token as string): boolean {
+    return token !== undefined && token !== null
   }
 
   protected async publicPost<T>(
@@ -127,10 +127,10 @@ export abstract class ApiAbstract {
       }
       return getGeneralApiProblem(response) as GeneralApiProblem<T>
     } catch (e) {
-      this._logger.error("publicPost failed due reason", e)
+      this._logger.error("publicPost failed due reason", (e as { message: string }).message)
       return {
         kind: GeneralApiProblemKind.BadData,
-        data: null,
+        data: undefined,
         errors: undefined,
         status: ResponseStatusType.INTERNAL,
       }
@@ -139,9 +139,14 @@ export abstract class ApiAbstract {
   protected async authPost<T>(
     url: string,
     body?: Record<string, unknown>,
-    token = AuthService.instance().token,
+    options: {
+      token: string
+    } = {
+      token: AuthService.instance().token as string,
+    },
   ): Promise<GeneralApiProblem<T>> {
-    if (!this.isAuthTokenExist()) {
+    const { token } = options
+    if (!this.isAuthTokenExist(token)) {
       return this.getAuthError<T>()
     }
 
@@ -157,9 +162,14 @@ export abstract class ApiAbstract {
 
   protected async authGet<T>(
     url: string,
-    token = AuthService.instance().token,
+    options: {
+      token: string
+    } = {
+      token: AuthService.instance().token as string,
+    },
   ): Promise<GeneralApiProblem<T>> {
-    if (!this.isAuthTokenExist()) return this.getAuthError()
+    const { token } = options
+    if (!this.isAuthTokenExist(token)) return this.getAuthError()
     return await this.withRetry(async () => {
       const response: ApiResponse<IResponse<T>> = await this.apisauce.get(
         url,

@@ -12,12 +12,11 @@ const emailConfirmationRouter = express.Router({ mergeParams: true });
 
 emailConfirmationRouter.use(tokenVerify, userIdVerify, userStatusVerify(UserStatus.NO_VERIFIED));
 
-emailConfirmationRouter.get('/expiryAt', validateQuery({}), routesInputValidation([]), EmailConfirmationController.resend);
+emailConfirmationRouter.get('/', validateQuery({}), routesInputValidation([]), EmailConfirmationController.get);
 emailConfirmationRouter.post('/resend', validateQuery({}), routesInputValidation([]), EmailConfirmationController.resend);
 
 emailConfirmationRouter.post(
     '/verify',
-
     validateQuery({}),
     routesInputValidation([validatePathConfirmationCodeProperty('confirmationCode')]),
     EmailConfirmationController.verify,

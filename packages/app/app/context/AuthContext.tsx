@@ -9,12 +9,21 @@ import {
 } from "react"
 import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
 import { UserStatus } from "tenpercent/shared/src/interfaces/UserStatus"
+import { ResponseStatusType } from "tenpercent/shared/src/types/ResponseStatusType"
 import Utils from "tenpercent/shared/src/Utils"
 
-import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { translate } from "@/i18n/translate"
+import AlertService from "@/services/AlertService"
+import {
+  buildGeneralApiBaseHandler,
+  GeneralApiProblem,
+  GeneralApiProblemKind,
+} from "@/services/api/apiProblem"
 import { AuthService } from "@/services/AuthService"
 import { LoginService } from "@/services/LoginService"
+import { SignupService } from "@/services/SignUpService"
 import { StorageKey } from "@/types/StorageKey"
+import { ValidationError } from "@/utils/errors/ValidationError"
 import { Logger } from "@/utils/logger/Logger"
 import { loadString, saveString } from "@/utils/storage"
 
@@ -23,20 +32,20 @@ export interface AuthContextType {
   isUserConfirmed: boolean
   setIsPasswordSaveCheckbox: (save: boolean) => void
   isPasswordSaveCheckbox: boolean
+  doSetUserConfirmed: () => void
   doLogout: () => Promise<boolean>
-  doLogin: ({
-    token,
+  doLogin: ({ email, password }: { email: string; password: string }) => Promise<boolean>
+  doSignUp: ({
+    password,
     email,
-    status,
-    userId,
-    tokenLong,
+    publicName,
+    locale,
   }: {
-    token: string
+    password: string
     email: string
-    status: UserStatus
-    userId: number
-    tokenLong: string
-  }) => Promise<boolean>
+    publicName: string
+    locale: string
+  }) => Promise<GeneralApiProblem>
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
@@ -56,54 +65,55 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
         const authService = new AuthService()
         const saved = loadString(StorageKey.isSavePassword)
         const isPassword: boolean = saved ? (Utils.parseBoolean(saved) as boolean) : false
-        setIsPasswordSave(isPassword)
 
-        if (!isPassword) return
-
+        if (!isPassword) {
+          _logger.info("Auto authentication disabled")
+          return
+        }
         const user = await authService.getCredentialFromSecureStore()
         if (!user) {
-          throw new Error("User object empty")
-        }
-
-        const { token, userId, tokenLong } = user
-        if (!tokenLong) {
-          throw new Error("Token long empty")
-        }
-        if (!token) {
-          throw new Error("Token empty")
-        }
-
-        if (!userId) {
-          throw new Error("UserId empty")
-        }
-
-        const response = await LoginService.instance().doTokenVerify({ userId, token })
-        if (response.kind === GeneralApiProblemKind.Ok) {
-          const { userId, email, status } = response.data as IUserClient
-          const result = await AuthService.instance().authorize({
-            token,
-            tokenLong,
-            status,
-            userId,
-            email,
+          throw new ValidationError({
+            message: "miss configuration for auto login",
           })
-          if (result) {
-            setIsAuthenticated(true)
-            setIsUserConfirmed(status === UserStatus.ACTIVE)
-          } else {
-            setIsAuthenticated(false)
-            setIsUserConfirmed(false)
-            await AuthService.instance().unauthorize()
+        }
+        const { token, userId, tokenLong, status, email } = user as IUserClient
+        const result = await AuthService.instance().authorize({
+          token,
+          tokenLong,
+          status,
+          userId,
+          email,
+        })
+        const response = await LoginService.instance().doTokenVerify({ userId })
+        switch (response.kind) {
+          case GeneralApiProblemKind.Ok: {
+            if (result) {
+              setIsAuthenticated(true)
+              setIsUserConfirmed(status === UserStatus.ACTIVE)
+            } else {
+              throw new ValidationError({
+                message: "authorize failed",
+              })
+            }
+            break
           }
-        } else {
-          await AuthService.instance().unauthorize()
-          await AuthService.instance().cleanCredentialStore()
-          throw new Error(`DoTokenVerify failed:  ${JSON.stringify(response)}`)
+          case GeneralApiProblemKind.BadData:
+          case GeneralApiProblemKind.Unauthorized:
+          case GeneralApiProblemKind.Forbidden: {
+            throw new ValidationError({
+              message: JSON.stringify(response.errors),
+            })
+          }
+          default: {
+            buildGeneralApiBaseHandler(response)
+          }
         }
       } catch (e) {
-        await AuthService.instance().cleanCredentialStore()
+        await AuthService.instance().unauthorized()
+        setIsUserConfirmed(false)
         setIsAuthenticated(false)
-        await AuthService.instance().unauthorize()
+        saveString(StorageKey.isSavePassword, String(false))
+        AlertService.error(translate("loginScreen:reLoginRequired"))
         _logger.error("Auto authentication failed due reason: ", (e as { message: string }).message)
       }
     })()
@@ -114,58 +124,138 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     saveString(StorageKey.isSavePassword, String(save))
   }, [])
 
-  const doLogin = useCallback(
-    async ({
-      token,
-      email,
-      status,
-      userId,
-      tokenLong,
-    }: {
-      token: string
-      email: string
-      status: UserStatus
-      userId: number
-      tokenLong: string
-    }): Promise<boolean> => {
-      try {
-        const result = await AuthService.instance().authorize({
-          token,
-          tokenLong,
-          status,
-          userId,
-          email,
-        })
-        if (result) {
-          setIsAuthenticated(true)
-          setIsUserConfirmed(status === UserStatus.ACTIVE)
-          return true
-        } else {
-          setIsAuthenticated(false)
-          setIsUserConfirmed(false)
-          return false
-        }
-      } catch (e) {
-        setIsUserConfirmed(false)
+  async function doAuthorize({
+    token,
+    email,
+    status,
+    userId,
+    tokenLong,
+  }: {
+    token: string
+    email: string
+    status: UserStatus
+    userId: number
+    tokenLong: string
+  }): Promise<boolean> {
+    try {
+      const result = await AuthService.instance().authorize({
+        token,
+        tokenLong,
+        status,
+        userId,
+        email,
+      })
+      if (result) {
+        setIsAuthenticated(true)
+        setIsUserConfirmed(status === UserStatus.ACTIVE)
+        return true
+      } else {
         setIsAuthenticated(false)
-        _logger.error("Do authentication failed due reason: ", (e as { message: string }).message)
+        setIsUserConfirmed(false)
         return false
+      }
+    } catch (e) {
+      setIsUserConfirmed(false)
+      setIsAuthenticated(false)
+      _logger.error("Do authentication failed due reason: ", (e as { message: string }).message)
+      return false
+    }
+  }
+
+  const doSignUp = useCallback(
+    async ({
+      password,
+      email,
+      publicName,
+      locale,
+    }: {
+      password: string
+      email: string
+      publicName: string
+      locale: string
+    }): Promise<GeneralApiProblem> => {
+      const response = await SignupService.instance().doSignUp({
+        password,
+        email,
+        publicName,
+        locale,
+      })
+      switch (response.kind) {
+        case GeneralApiProblemKind.Ok: {
+          const { email, userId, status, token, tokenLong } = response.data as IUserClient
+          const result = await doAuthorize({
+            email,
+            status,
+            userId,
+            token,
+            tokenLong,
+          })
+          if (!result) {
+            return {
+              kind: GeneralApiProblemKind.Unknown,
+              temporary: true,
+            }
+          }
+          return { ...response, data: null, status: ResponseStatusType.OK, errors: undefined }
+        }
+        default: {
+          buildGeneralApiBaseHandler(response)
+          return response
+        }
       }
     },
     [],
   )
 
+  const doLogin = useCallback(async ({ password, email }: { password: string; email: string }) => {
+    const response = await AuthService.instance().login({
+      password,
+      email,
+    })
+    switch (response.kind) {
+      case GeneralApiProblemKind.Ok: {
+        const { userId, token, tokenLong, status, email } = response.data as IUserClient
+        const result = await doAuthorize({
+          userId,
+          token,
+          tokenLong,
+          email,
+          status,
+        })
+        return result
+      }
+      case GeneralApiProblemKind.BadData: {
+        return false
+      }
+      default: {
+        buildGeneralApiBaseHandler(response)
+        return false
+      }
+    }
+  }, [])
+
+  const doSetUserConfirmed = useCallback(() => {
+    setIsUserConfirmed(true)
+  }, [])
+
   const doLogout = useCallback(async (): Promise<boolean> => {
     try {
       const response = await LoginService.instance().doLogout()
-      await AuthService.instance().unauthorize()
-      if (response.kind !== GeneralApiProblemKind.Ok) {
-        _logger.error("Do logout failed due reason: ", response.kind)
-        return false
+      switch (response.kind) {
+        case GeneralApiProblemKind.Ok: {
+          await AuthService.instance().unauthorized()
+          setIsAuthenticated(false)
+          setIsUserConfirmed(false)
+          setIsPasswordSave(false)
+          saveString(StorageKey.isSavePassword, String(false))
+          return true
+        }
+        default: {
+          _logger.error("Do logout failed due reason: ", response.kind)
+          buildGeneralApiBaseHandler(response)
+          return false
+        }
       }
-      setIsAuthenticated(false)
-      setIsUserConfirmed(false)
-      return true
     } catch (e) {
       _logger.error("Do logout failed due reason: ", (e as { message: string }).message)
       return false
@@ -178,7 +268,9 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     isUserConfirmed,
     setIsPasswordSaveCheckbox,
     doLogin,
+    doSignUp,
     doLogout,
+    doSetUserConfirmed,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

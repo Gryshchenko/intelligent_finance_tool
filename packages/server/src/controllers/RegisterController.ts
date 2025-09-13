@@ -17,7 +17,7 @@ export class RegisterController {
 
         try {
             const response = await UserRegistrationServiceBuilder.build().createUser(
-                req.body.email,
+                req.body.email.toLocaleLowerCase(),
                 req.body.password,
                 req.body.locale,
                 req.body.publicName,

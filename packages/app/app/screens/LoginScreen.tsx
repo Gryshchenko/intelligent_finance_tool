@@ -1,8 +1,6 @@
 import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
-import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
@@ -15,8 +13,6 @@ import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import AlertService from "@/services/AlertService"
-import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { LoginService } from "@/services/LoginService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { validateEmail, validatePassword } from "@/utils/validation"
@@ -32,7 +28,8 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
   const [attemptsCount, setAttemptsCount] = useState<number>(0)
   const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
   const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
-  const { doLogin, isPasswordSaveCheckbox, setIsPasswordSaveCheckbox } = useAuth()
+  const [responseError, setResponseError] = useState<TxKeyPath | undefined>()
+  const { isPasswordSaveCheckbox, setIsPasswordSaveCheckbox, doLogin } = useAuth()
 
   const {
     themed,
@@ -46,7 +43,7 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
   async function login() {
     const emailErr = validateEmail(authEmail)
     const passwordErr = validatePassword(authPassword)
-
+    setResponseError(undefined)
     setEmailError(emailErr)
     setPasswordError(passwordErr)
 
@@ -65,59 +62,16 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
     if (emailError) return
     if (passwordError) return
 
-    const response = await LoginService.instance().doLogin({
+    const result = await doLogin({
       password: authPassword as string,
       email: authEmail as string,
     })
-
-    if (response.kind === GeneralApiProblemKind.Ok) {
-      const { email, userId, status, token, tokenLong } = response.data as IUserClient
-      const result = await doLogin({
-        email,
-        status,
-        userId,
-        tokenLong,
-        token,
-      })
-      if (!result) {
-        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        return
-      }
-      setAuthPassword("")
-      setAuthEmail("")
-    } else {
-      switch (response.kind) {
-        case GeneralApiProblemKind.BadData: {
-          response?.errors?.forEach((error) => {
-            switch (error.errorCode) {
-              case ErrorCode.EMAIL_INVALID_ERROR:
-                setEmailError("validation:email")
-                break
-              case ErrorCode.PASSWORD_INVALID_ERROR: {
-                setEmailError("validation:password")
-                break
-              }
-              case ErrorCode.AUTH_ERROR: {
-                AlertService.error(
-                  translate("errorCode:CREDENTIALS_ERROR"),
-                  translate("common:error"),
-                )
-              }
-              default: {
-                AlertService.error(
-                  translate("errorCode:CREDENTIALS_ERROR"),
-                  translate("common:error"),
-                )
-              }
-            }
-          })
-          break
-        }
-        default: {
-          AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        }
-      }
+    if (!result) {
+      setResponseError("errorCode:CREDENTIALS_ERROR")
+      return
     }
+    setAuthEmail("")
+    setAuthPassword("")
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -197,6 +151,10 @@ export const LoginScreen: FC<LoginScreenProps> = (_props) => {
         onPress={() => setIsPasswordSaveCheckbox(!isPasswordSaveCheckbox)}
       />
 
+      {responseError && (
+        <Text tx={responseError} preset="subheading" style={themed($responseError)} />
+      )}
+
       <Button
         testID="login-button"
         tx="loginScreen:tapToLogIn"
@@ -224,6 +182,9 @@ const $logIn: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 })
 
+const $responseError: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.error,
+})
 const $enterDetails: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })

@@ -1,7 +1,7 @@
 import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
-import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
+import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
@@ -10,14 +10,16 @@ import { Text } from "@/components/Text"
 import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
 import { useAuth } from "@/context/AuthContext"
 import { TxKeyPath } from "@/i18n"
-import { translate } from "@/i18n/translate"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
-import AlertService from "@/services/AlertService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { SignupService } from "@/services/SignUpService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
-import { validateEmail, validatePublicName, validatePassword } from "@/utils/validation"
+import {
+  validateEmail,
+  validatePassword,
+  validatePublicName,
+  ValidationTypes,
+} from "@/utils/validation"
 
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
@@ -32,7 +34,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
   const [publicNameError, setPublicNameError] = useState<TxKeyPath | undefined>()
   const [emailError, setEmailError] = useState<TxKeyPath | undefined>()
   const [passwordError, setPasswordError] = useState<TxKeyPath | undefined>()
-  const { doLogin } = useAuth()
+  const { doSignUp } = useAuth()
 
   const {
     themed,
@@ -51,35 +53,44 @@ export const SignUpScreen: FC<SignUpScreenProps> = (_props) => {
     if (emailErr || passwordErr || publicNameError) {
       return
     }
-    setAttemptsCount(attemptsCount + 1)
 
-    const response = await SignupService.instance().doSignUp({
+    setAttemptsCount(attemptsCount + 1)
+    const response = await doSignUp({
       password: authPassword as string,
       email: authEmail as string,
       publicName: publicName as string,
-      locale: "en-US",
+      locale: "US-en",
     })
-    if (response.kind === GeneralApiProblemKind.Ok) {
-      const { email, userId, status, token, tokenLong } = response.data as IUserClient
-      const result = await doLogin({
-        email,
-        status,
-        userId,
-        token,
-        tokenLong,
-      })
-      if (!result) {
-        AlertService.error(translate("errorCode:UNKNOWN_ERROR"), translate("common:error"))
-        return
+    switch (response.kind) {
+      case GeneralApiProblemKind.Ok: {
+        setPublicName("")
+        setAuthEmail("")
+        setAuthPassword("")
+        break
       }
-      setAuthPassword("")
-      setAuthEmail("")
-      setPublicName("")
-    } else {
-      switch (response.kind) {
-        case GeneralApiProblemKind.BadData: {
-          break
+      case GeneralApiProblemKind.BadData: {
+        const errors = response.errors ?? []
+        for (const error of errors) {
+          const payload = error?.payload
+          const errorCode = error?.errorCode
+          if (errorCode === ErrorCode.SIGNUP_USER_ALREADY_EXISTS_ERROR) {
+            setEmailError(ValidationTypes.EMAIL_UNIQUE)
+          } else if (payload?.field === "email") {
+            setEmailError(ValidationTypes.REQUIRED)
+          }
+          if (payload?.field === "password") {
+            setPasswordError(ValidationTypes.REQUIRED)
+          }
+          if (payload?.field === "locale") {
+          }
+          if (payload?.field === "publicName") {
+            setPublicNameError(ValidationTypes.REQUIRED)
+          }
         }
+        break
+      }
+      case GeneralApiProblemKind.Unknown: {
+        break
       }
     }
   }

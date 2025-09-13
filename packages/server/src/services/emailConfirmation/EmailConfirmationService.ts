@@ -19,8 +19,9 @@ import { randomBytes } from 'crypto';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import Utils from 'src/utils/Utils';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { IEmailVerifyResponse } from 'tenpercent/shared/src/interfaces/IEmailVerifyResponse';
 
-const CONFIRMATION_MAIL_EXPIRED_TIME = [0, 15, 0];
+const CONFIRMATION_MAIL_EXPIRED_TIME = [0, 1, 0];
 
 export default class EmailConfirmationService extends LoggerBase implements IEmailConfirmationService {
     protected emailConfirmationDataAccess: IEmailConfirmationDataAccess;
@@ -120,7 +121,7 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         return userConfirmationDataInWork;
     }
 
-    public async resendConfirmationEmail(userId: number, email: string): Promise<void> {
+    public async resendConfirmationEmail(userId: number, email: string): Promise<{ expiresAt: string } | undefined> {
         let userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
         if (Utils.isObjectEmpty(userConfirmationData as unknown as Record<string, unknown>)) {
             userConfirmationData = await this.createEmailConfirmation(userId, email);
@@ -144,9 +145,17 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
         this.sendMail(userConfirmationDataInWork.email, confirmationCode).catch((e) => {
             this._logger.error('Send mail error', e);
         });
+        return {
+            expiresAt: newTime.toISOString(),
+        };
     }
 
-    public async confirmEmail(userId: number, email: string, confirmationCode: number, trx?: IDBTransaction): Promise<void> {
+    public async confirmEmail(
+        userId: number,
+        email: string,
+        confirmationCode: number,
+        trx?: IDBTransaction,
+    ): Promise<IEmailVerifyResponse> {
         const userConfirmationData = await this.emailConfirmationDataAccess.getUserConfirmation(userId, email);
         if (Utils.isObjectEmpty(userConfirmationData as unknown as Record<string, unknown>)) {
             throw new ValidationError({
@@ -169,6 +178,10 @@ export default class EmailConfirmationService extends LoggerBase implements IEma
             trx,
         );
         await this.userService.patch(userId, { status: UserStatus.ACTIVE });
+        return {
+            status: EmailConfirmationStatusType.Confirmed,
+            confirmationId: userConfirmationData?.confirmationId as number,
+        };
     }
 
     public async deleteEmailConfirmation(userId: number, email: string): Promise<boolean> {

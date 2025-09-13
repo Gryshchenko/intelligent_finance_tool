@@ -6,4 +6,5 @@ export interface IUserClient {
     status: UserStatus;
     token: string;
     tokenLong: string;
+    [key: string]: unknown;
 }

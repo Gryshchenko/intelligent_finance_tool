@@ -1,3 +1,6 @@
+import { IEmailConfirmationResponse } from "tenpercent/shared/src/interfaces/IEmailConfirmationResponse"
+import { IEmailResendResponse } from "tenpercent/shared/src/interfaces/IEmailResendResponse"
+import { IEmailVerifyResponse } from "tenpercent/shared/src/interfaces/IEmailVerifyResponse"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
@@ -13,16 +16,15 @@ export class SignupService extends ApiAbstract {
     return SignupService._instance || (SignupService._instance = new SignupService())
   }
 
-  public async doSignUpEmailResend(body: { userId: number }): Promise<
+  public async getSignUpConfirmationCode(userId: number): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
-        token: string | undefined
+        data: IEmailConfirmationResponse
       }
     | GeneralApiProblem
   > {
     try {
-      await this.authPost(`/register/signup/${body.userId}/email-confirmation/resend`)
-      return { kind: GeneralApiProblemKind.NoContent }
+      return await this.authGet(`/register/signup/${userId}/email-confirmation/`)
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n`, e.stack)
@@ -30,7 +32,33 @@ export class SignupService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+
+  public async doSignUpEmailResend(body: { userId: number }): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: IEmailResendResponse
+      }
+    | GeneralApiProblem
+  > {
+    try {
+      return await this.authPost(`/register/signup/${body.userId}/email-confirmation/resend`)
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
@@ -42,16 +70,14 @@ export class SignupService extends ApiAbstract {
   public async doSignUpEmailVerify(body: { confirmationCode: string; userId: number }): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
-        token: string | undefined
+        data: IEmailVerifyResponse
       }
     | GeneralApiProblem
   > {
     try {
-      await this.authPost(`/register/signup/${body.userId}/email-confirmation/verify`, {
+      return await this.authPost(`/register/signup/${body.userId}/email-confirmation/verify`, {
         confirmationCode: body.confirmationCode,
       })
-
-      return { kind: GeneralApiProblemKind.NoContent }
     } catch (e) {
       if (__DEV__ && e instanceof Error) {
         console.error(`Bad data: ${e.message}\n`, e.stack)
@@ -59,7 +85,7 @@ export class SignupService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
@@ -77,7 +103,6 @@ export class SignupService extends ApiAbstract {
     | {
         kind: GeneralApiProblemKind.Ok
         data: { userId: number } | undefined
-        token: string | undefined
       }
     | GeneralApiProblem
   > {
@@ -90,7 +115,7 @@ export class SignupService extends ApiAbstract {
       return {
         kind: GeneralApiProblemKind.BadData,
         status: undefined,
-        data: null,
+        data: undefined,
         errors: [
           {
             errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
