@@ -30,7 +30,18 @@ transactionRouter.post(
     TransactionController.create,
 );
 
-transactionRouter.get('/', validateQuery({ cursor: 'number?', limit: 'number?' }), TransactionController.getAll);
+transactionRouter.get(
+    '/',
+    validateQuery({
+        cursor: 'number',
+        limit: 'number',
+        accountId: 'number?',
+        categoryId: 'number?',
+        incomeId: 'number?',
+        orderBy: 'string?',
+    }),
+    TransactionController.getAll,
+);
 
 transactionRouter.get(
     '/:transactionId',

@@ -87,10 +87,10 @@ const createUserBase = async ({
     email?: string;
     locale?: LanguageType;
     publicName?: string;
-}): Promise<{ userId: number; authorization: string; longToken: string }> => {
+}): Promise<{ userId: number; authorization: string; longToken: string; token: string }> => {
     const { body, header } = await agent.post('/register/signup').send({ email, password, locale, publicName });
     const {
-        data: { userId, token },
+        data: { userId, token, tokenLong },
     } = body;
     expect(userId).toEqual(expect.any(Number));
     expect(token).toEqual(expect.any(String));
@@ -98,7 +98,8 @@ const createUserBase = async ({
     return {
         userId,
         authorization: header['authorization'],
-        longToken: token,
+        longToken: tokenLong,
+        token,
     };
 };
 
@@ -138,7 +139,11 @@ export const createUser = async ({
         .set('authorization', authorization)
         .send({ confirmationCode: confirm.confirmationCode });
 
-    expect(confirmMailResponse.status).toBe(HttpCode.NO_CONTENT);
+    expect(confirmMailResponse.status).toBe(HttpCode.OK);
+    expect(confirmMailResponse.body.data).toStrictEqual({
+        confirmationId: expect.any(Number),
+        status: EmailConfirmationStatusType.Confirmed,
+    });
     const confirmAfter = await databaseConnection.engine()('email_confirmations').select('*').where({ userId, email }).first();
     expect(confirmAfter.status).toBe(EmailConfirmationStatusType.Confirmed);
     expect(confirmAfter.email).toStrictEqual(email);
@@ -189,3 +194,12 @@ export const createUserNotVerify = async ({
         authorization,
     };
 };
+
+export async function getOverview(agent: any, userId: number, authorization: string) {
+    const {
+        body: {
+            data: { accounts, incomes, categories },
+        },
+    } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+    return { accounts, incomes, categories };
+}

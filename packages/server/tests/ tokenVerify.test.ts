@@ -4,6 +4,7 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ResponseBuilderPreset } from '../src/helper/responseBuilder/ResponseBuilderPreset';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import TokenBlacklistBuilder from '../src/services/auth/TokenBlacklistBuilder';
+import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const passport = require('passport');
@@ -59,7 +60,13 @@ describe('tokenVerify middleware', () => {
         await tokenVerify(req as Request, res as Response, next);
 
         expect(res.status).toHaveBeenCalledWith(HttpCode.UNAUTHORIZED);
-        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { errorCode: ErrorCode.TOKEN_INVALID_ERROR } }));
+        expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: {},
+                errors: [{ errorCode: ErrorCode.TOKEN_INVALID_ERROR }],
+                status: ResponseStatusType.INTERNAL,
+            }),
+        );
     });
 
     it('should return 503 if checking blacklist throws error', async () => {

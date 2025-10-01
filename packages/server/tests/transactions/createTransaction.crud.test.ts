@@ -1,7 +1,8 @@
-import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
+import { createUser, deleteUserAfterTest, generateSecureRandom, getOverview } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { createAllTransactions, fetchTransactions, fetchTransactionsAll, fetchTransactionsBad } from './TransactionsTestUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -116,74 +117,81 @@ describe('PATCH /transaction/patch - amount', () => {
     });
     it(`pagination`, async () => {
         const agent = request.agent(app);
-
         const databaseConnection = DatabaseConnection.instance(config);
-        const { userId, authorization } = await createUser({
-            agent,
-            databaseConnection,
-        });
-
+        const { userId, authorization } = await createUser({ agent, databaseConnection });
         userIds.push(userId);
-        const {
-            body: {
-                data: { accounts },
-            },
-        } = await agent.get(`/user/${userId}/overview/`).set('authorization', authorization).send({}).expect(HttpCode.OK);
+
+        const { accounts, incomes, categories } = await getOverview(agent, userId, authorization);
 
         const accountId = accounts[0].accountId;
         const currencyId = accounts[0].currencyId;
+        const categoryId = categories[0].categoryId;
+        const incomeId = incomes[0].incomeId;
         const targetAccountId = accounts[1].accountId;
-        const transactionIds = [];
-        for (const num of Array(4).fill(100)) {
-            const {
-                body: {
-                    data: { transactionId },
-                },
-            } = await agent
-                .post(`/user/${userId}/transaction/`)
-                .set('authorization', authorization)
-                .send({
-                    accountId,
-                    currencyId,
-                    transactionTypeId: 3,
-                    targetAccountId,
-                    amount: num,
-                    description: 'Test',
-                })
-                .expect(HttpCode.CREATED);
-            transactionIds.push(transactionId);
+
+        const transactionIds = await createAllTransactions(
+            agent,
+            userId,
+            authorization,
+            accountId,
+            currencyId,
+            categoryId,
+            incomeId,
+            targetAccountId,
+        );
+
+        expect(transactionIds.length).toStrictEqual(3 * 9);
+
+        for (const query of [
+            { name: 'accountId', id: accountId, not: ['categoryId', 'incomeId'] },
+            { name: 'categoryId', id: categoryId, not: ['accountId', 'incomeId'] },
+            { name: 'incomeId', id: incomeId, not: ['categoryId', 'incomeId'] },
+        ]) {
+            const all = await fetchTransactions(agent, userId, authorization, 100, 0, `&${query.name}=${query.id}`);
+            for (let i = 0; i < 9; i += 3) {
+                const cursoreId = all.data[i][query.name];
+                for (const field of ['amount', 'createAt']) {
+                    for (const order of ['asc', 'desc']) {
+                        const { resLimit, data } = await fetchTransactions(
+                            agent,
+                            userId,
+                            authorization,
+                            3,
+                            cursoreId,
+                            `&${query.name}=${query.id}&orderBy=${field}:${order}`,
+                        );
+
+                        for (const dt of data) {
+                            const not = query.not;
+                            for (const pr of not) {
+                                expect(dt[pr]).toStrictEqual(undefined);
+                            }
+                        }
+
+                        const sorted = [...data].sort((a, b) => {
+                            const valA = a[field];
+                            const valB = b[field];
+
+                            if (order === 'asc') {
+                                return valA > valB ? 1 : valA < valB ? -1 : 0;
+                            } else {
+                                return valA < valB ? 1 : valA > valB ? -1 : 0;
+                            }
+                        });
+
+                        expect(data).toStrictEqual(sorted);
+                        expect(resLimit).toStrictEqual(3);
+                        expect(data.length).toStrictEqual(3);
+                    }
+                }
+            }
         }
-        const {
-            body: {
-                data: { limit, cursor, data },
-            },
-        } = await agent
-            .get(`/user/${userId}/transactions/?limit=3&cursor=${transactionIds[0]}`)
-            .set('authorization', authorization)
-            .expect(HttpCode.OK);
-        expect(limit).toStrictEqual(3);
-        expect(cursor).toStrictEqual(transactionIds[0]);
-        expect(data.length).toStrictEqual(3);
 
-        for (let i = 1; i < transactionIds.length; i += 1) {
-            expect(transactionIds[i]).toStrictEqual(data[i - 1].transactionId);
-        }
+        const all = await fetchTransactionsAll(agent, userId, authorization, transactionIds.length, transactionIds[0]);
+        expect(all.limit).toStrictEqual(transactionIds.length);
+        expect(all.cursor).toStrictEqual(transactionIds[0]);
+        expect(all.data.length).toStrictEqual(transactionIds.length - 1);
 
-        const {
-            body: {
-                data: { data: remainingData },
-            },
-        } = await agent
-            .get(`/user/${userId}/transactions/?limit=3&cursor=${transactionIds[3]}`)
-            .set('authorization', authorization)
-            .expect(HttpCode.OK);
-        expect(remainingData.length).toBeLessThanOrEqual(3);
-        // @ts-expect-error is necessary
-        expect(remainingData.map((t: unknown) => t.transactionId)).toStrictEqual([]);
-
-        await agent
-            .get(`/user/${userId}/transactions/?limit=3&cursor=invalid_cursor`)
-            .set('authorization', authorization)
-            .expect(HttpCode.BAD_REQUEST);
+        await fetchTransactionsBad(agent, userId, authorization);
     });
 });

@@ -55,7 +55,7 @@ export abstract class ApiAbstract {
       const newToken = response.data?.data?.token
       if (!newToken) throw new Error("refresh failed token empty")
       AuthService.instance().token = newToken
-      this._logger.info("Token update on refresh")
+      this._logger.info("Token updated on refresh")
       return true
     } catch (e) {
       this._logger.error("Token refresh failed due reason", (e as { message: string }).message)

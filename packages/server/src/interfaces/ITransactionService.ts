@@ -1,20 +1,14 @@
-import { ITransaction } from 'interfaces/ITransaction';
+import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { IPatchTransaction } from './IPatchTransaction';
 import { IPagination } from 'interfaces/IPagination';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
+import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
+import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
 
 export interface ITransactionService {
     createTransaction(transactions: ICreateTransaction): Promise<number | null>;
-    getTransactions({
-        userId,
-        limit,
-        cursor,
-    }: {
-        userId: number;
-        limit: number;
-        cursor: number;
-    }): Promise<IPagination<ITransaction | null>>;
+    getTransactions({ userId, limit, cursor }: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>>;
     getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined>;
     deleteTransaction(userId: number, transactionId: number): Promise<boolean>;
     patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null>;

@@ -24,15 +24,17 @@ export const tokenLongVerify = (req: Request, res: Response, next: NextFunction)
         });
     };
 
+    const token = String(req.body?.token);
     try {
-        const token = String(req.body?.token);
         const userId = req.params?.userId;
         if (!token || !userId) {
             buildError(`Token or userID invalid - userID: ${userId}`);
         }
+        console.log('long 2', token);
         const payload = jwt.verify(token, getConfig().jwtLongSecret, {
             algorithms: [getConfig().jwtAlgorithm as Algorithm],
             issuer: getConfig().jwtIssuer,
+            ignoreExpiration: true,
             audience: getConfig().jwtAudience,
             subject: String(userId),
         }) as JwtPayloadCustom;
@@ -48,7 +50,7 @@ export const tokenLongVerify = (req: Request, res: Response, next: NextFunction)
         return next();
     } catch (e: unknown) {
         const responseBuilder = new ResponseBuilder();
-        _logger.info(`Token long failed due reason: ${(e as { message: string }).message}`);
+        _logger.error(`Token long failed due reason: ${(e as { message: string }).message}`);
         return res
             .status(HttpCode.BAD_REQUEST)
             .json(

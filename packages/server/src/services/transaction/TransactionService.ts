@@ -1,7 +1,7 @@
 import { ITransactionService } from 'interfaces/ITransactionService';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { ITransactionDataAccess } from 'interfaces/ITransactionDataAccess';
-import { ITransaction } from 'interfaces/ITransaction';
+import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { TransactionType } from 'types/TransactionType';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
 import { ValidationError } from 'src/utils/errors/ValidationError';
@@ -16,6 +16,8 @@ import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
 import { IPagination } from 'interfaces/IPagination';
 import { IBalanceService } from 'interfaces/IBalanceService';
+import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
+import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
@@ -131,16 +133,8 @@ export default class TransactionService extends LoggerBase implements ITransacti
     async getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined> {
         return await this._transactionDataAccess.getTransaction(userId, transactionId);
     }
-    async getTransactions({
-        userId,
-        limit,
-        cursor,
-    }: {
-        userId: number;
-        limit: number;
-        cursor: number;
-    }): Promise<IPagination<ITransaction | null>> {
-        return await this._transactionDataAccess.getTransactions({ userId, limit, cursor });
+    async getTransactions(data: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>> {
+        return await this._transactionDataAccess.getTransactions(data);
     }
     private async createIncomeTransaction(transaction: ICreateTransaction): Promise<number> {
         return this.processTransaction(

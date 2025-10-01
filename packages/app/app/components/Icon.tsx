@@ -131,6 +131,7 @@ export const iconRegistry = {
   settings: require("@assets/icons/settings.png"),
   slack: require("@assets/icons/demo/slack.png"),
   view: require("@assets/icons/view.png"),
+  edit: require("@assets/icons/edit.png"),
   x: require("@assets/icons/x.png"),
 }
 

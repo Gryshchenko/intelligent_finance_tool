@@ -95,7 +95,7 @@ describe('POST /auth', () => {
         expect(verifyResponse1.status).toBe(HttpCode.OK);
 
         // logout
-        const logOutResponse = await agent.get(`/auth/logout`).set('authorization', authorization);
+        const logOutResponse = await agent.post(`/auth/logout`).set('authorization', authorization);
         expect(logOutResponse.status).toBe(HttpCode.OK);
 
         // verify after logout
@@ -111,6 +111,7 @@ describe('POST /auth', () => {
                 userId,
                 email,
                 token: expect.any(String),
+                tokenLong: expect.any(String),
                 status: UserStatus.ACTIVE,
             },
             errors: [],
@@ -155,8 +156,8 @@ describe('POST /auth', () => {
     });
 
     it('should return UNAUTHORIZED on repeated logout', async () => {
-        await agent.get('/auth/logout').set('authorization', authorization);
-        const response = await agent.get('/auth/logout').set('authorization', authorization);
+        await agent.post('/auth/logout').set('authorization', authorization);
+        const response = await agent.post('/auth/logout').set('authorization', authorization);
         expect(response.status).toBe(HttpCode.UNAUTHORIZED);
     });
 

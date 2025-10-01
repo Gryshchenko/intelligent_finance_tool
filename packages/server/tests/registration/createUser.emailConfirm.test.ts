@@ -12,6 +12,7 @@ import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import TimeManagerUTC from '../../src/utils/TimeManagerUTC';
+import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -117,7 +118,7 @@ describe('POST /register/signup/emailConfirm', () => {
         const resendRequest = await agent
             .post(`/register/signup/${userId}/email-confirmation/resend`)
             .set('authorization', authorization);
-        expect(resendRequest.status).toBe(HttpCode.NO_CONTENT);
+        expect(resendRequest.status).toBe(HttpCode.OK);
         const newSesendRequest = await agent
             .post(`/register/signup/${userId}/email-confirmation/resend`)
             .set('authorization', authorization);
@@ -136,7 +137,12 @@ describe('POST /register/signup/emailConfirm', () => {
             .post(`/register/signup/${userId}/email-confirmation/verify`)
             .set('authorization', authorization)
             .send({ confirmationCode: newConfirmation.confirmationCode });
-        expect(newConfirmMail.status).toBe(HttpCode.NO_CONTENT);
+        expect(newConfirmMail.status).toBe(HttpCode.OK);
+        expect(newConfirmMail.status).toBe(HttpCode.OK);
+        expect(newConfirmMail.body.data).toStrictEqual({
+            confirmationId: expect.any(Number),
+            status: EmailConfirmationStatusType.Confirmed,
+        });
         const newConfirmMail2 = await agent
             .post(`/register/signup/${userId}/email-confirmation/verify`)
             .set('authorization', authorization)

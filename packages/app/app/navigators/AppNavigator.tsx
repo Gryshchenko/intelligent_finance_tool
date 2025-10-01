@@ -5,11 +5,13 @@
  * and a "main" flow which the user will use once logged in.
  */
 import { ComponentProps } from "react"
-import { NavigationContainer, NavigatorScreenParams } from "@react-navigation/native"
+import { NavigationContainer, NavigatorScreenParams, ParamListBase } from "@react-navigation/native"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
+import { OverviewNavigator, OverviewTabParamList } from "@/navigators/OverviewNavigator"
+import { AccountScreen } from "@/screens/AccountScreens/AccountScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { LoginScreen } from "@/screens/LoginScreen"
 import { SignUpConfirmationScreen } from "@/screens/SignUpConfirmationScreen"
@@ -29,20 +31,20 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  *   https://reactnavigation.org/docs/typescript/#organizing-types
  */
-export interface AppStackParamList {
-  [key: string]: NavigatorScreenParams<any> | undefined
-  Welcome: NavigatorScreenParams<{}>
-  Login: NavigatorScreenParams<{}>
+export interface AppStackParamList extends ParamListBase {
+  Welcome: undefined
+  Login: undefined
   Demo: NavigatorScreenParams<DemoTabParamList>
-  SignUp: NavigatorScreenParams<{}>
-  SignUpConfirmation: NavigatorScreenParams<{}>
-  // 🔥 Your screens go here
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  SignUp: undefined
+  SignUpConfirmation: undefined
+  Overview: NavigatorScreenParams<OverviewTabParamList>
+  Account: { accountId: number }
 }
 
 type ScreenConfig = {
   name: keyof AppStackParamList
   component: React.ComponentType<any>
+  initialParams?: Record<string, unknown>
 }
 
 /**
@@ -68,7 +70,7 @@ const AppStack = () => {
 
   const getInitialRoute = () => {
     if (!isAuthenticated) return "Login"
-    return isUserConfirmed ? "Welcome" : "SignUpConfirmation"
+    return isUserConfirmed ? "Overview" : "SignUpConfirmation"
   }
 
   const getScreens = (): ScreenConfig[] => {
@@ -85,6 +87,8 @@ const AppStack = () => {
 
     return [
       { name: "Welcome", component: WelcomeScreen },
+      { name: "Overview", component: OverviewNavigator },
+      { name: "Account", component: AccountScreen, initialParams: { accountId: null } },
       { name: "Demo", component: DemoNavigator },
     ]
   }
@@ -98,8 +102,8 @@ const AppStack = () => {
       }}
       initialRouteName={getInitialRoute()}
     >
-      {getScreens().map(({ name, component }) => (
-        <Stack.Screen key={name} name={name} component={component} />
+      {getScreens().map(({ name, component, initialParams }) => (
+        <Stack.Screen key={name} name={name} component={component} initialParams={initialParams} />
       ))}
     </Stack.Navigator>
   )

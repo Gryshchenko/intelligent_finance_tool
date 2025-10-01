@@ -3,13 +3,13 @@ import { ICategoryService } from 'interfaces/ICategoryService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IIncomeService } from 'interfaces/IIncomeService';
 import { IOverview } from 'tenpercent/shared/src/interfaces/IOverview';
-import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import Utils from 'src/utils/Utils';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';
 
 export default class OverviewService extends LoggerBase {
     protected accountService: IAccountService;
@@ -30,7 +30,7 @@ export default class OverviewService extends LoggerBase {
         categories,
         incomes,
     }: {
-        accounts: IAccount[] | undefined;
+        accounts: IAccountListItem[] | undefined;
         categories: ICategory[] | undefined;
         incomes: IIncome[] | undefined;
     }): IOverview {

@@ -4,6 +4,7 @@ export enum ErrorCode {
     UNEXPECTED_PROPERTY = 1,
     UNKNOWN_ERROR = 2,
     REQUEST_TIMEOUT_ERROR = 3,
+    QUERY_DATA_ERROR = 4,
 
     // 1000–1999: Data validation
     EMAIL_INVALID_ERROR = 1000,

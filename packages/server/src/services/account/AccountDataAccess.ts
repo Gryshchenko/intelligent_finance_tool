@@ -11,6 +11,7 @@ import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
+import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';
 
 export default class AccountDataAccess extends LoggerBase implements IAccountDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -51,12 +52,13 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
         }
     }
 
-    async getAccounts(userId: number): Promise<IAccount[] | undefined> {
+    async getAccounts(userId: number): Promise<IAccountListItem[] | undefined> {
         try {
             this._logger.info(`Fetching all accounts for userId: ${userId}`);
 
-            const data = await this.getAccountBaseQuery()
-                .innerJoin('currencies', 'accounts.currencyId', 'currencies.currencyId')
+            const data = await this._db
+                .engine()('accounts')
+                .select('accounts.accountId', 'accounts.amount', 'accounts.accountName', 'accounts.currencyId')
                 .where({ userId, status: AccountStatusType.Enable });
 
             if (!data.length) {
@@ -167,12 +169,10 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             .engine()('accounts')
             .select(
                 'accounts.accountId',
-                'accounts.userId',
                 'accounts.amount',
                 'accounts.accountName',
                 'accounts.currencyId',
                 'currencies.currencyCode',
-                'currencies.currencyName',
                 'currencies.symbol',
             );
     }

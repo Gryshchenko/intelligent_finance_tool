@@ -326,6 +326,7 @@ describe('POST /register/signup', () => {
                 email: mail,
                 status: UserStatus.NO_VERIFIED,
                 token: expect.any(String),
+                tokenLong: expect.any(String),
                 userId: expect.any(Number),
             },
             errors: [],

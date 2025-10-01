@@ -21,6 +21,7 @@ import "./utils/gestureHandler"
 import { useEffect, useState } from "react"
 import { useFonts } from "expo-font"
 import * as Linking from "expo-linking"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 
@@ -45,18 +46,11 @@ const config = {
     Welcome: "welcome",
     SignUp: "signup",
     SignUpConfirmation: "signupconfirmation",
-    // Demo: {
-    //   screens: {
-    //     DemoShowroom: {
-    //       path: "showroom/:queryIndex?/:itemIndex?",
-    //     },
-    //     DemoDebug: "debug",
-    //     DemoPodcastList: "podcast",
-    //     DemoCommunity: "community",
-    //   },
-    // },
+    Overview: "overview",
   },
 }
+
+const queryClient = new QueryClient()
 
 /**
  * This is the root component of our app.
@@ -100,11 +94,13 @@ export function App() {
       <KeyboardProvider>
         <AuthProvider>
           <ThemeProvider>
-            <AppNavigator
-              linking={linking}
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
+            <QueryClientProvider client={queryClient}>
+              <AppNavigator
+                linking={linking}
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+              />
+            </QueryClientProvider>
           </ThemeProvider>
         </AuthProvider>
       </KeyboardProvider>

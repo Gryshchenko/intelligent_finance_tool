@@ -1,7 +1,7 @@
 import { ITransactionDataAccess } from 'interfaces/ITransactionDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ITransaction } from 'interfaces/ITransaction';
+import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { DBError } from 'src/utils/errors/DBError';
 import Utils from 'src/utils/Utils';
@@ -10,6 +10,9 @@ import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { IPagination } from 'interfaces/IPagination';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
+import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
+import { parseSortBy } from 'src/utils/validation/parseSortBy';
 
 export default class TransactionDataAccess extends LoggerBase implements ITransactionDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -55,20 +58,54 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         userId,
         limit = 20,
         cursor,
-    }: {
-        userId: number;
-        limit: number;
-        cursor: number;
-    }): Promise<IPagination<ITransaction | null>> {
+        accountId,
+        categoryId,
+        incomeId,
+        orderBy,
+    }: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>> {
         try {
             this._logger.info(`Fetching all transactions for userId: ${userId}`);
+            const cleanFilters =
+                Object.fromEntries(
+                    Object.entries({
+                        'transactions.accountId': accountId,
+                        'transactions.categoryId': categoryId,
+                        'transactions.incomeId': incomeId,
+                    }).filter(([_, value]) => value !== undefined),
+                ) ?? {};
+            const orderArr = parseSortBy(orderBy as string, ['amount', 'createAt']);
 
-            const query = this.getTransactionBaseQuery()
-                .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
-                .where({ userId });
+            const query = this._db
+                .engine()('transactions')
+                .select<ITransactionListItem[]>(
+                    'transactions.transactionId',
+                    'transactions.amount',
+                    'transactions.description',
+                    'transactions.createAt',
+                    'transactions.currencyId',
+                    'transactions.targetAccountId',
+                    'transactions.transactionTypeId',
+                    'incomes.incomeName',
+                    'categories.categoryName',
+                    'sourceAccount.accountName',
+                    'targetAccount.accountName as targetAccountName',
+                )
+                .leftJoin('incomes', 'transactions.incomeId', 'incomes.incomeId')
+                .leftJoin('categories', 'transactions.categoryId', 'categories.categoryId')
+                .leftJoin({ sourceAccount: 'accounts' }, 'transactions.accountId', 'sourceAccount.accountId')
+                .leftJoin({ targetAccount: 'accounts' }, 'transactions.targetAccountId', 'targetAccount.accountId')
+                .where({
+                    'transactions.userId': userId,
+                    ...cleanFilters,
+                });
 
             if (cursor) {
                 query.andWhere('transactions.transactionId', '>', cursor);
+            }
+            if (Utils.isArrayNotEmpty(orderArr)) {
+                for (const { column, order } of orderArr) {
+                    query.orderBy(`transactions.${column}`, order);
+                }
             }
 
             query.limit(limit);
@@ -92,6 +129,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             );
             throw new DBError({
                 message: `Fetching transactions failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -101,7 +139,23 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             this._logger.info(`Fetching transaction with transactionId: ${transactionId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await this.getTransactionBaseQuery(query)
+            const data = await query('transactions')
+                .select(
+                    'transactions.transactionId',
+                    'transactions.amount',
+                    'transactions.categoryId',
+                    'transactions.accountId',
+                    'transactions.incomeId',
+                    'transactions.description',
+                    'transactions.createAt',
+                    'transactions.updatedAt',
+                    'transactions.currencyId',
+                    'transactions.targetAccountId',
+                    'transactions.transactionTypeId',
+                    'currencies.currencyCode',
+                    'currencies.currencyName',
+                    'currencies.symbol',
+                )
                 .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
                 .where({ userId, transactionId })
                 .first();
@@ -173,6 +227,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             );
             throw new DBError({
                 message: `Delete transaction failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -197,6 +252,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             );
             throw new DBError({
                 message: `Delete transactions for accountId failed due to a database error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
             });
         }
     }
@@ -223,24 +279,5 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             'updatedAt',
         ]);
         return allowedProperties;
-    }
-
-    protected getTransactionBaseQuery(trx = this._db.engine()) {
-        return trx('transactions').select(
-            'transactions.transactionId',
-            'transactions.amount',
-            'transactions.categoryId',
-            'transactions.accountId',
-            'transactions.incomeId',
-            'transactions.description',
-            'transactions.createAt',
-            'transactions.updatedAt',
-            'transactions.currencyId',
-            'transactions.targetAccountId',
-            'transactions.transactionTypeId',
-            'currencies.currencyCode',
-            'currencies.currencyName',
-            'currencies.symbol',
-        );
     }
 }

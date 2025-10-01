@@ -1,9 +1,9 @@
 import { ICategory } from 'interfaces/ICategory';
-import { IAccount } from 'interfaces/IAccount';
 import { IIncome } from 'interfaces/IIncome';
+import { IAccountListItem } from 'interfaces/IAccountListItem';
 
 export interface IOverview {
-    accounts: IAccount[] | [];
+    accounts: IAccountListItem[] | [];
     categories: ICategory[] | [];
     incomes: IIncome[] | [];
 }

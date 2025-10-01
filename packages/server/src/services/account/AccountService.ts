@@ -8,6 +8,7 @@ import Utils from 'src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { DBError } from 'src/utils/errors/DBError';
+import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';
 
 export default class AccountService extends LoggerBase implements IAccountService {
     private readonly _accountDataAccess: IAccountDataAccess;
@@ -49,7 +50,7 @@ export default class AccountService extends LoggerBase implements IAccountServic
             throw e;
         }
     }
-    async getAccounts(userId: number): Promise<IAccount[] | undefined> {
+    async getAccounts(userId: number): Promise<IAccountListItem[] | undefined> {
         return await this._accountDataAccess.getAccounts(userId);
     }
     async deleteAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean> {

@@ -1,5 +1,5 @@
 services:
-    sl-web-server-front-end:
+    tp-ten-percent-service:
         build:
             context: ../../
             dockerfile: docker/development/Dockerfile

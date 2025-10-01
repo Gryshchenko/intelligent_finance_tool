@@ -8,5 +8,6 @@ export default tseslint.config(tseslint.configs.strict, tseslint.configs.stylist
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-extraneous-class': 'off',
         '@typescript-eslint/no-require-imports': 'off',
+        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
 });

@@ -8,7 +8,7 @@ import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
 import Utils from 'src/utils/Utils';
-import { ITransaction } from 'interfaces/ITransaction';
+import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 
 export class TransactionController {
     private static readonly logger = Logger.Of('TransactionController');
@@ -66,10 +66,20 @@ export class TransactionController {
     public static async getAll(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
+            const accountId = Utils.greaterThen0(Number(req.query.accountId)) ? Number(req.query.accountId) : undefined;
+            const categoryId = Utils.greaterThen0(Number(req.query.categoryId)) ? Number(req.query.categoryId) : undefined;
+            const incomeId = Utils.greaterThen0(Number(req.query.incomeId)) ? Number(req.query.incomeId) : undefined;
+            const orderBy: string | undefined = Utils.isNotEmpty(req.query?.orderBy as string)
+                ? (String(req.query?.orderBy) as string)
+                : undefined;
             const { data, limit, cursor } = await TransactionServiceBuilder.build().getTransactions({
-                userId: req.user?.userId as number,
+                userId: Number(req.user?.userId),
                 limit: Number(req.query.limit),
                 cursor: Number(req.query.cursor),
+                accountId,
+                categoryId,
+                incomeId,
+                orderBy,
             });
             const transactionCount = data?.length ?? 0;
             if (Utils.isNull(data) || !Utils.greaterThen0(transactionCount)) {
@@ -87,14 +97,9 @@ export class TransactionController {
                 const response = {
                     limit,
                     cursor,
-                    data: data.map((transaction: ITransaction | null) => ({
+                    data: data.map((transaction: ITransactionListItem | null) => ({
                         transactionId: transaction?.transactionId,
-                        accountId: transaction?.accountId,
-                        targetAccountId: transaction?.targetAccountId,
-                        incomeId: transaction?.incomeId,
-                        categoryId: transaction?.categoryId,
                         currencyId: transaction?.currencyId,
-                        transactionTypeId: transaction?.transactionTypeId,
                         amount: transaction?.amount,
                         description: transaction?.description,
                         createAt: transaction?.createAt,

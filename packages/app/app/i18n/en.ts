@@ -100,6 +100,11 @@ const en = {
     publicNameFieldPlaceholder: "Enter your public name",
     confirmationCodeFieldLabel: "Confirmation code",
     confirmationCodeFieldPlaceholder: "Enter confirmation code",
+    main: "Main",
+    balance: "Balance",
+    expenses: "Expenses",
+    history: "History",
+    settings: "Settings",
   },
   welcomeScreen: {
     postscript:
