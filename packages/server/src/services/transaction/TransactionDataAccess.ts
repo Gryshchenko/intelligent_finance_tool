@@ -8,7 +8,7 @@ import Utils from 'src/utils/Utils';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
-import { IPagination } from 'interfaces/IPagination';
+import { IPagination } from 'tenpercent/shared/src/interfaces/IPagination';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
@@ -100,7 +100,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                 });
 
             if (cursor) {
-                query.andWhere('transactions.transactionId', '>', cursor);
+                query.andWhere('transactions.transactionId', '<', cursor);
             }
             if (Utils.isArrayNotEmpty(orderArr)) {
                 for (const { column, order } of orderArr) {
@@ -117,10 +117,11 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             } else {
                 this._logger.info(`Fetched ${data.length} transactions for userId: ${userId}`);
             }
+            const nextCursor = data?.[data.length - 1]?.transactionId ?? null;
 
             return {
                 data: Utils.greaterThen0(data?.length) ? data : [],
-                cursor,
+                cursor: nextCursor,
                 limit,
             };
         } catch (e) {

@@ -1,5 +1,4 @@
 import express, { NextFunction, Request, Response } from 'express';
-import http from 'http';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
@@ -23,14 +22,16 @@ import Logger from 'helper/logger/Logger';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import * as process from 'node:process';
+import { createServer } from 'src/createServer';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const app = express();
 const port = getConfig().appPort ?? 3000;
 
 passportSetup(passport);
 swaggerInit(app);
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== '') {
     const limiter = rateLimit({
         windowMs: 15 * 60 * 1000, // 15 min
         limit: 100,
@@ -49,8 +50,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-app.use(checkOriginReferer);
+// app.use(checkOriginReferer);
 app.use(checkCors());
+
 app.use(express.json({ limit: '5kb' }));
 app.use(express.urlencoded({ limit: '5kb', extended: true }));
 app.use(express.json());
@@ -66,7 +68,7 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
 });
 
-const httpsServer = http.createServer(app);
+const httpsServer = createServer(app);
 
 if (process.env.NODE_ENV !== 'test') {
     httpsServer.listen(port, async () => {

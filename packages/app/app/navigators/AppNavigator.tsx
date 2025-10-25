@@ -11,7 +11,6 @@ import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navig
 import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
 import { OverviewNavigator, OverviewTabParamList } from "@/navigators/OverviewNavigator"
-import { AccountScreen } from "@/screens/AccountScreens/AccountScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { LoginScreen } from "@/screens/LoginScreen"
 import { SignUpConfirmationScreen } from "@/screens/SignUpConfirmationScreen"
@@ -32,13 +31,12 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
  *   https://reactnavigation.org/docs/typescript/#organizing-types
  */
 export interface AppStackParamList extends ParamListBase {
-  Welcome: undefined
-  Login: undefined
-  Demo: NavigatorScreenParams<DemoTabParamList>
-  SignUp: undefined
-  SignUpConfirmation: undefined
-  Overview: NavigatorScreenParams<OverviewTabParamList>
-  Account: { accountId: number }
+  welcome: undefined
+  login: undefined
+  demo: NavigatorScreenParams<DemoTabParamList>
+  signUp: undefined
+  signUpConfirmation: undefined
+  overview: NavigatorScreenParams<OverviewTabParamList>
 }
 
 type ScreenConfig = {
@@ -69,27 +67,26 @@ const AppStack = () => {
   } = useAppTheme()
 
   const getInitialRoute = () => {
-    if (!isAuthenticated) return "Login"
-    return isUserConfirmed ? "Overview" : "SignUpConfirmation"
+    if (!isAuthenticated) return "login"
+    return isUserConfirmed ? "overview" : "signUpConfirmation"
   }
 
   const getScreens = (): ScreenConfig[] => {
     if (!isAuthenticated) {
       return [
-        { name: "Login", component: LoginScreen },
-        { name: "SignUp", component: SignUpScreen },
+        { name: "login", component: LoginScreen },
+        { name: "signUp", component: SignUpScreen },
       ]
     }
 
     if (!isUserConfirmed) {
-      return [{ name: "SignUpConfirmation", component: SignUpConfirmationScreen }]
+      return [{ name: "signUpConfirmation", component: SignUpConfirmationScreen }]
     }
 
     return [
-      { name: "Welcome", component: WelcomeScreen },
-      { name: "Overview", component: OverviewNavigator },
-      { name: "Account", component: AccountScreen, initialParams: { accountId: null } },
-      { name: "Demo", component: DemoNavigator },
+      { name: "welcome", component: WelcomeScreen },
+      { name: "overview", component: OverviewNavigator },
+      { name: "demo", component: DemoNavigator },
     ]
   }
 

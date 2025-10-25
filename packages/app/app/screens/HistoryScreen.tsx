@@ -1,22 +1,55 @@
 import { FC } from "react"
-import { TextStyle } from "react-native"
+import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
+import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 
-import { Screen } from "@/components/Screen"
-import { Text } from "@/components/Text"
+import { Transactions } from "@/components/Transactions"
+import { useAppQuery } from "@/hooks/useAppQuery"
+import { translate } from "@/i18n/translate"
 import { MainTabScreenProps } from "@/navigators/OverviewNavigator"
-import { useAppTheme } from "@/theme/context"
-import { $styles } from "@/theme/styles"
-import type { ThemedStyle } from "@/theme/types"
+import { GenericListScreen } from "@/screens/GenericListScreen"
+import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { TransactionsService } from "@/services/TransactionsService"
+import { Logger } from "@/utils/logger/Logger"
 
-export const HistoryScreen: FC<MainTabScreenProps<"History">> = function HistoryScreen(_props) {
-  const { themed } = useAppTheme()
+async function fetchTransactions(
+  cursor: number,
+  limit: number,
+): Promise<IPagination<ITransactionListItem> | undefined> {
+  try {
+    const transactionsService = TransactionsService.instance()
+    const response = await transactionsService.doGetTransactions({
+      cursor,
+      limit,
+    })
+    switch (response.kind) {
+      case GeneralApiProblemKind.Ok: {
+        return response.data as IPagination<ITransactionListItem>
+      }
+      default: {
+        return undefined
+      }
+    }
+  } catch (e) {
+    Logger.Of("FetchTransactions").error(
+      `Fetch history failed due reason: ${(e as { message: string }).message}`,
+    )
+    return undefined
+  }
+}
+export const HistoryScreen: FC<MainTabScreenProps<"history">> = function HistoryScreen(_props) {
+  const { isError, data, isPending } = useAppQuery<IPagination<ITransactionListItem> | undefined>(
+    ["history"],
+    async () => fetchTransactions(0, 10),
+  )
+
   return (
-    <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>
-      <Text preset="heading" tx="demoCommunityScreen:title" style={themed($title)} />
-    </Screen>
+    <GenericListScreen
+      name={translate("common:history")}
+      isError={isError}
+      isPending={isPending}
+      data={data}
+      fetch={({ cursor, limit }) => fetchTransactions(cursor, limit)}
+      RenderComponent={Transactions}
+    />
   )
 }
-
-const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginBottom: spacing.sm,
-})

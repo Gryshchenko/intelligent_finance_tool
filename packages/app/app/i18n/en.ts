@@ -84,6 +84,8 @@ const en = {
     success: "Your email has been successfully confirmed.",
   },
   common: {
+    loading: "Loading",
+    failedLoad: "Failed to load",
     error: "Error",
     info: "Info",
     warning: "Warning",
@@ -102,9 +104,28 @@ const en = {
     confirmationCodeFieldPlaceholder: "Enter confirmation code",
     main: "Main",
     balance: "Balance",
+    incomes: "Incomes",
     expenses: "Expenses",
+    accounts: "Accounts",
+    unknown: "unknown",
+    transfer: "Transfer",
     history: "History",
     settings: "Settings",
+    returnBack: "Return back",
+    transactions: "Transactions",
+    selectAccount: "Select account",
+    date: "Date",
+    selectOption: "Select option",
+  },
+  transactionScreen: {
+    from: "from",
+    to: "to",
+    description: "Description",
+    deleteTitle: "Delete Transaction",
+    deleteMessage:
+      "Are you sure you want to delete this transaction? This action cannot be undone.",
+    deleteSuccess: "Transaction has been successfully deleted.",
+    deleteFailed: "Could not delete the transaction. Please try again.",
   },
   welcomeScreen: {
     postscript:
@@ -122,10 +143,15 @@ const en = {
   },
   emptyStateComponent: {
     generic: {
-      heading: "So empty... so sad",
-      content: "No data found yet. Try clicking the button to refresh or reload the app.",
-      button: "Let's try this again",
+      heading: "Nothing here yet",
+      content: "It looks like there’s no data available. You can go back and try again later.",
+      button: "Go back",
     },
+  },
+  pendingStateComponent: {
+    heading: "Please wait a moment…",
+    content: "No data found yet. We’re getting things ready for you.",
+    button: "Cancel and go back",
   },
   errors: {
     invalidEmail: "Invalid email address.",

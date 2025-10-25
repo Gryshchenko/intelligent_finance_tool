@@ -14,7 +14,7 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IAccountService } from 'interfaces/IAccountService';
 import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
-import { IPagination } from 'interfaces/IPagination';
+import { IPagination } from 'tenpercent/shared/src/interfaces/IPagination';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';

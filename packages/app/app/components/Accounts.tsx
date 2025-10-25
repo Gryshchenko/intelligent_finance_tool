@@ -1,14 +1,17 @@
 import { FC } from "react"
-import { ViewStyle } from "react-native"
+import { StyleProp, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
+import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { Text } from "@/components/Text"
+import { useCurrency } from "@/context/CurrencyContext"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IAccountsPros {
   accounts: IAccountListItem[]
@@ -18,15 +21,17 @@ export const Accounts: FC<IAccountsPros> = function Accounts(_props) {
   const { accounts } = _props
   const navigation = useNavigation()
   const { themed } = useAppTheme()
+  const { getCurrencySymbol } = useCurrency()
 
   if (accounts.length <= 0) {
-    return <EmptyState />
+    return <EmptyState style={$containerStyleOverride} buttonOnPress={() => navigation.goBack()} />
   }
 
   const onPress = (accountId: number, accountName: string) => {
-    navigation
-      .getParent()
-      ?.navigate("Accounts", { screen: "Account", params: { accountId, accountName } })
+    navigation.getParent()?.navigate("balances", {
+      screen: "transactions",
+      params: { id: accountId, name: accountName, type: TransactionFieldType.Account },
+    })
   }
 
   return (
@@ -40,7 +45,7 @@ export const Accounts: FC<IAccountsPros> = function Accounts(_props) {
             onPress={() => onPress(accountId, accountName)}
             RightComponent={
               <Text style={themed([$centerAlign])}>
-                {amount} {currencyId}
+                {CurrencyUtils.formatWithDelimiter(amount, getCurrencySymbol(currencyId))}
               </Text>
             }
           >
@@ -58,4 +63,8 @@ const $centerAlign: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   alignContent: "center",
   flexDirection: "column",
+  justifyContent: "center",
 })
+const $containerStyleOverride: StyleProp<ViewStyle> = {
+  margin: "auto",
+}

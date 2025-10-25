@@ -80,7 +80,7 @@ export const SignUpConfirmationScreen: FC<SignUpConfirmationScreenProps> = () =>
   useEffect(() => {
     let timer: NodeJS.Timeout
     if (isResendDisabled && resendTimer > 0) {
-      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
+      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000) as unknown as NodeJS.Timeout
     } else if (resendTimer === 0) {
       setIsResendDisabled(false)
       setResendTimer(60)

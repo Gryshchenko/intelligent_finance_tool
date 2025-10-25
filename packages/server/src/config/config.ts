@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const caCert = readFileSync('./cert.pem').toString();
+const caCert = readFileSync('./src/certs/cert.pem').toString();
 
 interface IConfig {
     appName: string;

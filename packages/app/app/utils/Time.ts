@@ -3,6 +3,20 @@ import { DateTime, Interval } from "luxon"
 export enum TimeDuration {
   Hour = "hour",
 }
+export enum DateFormat {
+  /** 2025-09-27 */
+  YYYY_MM_DD = "yyyy-MM-dd",
+  /** 27/09/2025 */
+  DD_MM_YYYY_SLASH = "dd/MM/yyyy",
+  /** 27.09.2025 */
+  DD_MM_YYYY_DOT = "dd.MM.yyyy",
+  /** 27 September 2025 */
+  FULL_DATE = "dd LLLL yyyy",
+  /** 17:14 */
+  TIME_ONLY = "HH:mm",
+  /** 27 Sep 17:14 */
+  SHORT_WITH_TIME = "dd LLL HH:mm",
+}
 
 export class Time {
   public static getDiff({
@@ -21,6 +35,13 @@ export class Time {
 
     return interval.length(duration)
   }
+
+  public static formatDate(isoString: string, format: DateFormat): string {
+    const date = DateTime.fromISO(isoString)
+    if (!date.isValid) return ""
+    return date.toFormat(format)
+  }
+
   public static getSeconds(timestamp?: number | string | Date): number {
     const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone
     if (typeof timestamp === "number") {

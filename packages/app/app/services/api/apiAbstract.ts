@@ -99,10 +99,10 @@ export abstract class ApiAbstract {
     }
   }
 
-  private getAuthError<T>(): GeneralApiProblem<T> {
+  private getAuthError<T>(msg: string): GeneralApiProblem<T> {
     return {
       kind: GeneralApiProblemKind.Unauthorized,
-      errors: [{ errorCode: ErrorCode.AUTH_ERROR }],
+      errors: [{ errorCode: ErrorCode.AUTH_ERROR, msg }],
       status: ResponseStatusType.APP,
       data: undefined,
     }
@@ -117,6 +117,7 @@ export abstract class ApiAbstract {
   ): Promise<GeneralApiProblem<T>> {
     try {
       const response: ApiResponse<IResponse<T>> = await this.apisauce.post(url, body)
+      console.log(response)
       if (response.ok) {
         return {
           kind: GeneralApiProblemKind.Ok,
@@ -147,7 +148,7 @@ export abstract class ApiAbstract {
   ): Promise<GeneralApiProblem<T>> {
     const { token } = options
     if (!this.isAuthTokenExist(token)) {
-      return this.getAuthError<T>()
+      return this.getAuthError<T>("Token not exist")
     }
 
     return await this.withRetry(
@@ -169,9 +170,32 @@ export abstract class ApiAbstract {
     },
   ): Promise<GeneralApiProblem<T>> {
     const { token } = options
-    if (!this.isAuthTokenExist(token)) return this.getAuthError()
+    if (!this.isAuthTokenExist(token)) return this.getAuthError("Token not exist")
     return await this.withRetry(async () => {
       const response: ApiResponse<IResponse<T>> = await this.apisauce.get(
+        url,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      return response
+    })
+  }
+  protected async authDelete<T>(
+    url: string,
+    options: {
+      token: string
+    } = {
+      token: AuthService.instance().token as string,
+    },
+  ): Promise<GeneralApiProblem<T>> {
+    const { token } = options
+    if (!this.isAuthTokenExist(token)) return this.getAuthError("Token not exist")
+    return await this.withRetry(async () => {
+      const response: ApiResponse<IResponse<T>> = await this.apisauce.delete(
         url,
         {},
         {

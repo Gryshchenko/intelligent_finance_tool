@@ -8,11 +8,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Icon } from "@/components/Icon"
+import { CurrencyProvider } from "@/context/CurrencyContext"
 import { translate } from "@/i18n/translate"
-import { AccountsStackNavigator, AccountStackParamList } from "@/navigators/AccountsStackNavigator"
+import { BalancesStackNavigator, AccountStackParamList } from "@/navigators/BalancesStackNavigator"
 import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
 import { ExpensesScreen } from "@/screens/ExpensesScreen"
 import { HistoryScreen } from "@/screens/HistoryScreen"
+import { IncomesScreen } from "@/screens/IncomeScreens/IncomeScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -20,11 +22,12 @@ import type { ThemedStyle } from "@/theme/types"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type OverviewTabParamList = {
-  Accounts: NavigatorScreenParams<AccountStackParamList>
-  Expenses: undefined
-  History: undefined
-  Settings: undefined
-  Demo: undefined
+  incomes: undefined
+  balances: NavigatorScreenParams<AccountStackParamList> | {}
+  expenses: undefined
+  history: undefined
+  settings: undefined
+  demo: undefined
 } & ParamListBase
 
 /**
@@ -54,7 +57,7 @@ export function OverviewNavigator() {
   } = useAppTheme()
 
   return (
-    <>
+    <CurrencyProvider>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -67,8 +70,22 @@ export function OverviewNavigator() {
         }}
       >
         <Tab.Screen
-          name="Accounts"
-          component={AccountsStackNavigator}
+          name="incomes"
+          component={IncomesScreen}
+          options={{
+            tabBarLabel: translate("common:incomes"),
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                icon="components"
+                color={focused ? colors.tint : colors.tintInactive}
+                size={30}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="balances"
+          component={BalancesStackNavigator}
           options={{
             tabBarLabel: translate("common:balance"),
             tabBarIcon: ({ focused }) => (
@@ -82,7 +99,7 @@ export function OverviewNavigator() {
         />
 
         <Tab.Screen
-          name="Expenses"
+          name="expenses"
           component={ExpensesScreen}
           options={{
             tabBarLabel: translate("common:expenses"),
@@ -97,7 +114,7 @@ export function OverviewNavigator() {
         />
 
         <Tab.Screen
-          name="History"
+          name="history"
           component={HistoryScreen}
           options={{
             tabBarLabel: translate("common:history"),
@@ -108,7 +125,7 @@ export function OverviewNavigator() {
         />
 
         <Tab.Screen
-          name="Settings"
+          name="settings"
           component={SettingsScreen}
           options={{
             tabBarLabel: translate("common:settings"),
@@ -129,7 +146,7 @@ export function OverviewNavigator() {
           }}
         />
       </Tab.Navigator>
-    </>
+    </CurrencyProvider>
   )
 }
 

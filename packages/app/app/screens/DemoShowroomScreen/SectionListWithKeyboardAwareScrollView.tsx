@@ -4,7 +4,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
 
 import { DEFAULT_BOTTOM_OFFSET } from "@/components/Screen"
 
-interface SectionType<ItemType> {
+export interface SectionType<ItemType> {
   name: string
   description: string
   data: ItemType[]
@@ -18,7 +18,7 @@ type SectionListWithKeyboardAwareScrollViewProps<ItemType> = SectionListProps<It
   /* The sections to be rendered in the list */
   sections: SectionType<ItemType>[]
   /* Function to render the header for each section */
-  renderSectionHeader: ({ section }: { section: SectionType<ItemType> }) => React.ReactNode
+  renderSectionHeader?: ({ section }: { section: SectionType<ItemType> }) => React.ReactNode
 }
 
 function SectionListWithKeyboardAwareScrollView<ItemType = any>(

@@ -8,7 +8,7 @@ import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
-export const SettingsScreen: FC<MainTabScreenProps<"Settings">> = function SettingsScreen(_props) {
+export const SettingsScreen: FC<MainTabScreenProps<"settings">> = function SettingsScreen(_props) {
   const { themed } = useAppTheme()
   return (
     <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>

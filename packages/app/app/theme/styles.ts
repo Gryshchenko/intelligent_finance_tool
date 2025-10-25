@@ -9,10 +9,18 @@ export const $styles = {
   flexWrap: { flexWrap: "wrap" } as ViewStyle,
 
   container: {
-    paddingTop: spacing.lg + spacing.xl,
+    paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
+    height: "100%",
+    width: "100%",
   } as ViewStyle,
 
+  screen: {
+    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    height: "100%",
+    width: "100%",
+  } as ViewStyle,
   toggleInner: {
     width: "100%",
     height: "100%",

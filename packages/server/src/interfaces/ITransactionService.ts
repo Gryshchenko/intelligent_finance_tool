@@ -1,7 +1,7 @@
 import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { IPatchTransaction } from './IPatchTransaction';
-import { IPagination } from 'interfaces/IPagination';
+import { IPagination } from 'tenpercent/shared/src/interfaces/IPagination';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
