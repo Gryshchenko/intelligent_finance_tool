@@ -1,6 +1,4 @@
 import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
-import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
-import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"

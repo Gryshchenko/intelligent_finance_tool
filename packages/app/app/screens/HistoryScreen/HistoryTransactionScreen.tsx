@@ -6,35 +6,11 @@ import { Transaction } from "@/components/Transaction"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
-import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { TransactionsService } from "@/services/TransactionsService"
-import { Logger } from "@/utils/logger/Logger"
-
-export async function fetchTransaction(id: number | string): Promise<ITransaction | undefined> {
-  try {
-    const transactionsService = TransactionsService.instance()
-    const response = await transactionsService.doGetTransaction({
-      id,
-    })
-    switch (response.kind) {
-      case GeneralApiProblemKind.Ok: {
-        return response.data as ITransaction
-      }
-      default: {
-        return undefined
-      }
-    }
-  } catch (e) {
-    Logger.Of("FetchTransaction").error(
-      `Fetch transaction failed due reason: ${(e as { message: string }).message}`,
-    )
-    return undefined
-  }
-}
+import { fetchTransaction } from "@/screens/TransactionsScreen/TransactionScreen"
 
 type Props = NativeStackScreenProps<OverviewTabParamList, "transaction">
 
-export const TransactionScreen = function TransactionsScreen(_props: Props) {
+export const HistoryTransactionScreen = function HistoryTransactionScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string }
   const navigation = useNavigation()
   const { id, name } = params
@@ -51,7 +27,7 @@ export const TransactionScreen = function TransactionsScreen(_props: Props) {
       props={{
         data,
       }}
-      onBack={() => navigation.goBack()}
+      onBack={() => navigation.getParent()?.navigate("overview", { screen: "history", params: {} })}
       RenderComponent={Transaction}
     />
   )

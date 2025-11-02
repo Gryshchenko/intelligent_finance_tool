@@ -2,7 +2,7 @@ import { ViewStyle } from "react-native"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 
 import { Dropdown } from "@/components/Dropdown"
-import { fetchIncomes } from "@/screens/IncomeScreens/IncomeScreen"
+import { fetchIncomes } from "@/screens/IncomeScreens/IncomesScreen"
 
 type IncomeDropdownProps = {
   value?: number

@@ -10,11 +10,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "@/components/Icon"
 import { CurrencyProvider } from "@/context/CurrencyContext"
 import { translate } from "@/i18n/translate"
-import { BalancesStackNavigator, AccountStackParamList } from "@/navigators/BalancesStackNavigator"
+import { BalancesStackNavigator, BalanceStackParamList } from "@/navigators/BalancesStackNavigator"
+import { HistoryStackNavigator, HistoryStackParamList } from "@/navigators/HistoryStackNavigator"
+import { IncomesStackNavigator, IncomesStackParamList } from "@/navigators/IncomesStackNavigator"
 import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
 import { ExpensesScreen } from "@/screens/ExpensesScreen"
-import { HistoryScreen } from "@/screens/HistoryScreen"
-import { IncomesScreen } from "@/screens/IncomeScreens/IncomeScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -22,10 +22,10 @@ import type { ThemedStyle } from "@/theme/types"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type OverviewTabParamList = {
-  incomes: undefined
-  balances: NavigatorScreenParams<AccountStackParamList> | {}
+  incomes: NavigatorScreenParams<IncomesStackParamList> | {}
+  balances: NavigatorScreenParams<BalanceStackParamList> | {}
   expenses: undefined
-  history: undefined
+  history: NavigatorScreenParams<HistoryStackParamList> | {}
   settings: undefined
   demo: undefined
 } & ParamListBase
@@ -71,7 +71,7 @@ export function OverviewNavigator() {
       >
         <Tab.Screen
           name="incomes"
-          component={IncomesScreen}
+          component={IncomesStackNavigator}
           options={{
             tabBarLabel: translate("common:incomes"),
             tabBarIcon: ({ focused }) => (
@@ -115,7 +115,7 @@ export function OverviewNavigator() {
 
         <Tab.Screen
           name="history"
-          component={HistoryScreen}
+          component={HistoryStackNavigator}
           options={{
             tabBarLabel: translate("common:history"),
             tabBarIcon: ({ focused }) => (

@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query"
+import { useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from "@tanstack/react-query"
 
 type QueryFn<T> = () => Promise<T>
 
@@ -15,4 +15,12 @@ export function useAppQuery<TData>(
     retry: 1,
     ...options,
   })
+}
+
+export function useInvalidateQuery() {
+  const queryClient = useQueryClient()
+
+  return (keys: (string | readonly unknown[])[]) => {
+    keys.forEach((key) => queryClient.invalidateQueries(Array.isArray(key) ? key : [key]))
+  }
 }

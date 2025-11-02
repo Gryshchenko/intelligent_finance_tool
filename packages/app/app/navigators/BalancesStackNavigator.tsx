@@ -7,7 +7,7 @@ import { TransactionsScreen } from "@/screens/TransactionsScreen/TransactionsScr
 
 const BalancesStack = createNativeStackNavigator()
 
-export interface AccountStackParamList {
+export interface BalanceStackParamList {
   accounts: undefined
   transactions: { id: number; type: TransactionFieldType; name: string }
   transaction: { id: number }

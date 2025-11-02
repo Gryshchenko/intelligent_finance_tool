@@ -1,0 +1,65 @@
+import { useNavigation } from "@react-navigation/native"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import Utils from "tenpercent/shared/src/Utils"
+
+import { IncomeView } from "@/components/IncomeView"
+import { useAppQuery } from "@/hooks/useAppQuery"
+import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
+import { GenericListScreen } from "@/screens/GenericListScreen"
+import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { IncomeService } from "@/services/IncomeService"
+import { ValidationError } from "@/utils/errors/ValidationError"
+import { Logger } from "@/utils/logger/Logger"
+
+export async function fetchIncome(id: number): Promise<IIncome | undefined> {
+  try {
+    if (Utils.isNull(id)) {
+      throw new ValidationError({
+        message: "ID = null",
+      })
+    }
+    const incomeService = IncomeService.instance()
+    const response = await incomeService.doGetIncome(id)
+    switch (response.kind) {
+      case GeneralApiProblemKind.Ok: {
+        return response.data as IIncome
+      }
+      default: {
+        return undefined
+      }
+    }
+  } catch (e) {
+    Logger.Of("FetchIncomes").error(
+      `Fetch incomeId ${id}  failed due reason: ${(e as { message: string }).message}`,
+    )
+    return undefined
+  }
+}
+
+type Props = NativeStackScreenProps<OverviewTabParamList, "view">
+
+export const IncomeViewScreen = function IncomeViewScreen(_props: Props) {
+  const params = _props?.route?.params as { id: number; name: string }
+  const navigation = useNavigation()
+  const { isError, data, isPending } = useAppQuery<IIncome | undefined>("income_account", () =>
+    fetchIncome(params?.id),
+  )
+
+  return (
+    <GenericListScreen
+      name={data?.incomeName ?? ""}
+      isError={isError}
+      isPending={isPending}
+      onBack={() =>
+        navigation.getParent()?.navigate("incomes", {
+          screen: "accounts",
+        })
+      }
+      props={{
+        data,
+      }}
+      RenderComponent={IncomeView}
+    />
+  )
+}

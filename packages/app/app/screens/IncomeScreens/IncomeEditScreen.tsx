@@ -1,0 +1,32 @@
+import { useNavigation } from "@react-navigation/native"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import Utils from "tenpercent/shared/src/Utils"
+
+import { IncomeEdit } from "@/components/IncomeEdit"
+import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
+import { GenericListScreen } from "@/screens/GenericListScreen"
+
+type Props = NativeStackScreenProps<OverviewTabParamList, "edit">
+
+export const IncomeEditScreen = function IncomeEditScreen(_props: Props) {
+  const params = _props?.route?.params as { id: number; name: string; payload: string }
+  const navigation = useNavigation()
+  const data = Utils.parseObject<IIncome | undefined>(params.payload)
+  return (
+    <GenericListScreen
+      name={data?.incomeName ?? ""}
+      isError={false}
+      isPending={false}
+      onBack={() =>
+        navigation.getParent()?.navigate("incomes", {
+          screen: "accounts",
+        })
+      }
+      props={{
+        data,
+      }}
+      RenderComponent={IncomeEdit}
+    />
+  )
+}

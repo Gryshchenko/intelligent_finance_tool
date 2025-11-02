@@ -12,7 +12,7 @@ import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { TransactionsService } from "@/services/TransactionsService"
 import { Logger } from "@/utils/logger/Logger"
 
-async function fetchTransactions(
+export async function fetchTransactions(
   id: number | undefined,
   type: TransactionFieldType | undefined,
   cursor: number,
@@ -58,10 +58,19 @@ export const TransactionsScreen = function TransactionsScreen(_props: Props) {
       name={name}
       isError={isError}
       isPending={isPending}
-      data={data}
+      props={{
+        onPress: (id: number, name: string) => {
+          navigation.getParent()?.navigate("balances", {
+            screen: "transactions",
+            params: { id, name, type: TransactionFieldType.Account },
+          })
+        },
+        data,
+        fetch: async ({ cursor, limit }) =>
+          await fetchTransactions(undefined, undefined, cursor, limit),
+      }}
       onBack={() => navigation.goBack()}
       RenderComponent={Transactions}
-      fetch={({ cursor, limit }) => fetchTransactions(undefined, undefined, cursor, limit)}
     />
   )
 }

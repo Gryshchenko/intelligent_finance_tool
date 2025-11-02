@@ -33,6 +33,7 @@ export type fetchTransactionType = ({
 interface Props {
   transactions: ITransactionListItem[]
   fetch?: fetchTransactionType
+  onPress?: (id: number, name: string) => void
 }
 
 const getTypeKey = (typeId: TransactionType): string => {
@@ -110,7 +111,7 @@ const groupByDate = (transactions: ITransactionListItem[]): SectionType<ITransac
 }
 
 const TransactionSectionList = forwardRef<SectionList<ITransactionListItem>, Props>(
-  ({ transactions, fetch }, ref) => {
+  ({ transactions, fetch, onPress: onPressHandler }, ref) => {
     const defaultCursor = transactions?.[transactions?.length - 1]?.transactionId ?? 0
     const navigation = useNavigation()
     const { themed } = useAppTheme()
@@ -150,10 +151,9 @@ const TransactionSectionList = forwardRef<SectionList<ITransactionListItem>, Pro
         )
         return
       }
-      navigation.getParent()?.navigate("balances", {
-        screen: "transaction",
-        params: { id: transactionId, name: transactionName },
-      })
+      if (onPressHandler) {
+        onPressHandler(transactionId, transactionName)
+      }
     }
     const renderItem = ({ item: transaction }: { item: ITransactionListItem }) => {
       if (!transaction) return null
@@ -241,4 +241,5 @@ export const $typeLabel: ThemedStyle<TextStyle> = (theme) => ({
   fontWeight: "600",
   marginBottom: 2,
   color: theme.colors.text,
+  textTransform: "capitalize",
 })

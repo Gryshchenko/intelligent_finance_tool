@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { EmptyState } from "@/components/EmptyState"
 import TransactionSectionList, { fetchTransactionType } from "@/components/TransactionSectionList"
@@ -11,10 +10,11 @@ import TransactionSectionList, { fetchTransactionType } from "@/components/Trans
 interface ITransactionsPros {
   data: IPagination<ITransactionListItem> | undefined
   fetch?: fetchTransactionType
+  onPress?: (id: number, name: string) => void
 }
 
 export const Transactions: FC<ITransactionsPros> = function Transactions(_props) {
-  const { data, fetch } = _props
+  const { data, fetch, onPress } = _props
   const navigation = useNavigation()
 
   if (!data || data?.data?.length <= 0) {
@@ -26,16 +26,9 @@ export const Transactions: FC<ITransactionsPros> = function Transactions(_props)
     )
   }
 
-  const onPress = (accountId: number, accountName: string) => {
-    navigation.getParent()?.navigate("Transactions", {
-      screen: "Transaction",
-      params: { id: accountId, name: accountName, type: TransactionType.Income },
-    })
-  }
-
   return (
     <>
-      <TransactionSectionList transactions={data.data} fetch={fetch} />
+      <TransactionSectionList onPress={onPress} transactions={data.data} fetch={fetch} />
     </>
   )
 }

@@ -10,6 +10,33 @@ import { Logger } from "@/utils/logger/Logger"
 export interface CurrencyContextType {
   getCurrency: (currencyId: number) => ICurrency | undefined
   getCurrencySymbol: (currencyId: number) => string
+  currencies: Map<number, ICurrency>
+}
+
+export const fetchCurrencies = async (): Promise<ICurrency[] | undefined> => {
+  try {
+    const currencyService = new CurrencyService()
+    const response = await currencyService.doGetCurrencies()
+    switch (response.kind) {
+      case GeneralApiProblemKind.Ok: {
+        return response.data as ICurrency[]
+      }
+      case GeneralApiProblemKind.BadData:
+      case GeneralApiProblemKind.Unauthorized:
+      case GeneralApiProblemKind.Forbidden: {
+        throw new ValidationError({
+          message: JSON.stringify(response.errors),
+        })
+      }
+      default: {
+        buildGeneralApiBaseHandler(response)
+        return undefined
+      }
+    }
+  } catch (e) {
+    _logger.error("Currency context failed due reason: ", (e as { message: string }).message)
+    return undefined
+  }
 }
 
 export const CurrencyContext = createContext<CurrencyContextType | null>(null)
@@ -41,38 +68,18 @@ export const CurrencyProvider: FC<PropsWithChildren<CurrencyProviderProps>> = ({
   const value = {
     getCurrency,
     getCurrencySymbol,
+    currencies,
   }
 
   useEffect(() => {
     ;(async () => {
-      try {
-        const currencyService = new CurrencyService()
-        const response = await currencyService.doGetCurrencies()
-        switch (response.kind) {
-          case GeneralApiProblemKind.Ok: {
-            const data = response.data as ICurrency[]
-            const result: Map<number, ICurrency> = new Map()
-            data?.forEach((currency) => {
-              result.set(currency.currencyId, currency)
-            })
-            setCurrencies(result)
-            break
-          }
-          case GeneralApiProblemKind.BadData:
-          case GeneralApiProblemKind.Unauthorized:
-          case GeneralApiProblemKind.Forbidden: {
-            throw new ValidationError({
-              message: JSON.stringify(response.errors),
-            })
-            break
-          }
-          default: {
-            buildGeneralApiBaseHandler(response)
-          }
-        }
-      } catch (e) {
-        _logger.error("Currency context failed due reason: ", (e as { message: string }).message)
-      }
+      const data = await fetchCurrencies()
+      if (!data) return
+      const result: Map<number, ICurrency> = new Map()
+      data?.forEach((currency) => {
+        result.set(currency.currencyId, currency)
+      })
+      setCurrencies(result)
     })()
   }, [])
 

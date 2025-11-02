@@ -184,6 +184,26 @@ export abstract class ApiAbstract {
       return response
     })
   }
+  protected async authPatch<T>(
+    url: string,
+    body: Record<string, unknown>,
+    options: {
+      token: string
+    } = {
+      token: AuthService.instance().token as string,
+    },
+  ): Promise<GeneralApiProblem<T>> {
+    const { token } = options
+    if (!this.isAuthTokenExist(token)) return this.getAuthError("Token not exist")
+    return await this.withRetry(async () => {
+      const response: ApiResponse<IResponse<T>> = await this.apisauce.patch(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      return response
+    })
+  }
   protected async authDelete<T>(
     url: string,
     options: {

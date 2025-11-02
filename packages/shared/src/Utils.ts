@@ -6,6 +6,20 @@ export default class Utils {
         return /^\d+$/.test(value);
     }
 
+    public static objectToString(value: Record<string, unknown>): string | undefined {
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            return undefined;
+        }
+    }
+    public static parseObject<T>(value: string): T {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return undefined;
+        }
+    }
     public static parseNumber(v: string): number | null {
         if (Utils.isNotEmpty(v)) {
             const result: number = parseFloat(v);

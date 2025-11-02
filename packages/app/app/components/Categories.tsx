@@ -23,13 +23,6 @@ export const Categories: FC<ICategoriesPros> = function Categories(_props) {
     )
   }
 
-  // const onPress = (accountId: number, accountName: string) => {
-  //   navigation.getParent()?.navigate("Categories", {
-  //     screen: "Transaction",
-  //     params: { id: accountId, name: accountName, type: TransactionType.Income },
-  //   })
-  // }
-
   return <CategorySectionList categories={data} />
 }
 

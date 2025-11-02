@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View, Pressable, FlatList, Modal, ViewStyle, TextStyle } from "react-native"
+import { View, Pressable, FlatList, Modal, ViewStyle, TextStyle, StyleProp } from "react-native"
 
 import { Text } from "@/components/Text"
 import { useAppQuery } from "@/hooks/useAppQuery"
@@ -10,13 +10,13 @@ import { ThemedStyle } from "@/theme/types"
 
 type DropdownProps<T> = {
   queryKey: string
-  fetcher: () => Promise<T[]>
+  fetcher: () => Promise<T[] | undefined>
   value?: string | number
   onChange?: (item: T) => void
   keyExtractor: (item: T) => string
   labelExtractor: (item: T) => string
   labelTx?: TxKeyPath
-  style?: ViewStyle
+  style?: StyleProp<TextStyle>
   disabled?: boolean
   filter?: (items: T[] | undefined) => T[]
 }
@@ -33,7 +33,7 @@ export function Dropdown<T>({
   disabled,
   filter,
 }: DropdownProps<T>) {
-  const { isError, data, isPending } = useAppQuery<T[]>(queryKey, fetcher)
+  const { isError, data, isPending } = useAppQuery<T[] | undefined>(queryKey, fetcher)
   const [isOpen, setIsOpen] = useState(false)
   const { themed } = useAppTheme()
 
@@ -47,7 +47,7 @@ export function Dropdown<T>({
 
   return (
     <View style={style}>
-      {labelTx && <Text preset="formLabel" tx={labelTx} />}
+      {labelTx && <Text size={"xs"} preset="formLabel" tx={labelTx} />}
       <Pressable
         disabled={disabled || isPending || isError}
         style={themed($trigger)}
@@ -128,5 +128,5 @@ const $option: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $optionText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  fontSize: 15,
+  fontSize: 14,
 })

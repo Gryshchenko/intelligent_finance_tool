@@ -84,6 +84,9 @@ const en = {
     success: "Your email has been successfully confirmed.",
   },
   common: {
+    new: "New",
+    name: "Name",
+    currency: "Currency",
     loading: "Loading",
     failedLoad: "Failed to load",
     error: "Error",
@@ -116,6 +119,18 @@ const en = {
     selectAccount: "Select account",
     date: "Date",
     selectOption: "Select option",
+    deleteAccountTitle: "Delete Account",
+    deleteAccountMessage:
+      "Are you sure you want to delete this account? This action cannot be undone.",
+    deleteAccountSuccess: "Account has been successfully deleted.",
+    deleteAccountFailed: "Could not delete the account. Please try again.",
+    updateAccountSuccess: "Account has been successfully update.",
+    updateAccountFailed: "Could not update the account. Please try again.",
+    createAccountSuccess: "Account has been successfully created.",
+    createAccountFailed: "Could not create the account. Please try again.",
+  },
+  incomeScreen: {
+    deleteTitle: "Delete account",
   },
   transactionScreen: {
     from: "from",

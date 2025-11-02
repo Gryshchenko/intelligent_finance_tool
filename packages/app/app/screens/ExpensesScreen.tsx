@@ -41,7 +41,9 @@ export const ExpensesScreen: FC<MainTabScreenProps<"expenses">> = function Expen
       name={translate("common:expenses")}
       isError={isError}
       isPending={isPending}
-      data={data}
+      props={{
+        data,
+      }}
       RenderComponent={Categories}
     />
   )

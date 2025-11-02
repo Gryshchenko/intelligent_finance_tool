@@ -2,7 +2,6 @@ import { FC } from "react"
 import { StyleProp, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { EmptyState } from "@/components/EmptyState"
@@ -14,29 +13,30 @@ import type { ThemedStyle } from "@/theme/types"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IAccountsPros {
-  accounts: IAccountListItem[]
+  data: IAccountListItem[] | undefined
+  fetch?: () => Promise<IAccountListItem[] | undefined>
+  onPress?: (id: number, name: string) => void
 }
 
 export const Accounts: FC<IAccountsPros> = function Accounts(_props) {
-  const { accounts } = _props
+  const { data } = _props
   const navigation = useNavigation()
   const { themed } = useAppTheme()
   const { getCurrencySymbol } = useCurrency()
 
-  if (accounts.length <= 0) {
+  if (!data || data.length <= 0) {
     return <EmptyState style={$containerStyleOverride} buttonOnPress={() => navigation.goBack()} />
   }
 
   const onPress = (accountId: number, accountName: string) => {
-    navigation.getParent()?.navigate("balances", {
-      screen: "transactions",
-      params: { id: accountId, name: accountName, type: TransactionFieldType.Account },
-    })
+    if (_props.onPress) {
+      _props.onPress(accountId, accountName)
+    }
   }
 
   return (
     <>
-      {accounts.map(({ accountName, accountId, amount, currencyId }) => {
+      {data.map(({ accountName, accountId, amount, currencyId }) => {
         return (
           <ListItem
             key={accountId}

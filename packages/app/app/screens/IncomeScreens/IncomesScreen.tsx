@@ -1,17 +1,15 @@
-import { TextStyle } from "react-native"
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
+import { useNavigation } from "@react-navigation/native"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 
-import { ErrorState } from "@/components/ErrorState"
-import { Header } from "@/components/Header"
+import { AddButton } from "@/components/AddButton"
 import { Incomes } from "@/components/Incomes"
-import { PendingState } from "@/components/PengingState"
-import { Screen } from "@/components/Screen"
 import { useAppQuery } from "@/hooks/useAppQuery"
+import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
+import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { IncomeService } from "@/services/IncomeService"
-import { $styles } from "@/theme/styles"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchIncomes(): Promise<IIncome[]> {
@@ -34,25 +32,34 @@ export async function fetchIncomes(): Promise<IIncome[]> {
   }
 }
 
-type Props = BottomTabScreenProps<OverviewTabParamList, "incomes">
+type Props = NativeStackScreenProps<OverviewTabParamList, "accounts">
 
 export const IncomesScreen = function IncomesScreen(_props: Props) {
-  const { isError, data, isPending } = useAppQuery<IIncome[]>("incomes", fetchIncomes)
+  const navigator = useNavigation()
+  const { isError, data, isPending } = useAppQuery<IIncome[] | undefined>(
+    "income_accounts",
+    fetchIncomes,
+  )
 
   return (
-    <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>
-      <Header
-        titleTx="common:incomes"
-        titleMode="flex"
-        titleStyle={$rightAlignTitle}
-        safeAreaEdges={[]}
-      />
-      {isError && <ErrorState />}
-      {isPending && <PendingState />}
-      {!isError && !isPending && <Incomes incomes={data} />}
-    </Screen>
+    <GenericListScreen
+      name={translate("common:incomes")}
+      isError={isError}
+      isPending={isPending}
+      props={{
+        data,
+        fetch: fetchIncomes,
+      }}
+      RightActionComponent={
+        <AddButton
+          onPress={() => {
+            navigator.getParent()?.navigate("incomes", {
+              screen: "create",
+            })
+          }}
+        />
+      }
+      RenderComponent={Incomes}
+    />
   )
-}
-const $rightAlignTitle: TextStyle = {
-  textAlign: "center",
 }

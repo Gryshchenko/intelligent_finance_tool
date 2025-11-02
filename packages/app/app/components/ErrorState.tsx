@@ -38,6 +38,5 @@ const $centerAlignTitle: TextStyle = {
   flexDirection: "row",
   justifyContent: "center",
   alignItems: "center",
-  height: "100%",
-  width: "100%",
+  margin: "auto",
 }
