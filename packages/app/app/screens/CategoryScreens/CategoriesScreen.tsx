@@ -1,18 +1,21 @@
 import { FC } from "react"
+import { useNavigation } from "@react-navigation/native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
+import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
-import { Categories } from "@/components/Categories"
+import { AddButton } from "@/components/buttons/AddButton"
+import { Categories } from "@/components/category/Categories"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
 import { MainTabScreenProps } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { CategoriesService } from "@/services/CategoriesService"
+import { CategoryService } from "@/services/CategoryService"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchCategories(): Promise<ICategory[]> {
   try {
-    const categoriesService = CategoriesService.instance()
+    const categoriesService = CategoryService.instance()
     const response = await categoriesService.doGetCategories()
     switch (response.kind) {
       case GeneralApiProblemKind.Ok: {
@@ -30,7 +33,10 @@ export async function fetchCategories(): Promise<ICategory[]> {
   }
 }
 
-export const ExpensesScreen: FC<MainTabScreenProps<"expenses">> = function ExpensesScreen(_props) {
+export const CategoriesScreen: FC<MainTabScreenProps<"categories">> = function ExpensesScreen(
+  _props,
+) {
+  const navigation = useNavigation()
   const { isError, data, isPending } = useAppQuery<ICategory[] | undefined>(
     ["categories"],
     async () => fetchCategories(),
@@ -43,8 +49,23 @@ export const ExpensesScreen: FC<MainTabScreenProps<"expenses">> = function Expen
       isPending={isPending}
       props={{
         data,
+        onPress: (id: number, name: string) => {
+          navigation.getParent()?.navigate("expenses", {
+            screen: "transactions",
+            params: { id, name, type: TransactionFieldType.Category },
+          })
+        },
       }}
       RenderComponent={Categories}
+      RightActionComponent={
+        <AddButton
+          onPress={() => {
+            navigation.getParent()?.navigate("expenses", {
+              screen: "create",
+            })
+          }}
+        />
+      }
     />
   )
 }

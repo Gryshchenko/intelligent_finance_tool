@@ -10,7 +10,7 @@ import {
 } from "react-native"
 import * as Application from "expo-application"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"

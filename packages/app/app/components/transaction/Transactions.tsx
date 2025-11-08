@@ -5,7 +5,9 @@ import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 
 import { EmptyState } from "@/components/EmptyState"
-import TransactionSectionList, { fetchTransactionType } from "@/components/TransactionSectionList"
+import TransactionSectionList, {
+  fetchTransactionType,
+} from "@/components/transaction/TransactionSectionList"
 
 interface ITransactionsPros {
   data: IPagination<ITransactionListItem> | undefined

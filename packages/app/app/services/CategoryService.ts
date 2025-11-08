@@ -1,5 +1,4 @@
-import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
-import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
+import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
@@ -7,16 +6,16 @@ import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProb
 import { AuthService } from "@/services/AuthService"
 import { Logger } from "@/utils/logger/Logger"
 
-export class AccountService extends ApiAbstract {
-  protected readonly _logger: Logger = Logger.Of("AccountService")
+export class CategoryService extends ApiAbstract {
+  protected readonly _logger: Logger = Logger.Of("CategoryService")
   private readonly _authService: AuthService
 
-  private static _instance: AccountService
+  private static _instance: CategoryService
 
-  public static instance(): AccountService {
+  public static instance(): CategoryService {
     return (
-      AccountService._instance ||
-      (AccountService._instance = new AccountService(AuthService.instance()))
+      CategoryService._instance ||
+      (CategoryService._instance = new CategoryService(AuthService.instance()))
     )
   }
 
@@ -25,20 +24,20 @@ export class AccountService extends ApiAbstract {
     this._authService = authService
   }
 
-  public async doGetAccount(accountId: number): Promise<
+  public async doGetCategory(categoryId: number): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
-        data: IAccount | undefined
+        data: ICategory | undefined
       }
     | GeneralApiProblem
   > {
     try {
-      this._logger.info("Start fetching accounts")
+      this._logger.info("Start fetching categorys")
       const userId = this._authService.userId
-      const response = await this.authGet(`/user/${userId}/account/${accountId}`)
+      const response = await this.authGet(`/user/${userId}/category/${categoryId}`)
       if (response.kind === GeneralApiProblemKind.Ok) {
         this._logger.info(
-          `Fetching account successfully: ${(response.data as IAccount)?.accountId}`,
+          `Fetching account successfully: ${(response.data as ICategory)?.categoryId}`,
         )
       } else {
         this._logger.info(`Fetching account failed: ${response.kind}`)
@@ -61,21 +60,23 @@ export class AccountService extends ApiAbstract {
     }
   }
 
-  public async doGetAccounts(): Promise<
+  public async doGetCategories(): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
-        data: IAccountListItem[] | undefined
+        data: ICategory[]
       }
     | GeneralApiProblem
   > {
     try {
-      this._logger.info("Start fetching accounts")
+      this._logger.info(`Start fetching categories from`)
       const userId = this._authService.userId
-      const response = await this.authGet(`/user/${userId}/accounts`)
+      const response = await this.authGet(`/user/${userId}/categories`)
       if (response.kind === GeneralApiProblemKind.Ok) {
-        this._logger.info(`Fetching accounts successfully: ${(response.data as [])?.length}`)
+        this._logger.info(
+          `Fetching categories successfully: ${(response.data as ICategory[])?.length}`,
+        )
       } else {
-        this._logger.info(`Fetching accounts failed: ${response.kind}`)
+        this._logger.info(`Fetching categories failed: ${response.kind}`)
       }
       return response
     } catch (e) {
@@ -95,43 +96,9 @@ export class AccountService extends ApiAbstract {
     }
   }
 
-  public async doDeleteAccount(accountId: number): Promise<
-    | {
-        kind: GeneralApiProblemKind.Ok
-        data: IAccount | undefined
-      }
-    | GeneralApiProblem
-  > {
-    try {
-      this._logger.info(`Start deleting account ${accountId}`)
-      const userId = this._authService.userId
-      const response = await this.authDelete(`/user/${userId}/account/${accountId}`)
-      if (response.kind === GeneralApiProblemKind.Ok) {
-        this._logger.info(`Delete account successfully id: ${accountId}`)
-      } else {
-        this._logger.info(`Delete account failed: ${response.kind}`)
-      }
-      return response
-    } catch (e) {
-      if (__DEV__ && e instanceof Error) {
-        this._logger.error(`Bad data: ${e.message}\n}`, e.stack)
-      }
-      return {
-        kind: GeneralApiProblemKind.BadData,
-        status: undefined,
-        data: undefined,
-        errors: [
-          {
-            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
-          },
-        ],
-      }
-    }
-  }
-
-  public async doPatchAccount(
+  public async doPatchCategory(
     id: number,
-    body: { accountName: string; amount?: number },
+    body: { categoryName: string },
   ): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
@@ -140,16 +107,15 @@ export class AccountService extends ApiAbstract {
     | GeneralApiProblem
   > {
     try {
-      this._logger.info("Start patch account")
+      this._logger.info("Start patch category")
       const userId = this._authService.userId
-      const response = await this.authPatch(`/user/${userId}/account/${id}`, {
-        accountName: String(body.accountName),
-        amount: Number(body.amount),
+      const response = await this.authPatch(`/user/${userId}/category/${id}`, {
+        categoryName: String(body.categoryName),
       })
       if (response.kind === GeneralApiProblemKind.Ok) {
-        this._logger.info(`Patch account successfully: ${(response.data as [])?.length}`)
+        this._logger.info(`Patch category successfully: ${(response.data as [])?.length}`)
       } else {
-        this._logger.info(`Patch account failed: ${response.kind}`)
+        this._logger.info(`Patch category failed: ${response.kind}`)
       }
       return response
     } catch (e) {
@@ -169,29 +135,60 @@ export class AccountService extends ApiAbstract {
     }
   }
 
-  public async doCreateAccount(body: {
-    accountName: string
-    currencyId: number
-    amount: number
-  }): Promise<
+  public async doCreateCategory(body: { categoryName: string; currencyId: number }): Promise<
     | {
         kind: GeneralApiProblemKind.Ok
-        data: IAccount | undefined
+        data: ICategory | undefined
       }
     | GeneralApiProblem
   > {
     try {
-      this._logger.info("Start create account")
+      this._logger.info("Start create category")
       const userId = this._authService.userId
-      const response = await this.authPost(`/user/${userId}/account`, {
-        accountName: String(body.accountName),
+      const response = await this.authPost(`/user/${userId}/category`, {
+        categoryName: String(body.categoryName),
         currencyId: Number(body.currencyId),
-        amount: Number(body.amount),
       })
       if (response.kind === GeneralApiProblemKind.Ok) {
-        this._logger.info(`Create account successfully: ${(response?.data as IAccount)?.accountId}`)
+        this._logger.info(
+          `Create category successfully: ${(response?.data as ICategory)?.categoryId}`,
+        )
       } else {
-        this._logger.info(`Create account failed: ${response.kind}`)
+        this._logger.info(`Create category failed: ${response.kind}`)
+      }
+      return response
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        this._logger.error(`Bad data: ${e.message}\n}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: undefined,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+
+  public async doDeleteCategory(categoryId: number): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: ICategory | undefined
+      }
+    | GeneralApiProblem
+  > {
+    try {
+      this._logger.info(`Start deleting category ${categoryId}`)
+      const userId = this._authService.userId
+      const response = await this.authDelete(`/user/${userId}/category/${categoryId}`)
+      if (response.kind === GeneralApiProblemKind.Ok) {
+        this._logger.info(`Delete category successfully id: ${categoryId}`)
+      } else {
+        this._logger.info(`Delete category failed: ${response.kind}`)
       }
       return response
     } catch (e) {

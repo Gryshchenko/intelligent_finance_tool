@@ -4,7 +4,7 @@ import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
-import { Transactions } from "@/components/Transactions"
+import { Transactions } from "@/components/transaction/Transactions"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"

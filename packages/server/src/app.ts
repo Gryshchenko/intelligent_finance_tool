@@ -10,7 +10,6 @@ import userRouter from './routes/user';
 import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
 import { swaggerInit } from 'src/swagger/swagger';
-import { checkOriginReferer } from 'middleware/checkOriginReferer';
 import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 

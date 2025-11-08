@@ -1,37 +1,37 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 import Utils from "tenpercent/shared/src/Utils"
 
-import { IncomeView } from "@/components/income/IncomeView"
+import { CategoryView } from "@/components/category/CategoryView"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { IncomeService } from "@/services/IncomeService"
+import { CategoryService } from "@/services/CategoryService"
 import { ValidationError } from "@/utils/errors/ValidationError"
 import { Logger } from "@/utils/logger/Logger"
 
-export async function fetchIncome(id: number): Promise<IIncome | undefined> {
+export async function fetchCategory(id: number): Promise<ICategory | undefined> {
   try {
     if (Utils.isNull(id)) {
       throw new ValidationError({
         message: "ID = null",
       })
     }
-    const incomeService = IncomeService.instance()
-    const response = await incomeService.doGetIncome(id)
+    const categoryService = CategoryService.instance()
+    const response = await categoryService.doGetCategory(id)
     switch (response.kind) {
       case GeneralApiProblemKind.Ok: {
-        return response.data as IIncome
+        return response.data as ICategory
       }
       default: {
         return undefined
       }
     }
   } catch (e) {
-    Logger.Of("FetchIncomes").error(
-      `Fetch incomeId ${id}  failed due reason: ${(e as { message: string }).message}`,
+    Logger.Of("FetchCategorys").error(
+      `Fetch categoryId ${id}  failed due reason: ${(e as { message: string }).message}`,
     )
     return undefined
   }
@@ -39,28 +39,28 @@ export async function fetchIncome(id: number): Promise<IIncome | undefined> {
 
 type Props = NativeStackScreenProps<OverviewTabParamList, "view">
 
-export const IncomeViewScreen = function IncomeViewScreen(_props: Props) {
+export const CategoryViewScreen = function CategoryViewScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string }
   const navigation = useNavigation()
-  const { isError, data, isPending } = useAppQuery<IIncome | undefined>(
-    ["income", params?.id],
-    () => fetchIncome(params?.id),
+  const { isError, data, isPending } = useAppQuery<ICategory | undefined>(
+    ["category", params?.id],
+    () => fetchCategory(params?.id),
   )
 
   return (
     <GenericListScreen
-      name={data?.incomeName ?? ""}
+      name={data?.categoryName ?? ""}
       isError={isError}
       isPending={isPending}
       onBack={() =>
-        navigation.getParent()?.navigate("incomes", {
-          screen: "accounts",
+        navigation.getParent()?.navigate("expenses", {
+          screen: "categories",
         })
       }
       props={{
         data,
       }}
-      RenderComponent={IncomeView}
+      RenderComponent={CategoryView}
     />
   )
 }

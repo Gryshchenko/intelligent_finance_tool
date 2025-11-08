@@ -1,6 +1,6 @@
 import { ScrollView, View } from "react-native"
 
-import { EditButtons } from "@/components/EditButtons"
+import { EditButtons } from "@/components/buttons/EditButtons"
 import { spacing } from "@/theme/spacing"
 
 interface GeneralDetailViewProps {

@@ -11,10 +11,13 @@ import { Icon } from "@/components/Icon"
 import { CurrencyProvider } from "@/context/CurrencyContext"
 import { translate } from "@/i18n/translate"
 import { BalancesStackNavigator, BalanceStackParamList } from "@/navigators/BalancesStackNavigator"
+import {
+  CategoriesStackNavigator,
+  CategoriesStackParamList,
+} from "@/navigators/CategoriesStackNavigator"
 import { HistoryStackNavigator, HistoryStackParamList } from "@/navigators/HistoryStackNavigator"
 import { IncomesStackNavigator, IncomesStackParamList } from "@/navigators/IncomesStackNavigator"
 import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
-import { ExpensesScreen } from "@/screens/ExpensesScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -24,7 +27,7 @@ import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 export type OverviewTabParamList = {
   incomes: NavigatorScreenParams<IncomesStackParamList> | {}
   balances: NavigatorScreenParams<BalanceStackParamList> | {}
-  expenses: undefined
+  expenses: NavigatorScreenParams<CategoriesStackParamList | {}>
   history: NavigatorScreenParams<HistoryStackParamList> | {}
   settings: undefined
   demo: undefined
@@ -100,7 +103,7 @@ export function OverviewNavigator() {
 
         <Tab.Screen
           name="expenses"
-          component={ExpensesScreen}
+          component={CategoriesStackNavigator}
           options={{
             tabBarLabel: translate("common:expenses"),
             tabBarIcon: ({ focused }) => (

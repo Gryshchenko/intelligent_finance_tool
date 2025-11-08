@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
 
-import { Transaction } from "@/components/Transaction"
+import { Transaction } from "@/components/transaction/Transaction"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"

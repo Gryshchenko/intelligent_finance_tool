@@ -3,19 +3,23 @@ import { useNavigation } from "@react-navigation/native"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 import Utils from "tenpercent/shared/src/Utils"
 
-import { IncomeFields } from "@/components/IncomeFields"
+import { IncomeFields } from "@/components/income/IncomeFields"
 import { useEditView } from "@/hooks/useEditView"
 import { translate } from "@/i18n/translate"
+import { incomeCreateSchema } from "@/schems/validationSchemas"
 import AlertService from "@/services/AlertService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { IncomeService } from "@/services/IncomeService"
 
 export const IncomeCreate: FC = function IncomeCreate(_props) {
   const navigation = useNavigation()
-  const { form, handleChange, save } = useEditView<Partial<IIncome>>({
-    incomeName: "",
-    currencyId: 1,
-  })
+  const { form, handleChange, save, errors } = useEditView<Partial<IIncome>>(
+    {
+      incomeName: "",
+      currencyId: 1,
+    },
+    incomeCreateSchema,
+  )
 
   const handleCreate = async () => {
     const incomeService = IncomeService.instance()
@@ -37,15 +41,18 @@ export const IncomeCreate: FC = function IncomeCreate(_props) {
   }
 
   const handleSave = async () => {
-    save()
+    await save()
     await handleCreate()
   }
 
   return (
     <IncomeFields
       form={form}
+      errors={errors}
       isView={false}
-      handleChange={handleChange}
+      handleChange={(key: string, value: string | number) => {
+        handleChange(key as keyof IIncome, value)
+      }}
       cancel={() => {
         navigation.getParent()?.navigate("incomes", {
           screen: "view",

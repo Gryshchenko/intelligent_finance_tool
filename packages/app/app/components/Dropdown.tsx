@@ -1,10 +1,13 @@
 import { useState } from "react"
-import { View, Pressable, FlatList, Modal, ViewStyle, TextStyle, StyleProp } from "react-native"
+import { View, Pressable, Modal, ViewStyle, TextStyle, StyleProp } from "react-native"
 
-import { Text } from "@/components/Text"
+import { ListItem } from "@/components/ListItem"
+import { Text, TextProps } from "@/components/Text"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
+import SectionListWithKeyboardAwareScrollView from "@/screens/DemoShowroomScreen/SectionListWithKeyboardAwareScrollView"
+import { colors } from "@/theme/colors"
 import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
 
@@ -19,6 +22,11 @@ type DropdownProps<T> = {
   style?: StyleProp<TextStyle>
   disabled?: boolean
   filter?: (items: T[] | undefined) => T[]
+  helperTx?: TxKeyPath
+  helper?: string
+  HelperTextProps?: TextProps
+  status?: "error" | "disabled"
+  helperTxOptions?: TextProps["txOptions"]
 }
 
 export function Dropdown<T>({
@@ -32,6 +40,11 @@ export function Dropdown<T>({
   style,
   disabled,
   filter,
+  HelperTextProps,
+  status,
+  helper,
+  helperTx,
+  helperTxOptions,
 }: DropdownProps<T>) {
   const { isError, data, isPending } = useAppQuery<T[] | undefined>(queryKey, fetcher)
   const [isOpen, setIsOpen] = useState(false)
@@ -45,12 +58,43 @@ export function Dropdown<T>({
     onChange?.(item)
   }
 
+  const $helperStyles = [
+    $helperStyle,
+    status === "error" && { color: colors.error },
+    HelperTextProps?.style,
+  ]
+  const $inputWrapperStyles = [status === "error" && { borderColor: colors.error }]
+
+  const renderItem = ({ item: transaction }: { item: T }) => {
+    if (!transaction) return null
+
+    return (
+      <ListItem
+        key={keyExtractor(transaction)}
+        disabled={false}
+        bottomSeparator
+        onPress={() => handleSelect(transaction)}
+      >
+        <View style={themed([$option])}>
+          <Text style={themed([$optionText])}>{labelExtractor(transaction)}</Text>
+        </View>
+      </ListItem>
+    )
+  }
+
+  const sections = [
+    {
+      name: "",
+      description: "",
+      data: filteredData ?? [],
+    },
+  ]
   return (
     <View style={style}>
       {labelTx && <Text size={"xs"} preset="formLabel" tx={labelTx} />}
       <Pressable
         disabled={disabled || isPending || isError}
-        style={themed($trigger)}
+        style={[themed($trigger), themed($inputWrapperStyles)]}
         onPress={() => setIsOpen(true)}
       >
         <Text style={themed($triggerText)}>
@@ -63,23 +107,30 @@ export function Dropdown<T>({
                 : translate("common:selectOption")}
         </Text>
       </Pressable>
+      {!!(helper || helperTx) && (
+        <Text
+          preset="formHelper"
+          text={helper}
+          tx={helperTx}
+          txOptions={helperTxOptions}
+          {...HelperTextProps}
+          style={themed($helperStyles)}
+        />
+      )}
 
       <Modal
         visible={isOpen}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setIsOpen(false)}
       >
         <Pressable style={themed($overlay)} onPress={() => setIsOpen(false)}>
           <View style={themed($dropdown)}>
-            <FlatList
-              data={filteredData || []}
+            <SectionListWithKeyboardAwareScrollView
+              sections={sections}
               keyExtractor={(item) => keyExtractor(item) ?? "id"}
-              renderItem={({ item }) => (
-                <Pressable style={themed($option)} onPress={() => handleSelect(item)}>
-                  <Text style={themed($optionText)}>{labelExtractor(item)}</Text>
-                </Pressable>
-              )}
+              renderItem={renderItem}
+              stickySectionHeadersEnabled={true}
             />
           </View>
         </Pressable>
@@ -110,10 +161,11 @@ const $overlay: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $dropdown: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  width: "80%",
+  width: "100%",
+  height: "90%",
+  marginTop: "auto",
   backgroundColor: colors.background,
   borderRadius: spacing.xxs,
-  maxHeight: 300,
   overflow: "hidden",
   shadowColor: "#000",
   shadowOpacity: 0.1,
@@ -129,4 +181,7 @@ const $option: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $optionText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   fontSize: 14,
+})
+const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
 })

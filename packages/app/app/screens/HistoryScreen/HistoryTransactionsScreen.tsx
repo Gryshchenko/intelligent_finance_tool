@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native"
 import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 
-import { Transactions } from "@/components/Transactions"
+import { Transactions } from "@/components/transaction/Transactions"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"

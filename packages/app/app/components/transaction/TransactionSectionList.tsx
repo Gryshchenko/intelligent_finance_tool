@@ -20,7 +20,7 @@ import { CurrencyUtils } from "@/utils/CurrencyUtils"
 import { Logger } from "@/utils/logger/Logger"
 import { DateFormat, Time } from "@/utils/Time"
 
-import { ListItem } from "./ListItem"
+import { ListItem } from "../ListItem"
 
 export type fetchTransactionType = ({
   cursor,

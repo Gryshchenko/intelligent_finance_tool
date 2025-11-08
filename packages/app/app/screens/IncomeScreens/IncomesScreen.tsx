@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
-import { AddButton } from "@/components/AddButton"
-import { Incomes } from "@/components/Incomes"
+import { AddButton } from "@/components/buttons/AddButton"
+import { Incomes } from "@/components/income/Incomes"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
@@ -35,7 +36,7 @@ export async function fetchIncomes(): Promise<IIncome[]> {
 type Props = NativeStackScreenProps<OverviewTabParamList, "accounts">
 
 export const IncomesScreen = function IncomesScreen(_props: Props) {
-  const navigator = useNavigation()
+  const navigation = useNavigation()
   const { isError, data, isPending } = useAppQuery<IIncome[] | undefined>(
     "income_accounts",
     fetchIncomes,
@@ -49,11 +50,17 @@ export const IncomesScreen = function IncomesScreen(_props: Props) {
       props={{
         data,
         fetch: fetchIncomes,
+        onPress: (id: number, name: string) => {
+          navigation.getParent()?.navigate("incomes", {
+            screen: "transactions",
+            params: { id, name, type: TransactionFieldType.Income },
+          })
+        },
       }}
       RightActionComponent={
         <AddButton
           onPress={() => {
-            navigator.getParent()?.navigate("incomes", {
+            navigation.getParent()?.navigate("incomes", {
               screen: "create",
             })
           }}

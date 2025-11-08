@@ -46,6 +46,10 @@ const en = {
     EMAIL_CONFIRMATION_ERROR: "We couldn’t confirm your email.",
   },
   validation: {
+    valueRequired: "This field is required",
+    valueTooShort: "Value is too short",
+    valueTooLong: "Value is too long",
+    valueInvalidRange: "Value is out of allowed range",
     emailAlreadyInUse: "The entered email is already in use.",
     maxLength: "This field cannot be longer than 50 characters.",
     required: "Field cannot be empty",
@@ -84,6 +88,7 @@ const en = {
     success: "Your email has been successfully confirmed.",
   },
   common: {
+    amount: "Amount",
     new: "New",
     name: "Name",
     currency: "Currency",
@@ -128,6 +133,17 @@ const en = {
     updateAccountFailed: "Could not update the account. Please try again.",
     createAccountSuccess: "Account has been successfully created.",
     createAccountFailed: "Could not create the account. Please try again.",
+  },
+  categoryScreen: {
+    createCategorySuccess: "Category has been successfully created.",
+    createCategoryFailed: "Could not create the category. Please try again.",
+    deleteCategorySuccess: "Account has been successfully deleted.",
+    deleteCategoryFailed: "Could not delete the account. Please try again.",
+    deleteCategoryTitle: "Delete Account",
+    deleteCategoryMessage:
+      "Are you sure you want to delete this account? This action cannot be undone.",
+    updateCategorySuccess: "Account has been successfully update.",
+    updateCategoryFailed: "Could not update the account. Please try again.",
   },
   incomeScreen: {
     deleteTitle: "Delete account",

@@ -1,14 +1,14 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-import { IncomeCreate } from "@/components/income/IncomeCreate"
+import { AccountCreate } from "@/components/account/AccountCreate"
 import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 
 type Props = NativeStackScreenProps<OverviewTabParamList, "create">
 
-export const IncomeCreateScreen = function IncomeCreateScreen(_props: Props) {
+export const AccountCreateScreen = function AccountCreateScreen(_props: Props) {
   const navigation = useNavigation()
   return (
     <GenericListScreen
@@ -16,14 +16,14 @@ export const IncomeCreateScreen = function IncomeCreateScreen(_props: Props) {
       isError={false}
       isPending={false}
       onBack={() =>
-        navigation.getParent()?.navigate("incomes", {
+        navigation.getParent()?.navigate("balances", {
           screen: "accounts",
         })
       }
       props={{
         data: undefined,
       }}
-      RenderComponent={IncomeCreate}
+      RenderComponent={AccountCreate}
     />
   )
 }

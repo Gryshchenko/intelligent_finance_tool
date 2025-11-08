@@ -1,41 +1,46 @@
 import { FC } from "react"
 import { StyleProp, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import Utils from "tenpercent/shared/src/Utils"
 
+import { AccountFields } from "@/components/account/AccountFields"
 import { EmptyState } from "@/components/EmptyState"
-import { IncomeFields } from "@/components/IncomeFields"
 import { useInvalidateQuery } from "@/hooks/useAppQuery"
 import { useEditView } from "@/hooks/useEditView"
 import { translate } from "@/i18n/translate"
+import { accountEditSchema } from "@/schems/validationSchemas"
+import { AccountService } from "@/services/AccountService"
 import AlertService from "@/services/AlertService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { IncomeService } from "@/services/IncomeService"
 
-interface IIncomePros {
-  data: Partial<IIncome> | undefined
+interface IAccountPros {
+  data: Partial<IAccount> | undefined
 }
 
-export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
+export const AccountEdit: FC<IAccountPros> = function AccountEdit(_props) {
   const { data } = _props
   const navigation = useNavigation()
   const invalidateQuery = useInvalidateQuery()
-  const { form, handleChange, save } = useEditView<IIncome>(data!)
+  const { form, handleChange, save, errors } = useEditView<Partial<IAccount>>(
+    data!,
+    accountEditSchema,
+  )
 
   const handlePatch = async () => {
-    const incomeService = IncomeService.instance()
-    if (Utils.isEmpty(form.incomeName)) return
-    if (Utils.isNull(form.incomeId)) return
+    const incomeService = AccountService.instance()
+    if (Utils.isEmpty(form.accountName)) return
+    if (Utils.isNull(form.accountId)) return
 
-    const response = await incomeService.doPatchIncome(form.incomeId!, {
-      incomeName: form.incomeName!,
+    const response = await incomeService.doPatchAccount(form.accountId!, {
+      accountName: form.accountName!,
+      amount: form.amount!,
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:updateAccountSuccess"))
       invalidateQuery([["income_accounts"]])
-      invalidateQuery([["income_account", form.incomeId]])
-      navigation.getParent()?.navigate("incomes", {
+      invalidateQuery([["income_account", form.accountId]])
+      navigation.getParent()?.navigate("balances", {
         screen: "accounts",
       })
     } else {
@@ -52,14 +57,18 @@ export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
   }
 
   return (
-    <IncomeFields
+    <AccountFields
       form={form}
+      errors={errors}
+      isEdit={true}
       isView={false}
-      handleChange={handleChange}
+      handleChange={(key: string, value: string | number) => {
+        handleChange(key as keyof IAccount, value)
+      }}
       cancel={() => {
-        navigation.getParent()?.navigate("incomes", {
+        navigation.getParent()?.navigate("balances", {
           screen: "view",
-          params: { id: form.incomeId, name: form.incomeName },
+          params: { id: form.accountId, name: form.accountName },
         })
       }}
       handleSave={handleSave}

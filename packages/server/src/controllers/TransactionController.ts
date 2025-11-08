@@ -9,7 +9,6 @@ import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
 import Utils from 'src/utils/Utils';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
-import { TransactionType } from 'tenpercent/shared/src/types/TransactionType';
 
 export class TransactionController {
     private static readonly logger = Logger.Of('TransactionController');

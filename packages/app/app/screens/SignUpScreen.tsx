@@ -3,7 +3,7 @@ import { ComponentType, FC, useMemo, useRef, useState } from "react"
 import { TextInput, TextStyle, ViewStyle } from "react-native"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { PressableIcon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"

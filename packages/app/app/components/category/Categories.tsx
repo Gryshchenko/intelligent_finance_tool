@@ -3,15 +3,16 @@ import { StyleSheet } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 
-import CategorySectionList from "@/components/CategoriesSectionList"
+import CategorySectionList from "@/components/category/CategoriesSectionList"
 import { EmptyState } from "@/components/EmptyState"
 
 interface ICategoriesPros {
   data: ICategory[] | undefined
+  onPress?: (id: number, name: string) => void
 }
 
 export const Categories: FC<ICategoriesPros> = function Categories(_props) {
-  const { data } = _props
+  const { data, onPress } = _props
   const navigation = useNavigation()
 
   if (!data || data?.length <= 0) {
@@ -23,7 +24,7 @@ export const Categories: FC<ICategoriesPros> = function Categories(_props) {
     )
   }
 
-  return <CategorySectionList categories={data} />
+  return <CategorySectionList categories={data} onPress={onPress} />
 }
 
 const $styles = StyleSheet.create({

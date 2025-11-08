@@ -36,9 +36,9 @@ export class IncomeService extends ApiAbstract {
       const userId = this._authService.userId
       const response = await this.authDelete(`/user/${userId}/income/${incomeId}`)
       if (response.kind === GeneralApiProblemKind.Ok) {
-        this._logger.info(`Delete account successfully id: ${incomeId}`)
+        this._logger.info(`Delete income successfully id: ${incomeId}`)
       } else {
-        this._logger.info(`Delete account failed: ${response.kind}`)
+        this._logger.info(`Delete income failed: ${response.kind}`)
       }
       return response
     } catch (e) {

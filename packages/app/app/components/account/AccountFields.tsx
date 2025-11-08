@@ -1,25 +1,28 @@
 import { FC } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
+import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 
 import { Field } from "@/components/Field"
 import { GeneralDetailView } from "@/components/GeneralDetailViewю"
 import { CurrencyDropdown } from "@/components/Toggle/CurrencyDropdown"
+import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 
 interface IProps {
-  form: Partial<IIncome>
-  handleChange?: <K extends keyof T>(key: K, value: T[K]) => void
+  form: Partial<IAccount>
+  errors?: Partial<Record<keyof IAccount, TxKeyPath>>
+  handleChange?: (key: string, value: string | number) => void
   isView: boolean
+  isEdit: boolean
   edit?: () => void
   cancel?: () => void
   onDelete?: () => void
   handleSave?: () => void
 }
 
-export const IncomeFields: FC<IProps> = function IncomeFields(_props) {
-  const { isView, form, handleChange, handleSave, edit, cancel, onDelete } = _props
+export const AccountFields: FC<IProps> = function AccountFields(_props) {
+  const { isView, form, handleChange, handleSave, edit, cancel, onDelete, errors, isEdit } = _props
   return (
     <GeneralDetailView
       isView={isView}
@@ -32,21 +35,40 @@ export const IncomeFields: FC<IProps> = function IncomeFields(_props) {
         <Field
           style={$fieldName}
           label={translate("common:name")}
-          value={String(form.incomeName)}
+          value={String(form.accountName)}
+          helperTx={errors?.accountName}
+          status={errors?.accountName ? "error" : undefined}
           editable={!isView}
           onChangeText={(v) => {
             if (handleChange) {
-              handleChange("incomeName", v)
+              handleChange("accountName", v)
             }
           }}
         />
         <CurrencyDropdown
           style={$fieldCurrency}
-          disabled={isView}
+          disabled={isView || isEdit}
+          helperTx={errors?.currencyId}
+          status={errors?.currencyId ? "error" : undefined}
           value={form.currencyId}
           onChange={(item: ICurrency) => {
             if (handleChange) {
               handleChange("currencyId", item.currencyId)
+            }
+          }}
+        />
+      </view>
+      <view>
+        <Field
+          style={$fieldName}
+          label={translate("common:amount")}
+          value={String(form.amount)}
+          helperTx={errors?.amount}
+          status={errors?.amount ? "error" : undefined}
+          editable={!isView}
+          onChangeText={(v) => {
+            if (handleChange) {
+              handleChange("amount", v)
             }
           }}
         />

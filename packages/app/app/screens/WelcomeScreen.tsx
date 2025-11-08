@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAuth } from "@/context/AuthContext"

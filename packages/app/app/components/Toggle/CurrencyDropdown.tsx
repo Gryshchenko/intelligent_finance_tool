@@ -3,13 +3,17 @@ import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
 
 import { Dropdown } from "@/components/Dropdown"
 import { fetchCurrencies } from "@/context/CurrencyContext"
+import { TxKeyPath } from "@/i18n"
 
 type CurrencyDropdownProps = {
+  error?: TxKeyPath
   value?: number
   onChange?: (item: ICurrency) => void
   style?: StyleProp<TextStyle>
   disabled?: boolean
   filter?: (items: ICurrency[] | undefined) => ICurrency[]
+  helperTx?: TxKeyPath
+  status?: "error" | "disabled"
 }
 
 export const CurrencyDropdown: React.FC<CurrencyDropdownProps> = ({
@@ -18,9 +22,13 @@ export const CurrencyDropdown: React.FC<CurrencyDropdownProps> = ({
   style,
   disabled,
   filter,
+  helperTx,
+  status,
 }) => {
   return (
     <Dropdown
+      helperTx={helperTx}
+      status={status}
       style={style}
       onChange={onChange}
       value={value}

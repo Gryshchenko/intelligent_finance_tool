@@ -5,7 +5,7 @@ import { IEmailResendResponse } from "tenpercent/shared/src/interfaces/IEmailRes
 import { EmailConfirmationStatusType } from "tenpercent/shared/src/types/EmailConfirmationStatusType"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"

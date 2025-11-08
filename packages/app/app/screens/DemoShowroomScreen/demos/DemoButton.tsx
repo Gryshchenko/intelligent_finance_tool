@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { Icon } from "@/components/Icon"
 import { Text } from "@/components/Text"
 import { translate } from "@/i18n/translate"

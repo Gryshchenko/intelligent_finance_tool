@@ -5,7 +5,7 @@ import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { EmptyState } from "@/components/EmptyState"
-import { IncomeFields } from "@/components/IncomeFields"
+import { IncomeFields } from "@/components/income/IncomeFields"
 import { useInvalidateQuery } from "@/hooks/useAppQuery"
 import { useEditView } from "@/hooks/useEditView"
 import { translate } from "@/i18n/translate"
@@ -53,6 +53,7 @@ export const IncomeView: FC<IIncomePros> = function IncomeView(_props) {
     <IncomeFields
       form={form}
       isView={true}
+      isEdit={false}
       edit={() => {
         navigation.getParent()?.navigate("incomes", {
           screen: "edit",

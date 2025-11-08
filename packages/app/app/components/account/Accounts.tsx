@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { StyleProp, ViewStyle } from "react-native"
+import { StyleProp, View, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
 import Utils from "tenpercent/shared/src/Utils"
@@ -7,6 +7,7 @@ import Utils from "tenpercent/shared/src/Utils"
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { Text } from "@/components/Text"
+import { ViewButton } from "@/components/ViewButton"
 import { useCurrency } from "@/context/CurrencyContext"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -44,9 +45,22 @@ export const Accounts: FC<IAccountsPros> = function Accounts(_props) {
             bottomSeparator
             onPress={() => onPress(accountId, accountName)}
             RightComponent={
-              <Text style={themed([$centerAlign])}>
-                {CurrencyUtils.formatWithDelimiter(amount, getCurrencySymbol(currencyId))}
-              </Text>
+              <>
+                <Text style={themed([$centerAlign])}>
+                  {CurrencyUtils.formatWithDelimiter(amount, getCurrencySymbol(currencyId))}
+                </Text>
+                <View style={$buttons}>
+                  <ViewButton
+                    style={$button}
+                    onPress={() => {
+                      navigation.getParent()?.navigate("balances", {
+                        screen: "view",
+                        params: { id: accountId, name: accountName },
+                      })
+                    }}
+                  />
+                </View>
+              </>
             }
           >
             {accountName}
@@ -67,4 +81,14 @@ const $centerAlign: ThemedStyle<ViewStyle> = () => ({
 })
 const $containerStyleOverride: StyleProp<ViewStyle> = {
   margin: "auto",
+}
+const $buttons: StyleProp<ViewStyle> = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  flexDirection: "row",
+  height: "100%",
+}
+const $button: StyleProp<ViewStyle> = {
+  paddingHorizontal: 5,
 }

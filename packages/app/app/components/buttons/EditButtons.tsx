@@ -1,6 +1,6 @@
 import { View, ViewStyle } from "react-native"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/buttons/Button"
 import { colors } from "@/theme/colors"
 import { spacing } from "@/theme/spacing"
 

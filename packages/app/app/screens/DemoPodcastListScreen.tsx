@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated"
 
-import { Button, type ButtonAccessoryProps } from "@/components/Button"
+import { Button, type ButtonAccessoryProps } from "@/components/buttons/Button"
 import { Card } from "@/components/Card"
 import { EmptyState } from "@/components/EmptyState"
 import { Icon } from "@/components/Icon"

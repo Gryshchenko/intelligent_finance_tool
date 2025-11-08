@@ -12,7 +12,7 @@ import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
 import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
-import { Text, TextProps } from "./Text"
+import { Text, TextProps } from "../Text"
 
 type Presets = "default" | "filled" | "reversed"
 

@@ -4,7 +4,8 @@ import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
-import { Accounts } from "@/components/Accounts"
+import { Accounts } from "@/components/account/Accounts"
+import { AddButton } from "@/components/buttons/AddButton"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
@@ -57,6 +58,15 @@ export const AccountsScreen = function AccountsScreen(_props: Props) {
           })
         },
       }}
+      RightActionComponent={
+        <AddButton
+          onPress={() => {
+            navigation.getParent()?.navigate("balances", {
+              screen: "create",
+            })
+          }}
+        />
+      }
       RenderComponent={Accounts}
     />
   )

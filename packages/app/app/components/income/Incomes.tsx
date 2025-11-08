@@ -1,13 +1,14 @@
 import { FC } from "react"
-import { StyleProp, ViewStyle } from "react-native"
+import { StyleProp, View, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 import Utils from "tenpercent/shared/src/Utils"
 
-import { $center } from "@/components/CategoriesSectionList"
+import { $center } from "@/components/category/CategoriesSectionList"
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { Text } from "@/components/Text"
+import { ViewButton } from "@/components/ViewButton"
 import { useCurrency } from "@/context/CurrencyContext"
 import { useAppTheme } from "@/theme/context"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
@@ -19,20 +20,13 @@ interface IIncomesPros {
 }
 
 export const Incomes: FC<IIncomesPros> = function Incomes(_props) {
-  const { data } = _props
+  const { data, onPress } = _props
   const navigation = useNavigation()
   const { themed } = useAppTheme()
   const { getCurrencySymbol } = useCurrency()
 
   if (!data || data?.length <= 0) {
     return <EmptyState style={$containerStyleOverride} buttonOnPress={() => navigation.goBack()} />
-  }
-
-  const onPress = (accountId: number, accountName: string) => {
-    navigation.getParent()?.navigate("incomes", {
-      screen: "view",
-      params: { id: accountId, name: accountName },
-    })
   }
 
   return (
@@ -44,11 +38,28 @@ export const Incomes: FC<IIncomesPros> = function Incomes(_props) {
             disabled={!Utils.isNumber(incomeId as unknown as string)}
             bottomSeparator
             RightComponent={
-              <Text style={themed([$center])}>
-                {CurrencyUtils.formatWithDelimiter(0, getCurrencySymbol(currencyId))}
-              </Text>
+              <>
+                <Text style={themed([$center])}>
+                  {CurrencyUtils.formatWithDelimiter(0, getCurrencySymbol(currencyId))}
+                </Text>
+                <View style={$buttons}>
+                  <ViewButton
+                    style={$button}
+                    onPress={() => {
+                      navigation.getParent()?.navigate("incomes", {
+                        screen: "view",
+                        params: { id: incomeId, name: incomeName },
+                      })
+                    }}
+                  />
+                </View>
+              </>
             }
-            onPress={() => onPress(incomeId, incomeName)}
+            onPress={() => {
+              if (onPress) {
+                onPress?.(incomeId, incomeName)
+              }
+            }}
           >
             {incomeName}
           </ListItem>
@@ -59,4 +70,14 @@ export const Incomes: FC<IIncomesPros> = function Incomes(_props) {
 }
 const $containerStyleOverride: StyleProp<ViewStyle> = {
   margin: "auto",
+}
+const $buttons: StyleProp<ViewStyle> = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  flexDirection: "row",
+  height: "100%",
+}
+const $button: StyleProp<ViewStyle> = {
+  paddingHorizontal: 5,
 }

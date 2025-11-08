@@ -2,7 +2,7 @@ import { ViewStyle } from "react-native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 
 import { Dropdown } from "@/components/Dropdown"
-import { fetchCategories } from "@/screens/ExpensesScreen"
+import { fetchCategories } from "@/screens/CategoryScreens/CategoriesScreen"
 
 type CategoryDropdownProps = {
   value?: number
