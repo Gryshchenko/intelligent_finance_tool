@@ -9,16 +9,16 @@ import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProb
 import { AuthService } from "@/services/AuthService"
 import { Logger } from "@/utils/logger/Logger"
 
-export class TransactionsService extends ApiAbstract {
-  protected readonly _logger: Logger = Logger.Of("TransactionsService")
+export class TransactionService extends ApiAbstract {
+  protected readonly _logger: Logger = Logger.Of("TransactionService")
   private readonly _authService: AuthService
 
-  private static _instance: TransactionsService
+  private static _instance: TransactionService
 
-  public static instance(): TransactionsService {
+  public static instance(): TransactionService {
     return (
-      TransactionsService._instance ||
-      (TransactionsService._instance = new TransactionsService(AuthService.instance()))
+      TransactionService._instance ||
+      (TransactionService._instance = new TransactionService(AuthService.instance()))
     )
   }
 
@@ -145,6 +145,115 @@ export class TransactionsService extends ApiAbstract {
         )
       } else {
         this._logger.info(`Delete transaction failed: ${response.kind}`)
+      }
+      return response
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        this._logger.error(`Bad data: ${e.message}\n}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: undefined,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+  public async doCreateTransaction(body: {
+    accountId: number | undefined
+    incomeId: number | undefined
+    categoryId: number | undefined
+    currencyId: number | undefined
+    transactionTypeId: number | undefined
+    amount: number | undefined
+    createAt: string | undefined
+    targetAccountId: number | undefined
+    description: string | undefined
+  }): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: ITransaction | undefined
+      }
+    | GeneralApiProblem
+  > {
+    try {
+      this._logger.info("Start create transaction")
+      const userId = this._authService.userId
+      const response = await this.authPost(`/user/${userId}/transaction`, {
+        accountId: body.accountId,
+        incomeId: body.incomeId,
+        categoryId: body.categoryId,
+        currencyId: body.currencyId,
+        transactionTypeId: body.transactionTypeId,
+        amount: body.amount,
+        createAt: body.createAt,
+        targetAccountId: body.targetAccountId,
+        description: body.description,
+      })
+      if (response.kind === GeneralApiProblemKind.Ok) {
+        this._logger.info(
+          `Create transaction successfully: ${(response?.data as ITransaction)?.accountId}`,
+        )
+      } else {
+        this._logger.info(`Create transaction failed: ${response.kind}`)
+      }
+      return response
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        this._logger.error(`Bad data: ${e.message}\n}`, e.stack)
+      }
+      return {
+        kind: GeneralApiProblemKind.BadData,
+        status: undefined,
+        data: undefined,
+        errors: [
+          {
+            errorCode: ErrorCode.CLIENT_UNKNOWN_ERROR,
+          },
+        ],
+      }
+    }
+  }
+  public async doPatchTransaction(
+    id: number,
+    body: {
+      accountId: number | undefined
+      incomeId: number | undefined
+      categoryId: number | undefined
+      currencyId: number | undefined
+      amount: number | undefined
+      createAt: string | undefined
+      targetAccountId: number | undefined
+      description: string | undefined
+    },
+  ): Promise<
+    | {
+        kind: GeneralApiProblemKind.Ok
+        data: undefined
+      }
+    | GeneralApiProblem
+  > {
+    try {
+      this._logger.info("Start patch transaction")
+      const userId = this._authService.userId
+      const response = await this.authPatch(`/user/${userId}/transaction/${id}`, {
+        accountId: body.accountId,
+        incomeId: body.incomeId,
+        categoryId: body.categoryId,
+        currencyId: body.currencyId,
+        amount: body.amount,
+        createAt: body.createAt,
+        targetAccountId: body.targetAccountId,
+        description: body.description,
+      })
+      if (response.kind === GeneralApiProblemKind.Ok) {
+        this._logger.info(`Patch transaction successfully: ${(response.data as [])?.length}`)
+      } else {
+        this._logger.info(`Patch transaction failed: ${response.kind}`)
       }
       return response
     } catch (e) {

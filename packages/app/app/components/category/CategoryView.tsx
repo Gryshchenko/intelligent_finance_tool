@@ -32,6 +32,9 @@ export const CategoryView: FC<ICategoryPros> = function CategoryView(_props) {
       AlertService.info(translate("common:info"), translate("categoryScreen:deleteCategorySuccess"))
       invalidateQuery([["categories"]])
       invalidateQuery([["category", form.categoryId]])
+      navigation.getParent()?.navigate("expenses", {
+        screen: "categories",
+      })
     } else {
       AlertService.error(
         translate("common:error"),

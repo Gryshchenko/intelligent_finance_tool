@@ -32,7 +32,7 @@ export const CategoryCreate: FC = function CategoryCreate(_props) {
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("categoryScreen:createCategorySuccess"))
-      navigation.getParent()?.navigate("balances", {
+      navigation.getParent()?.navigate("expenses", {
         screen: "categories",
       })
     } else {
@@ -58,7 +58,7 @@ export const CategoryCreate: FC = function CategoryCreate(_props) {
         handleChange(key as keyof ICategory, value)
       }}
       cancel={() => {
-        navigation.getParent()?.navigate("expanses", {
+        navigation.getParent()?.navigate("expenses", {
           screen: "view",
           params: { id: form.categoryId, name: form.categoryName },
         })

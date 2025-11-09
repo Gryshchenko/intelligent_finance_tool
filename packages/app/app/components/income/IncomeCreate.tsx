@@ -50,6 +50,7 @@ export const IncomeCreate: FC = function IncomeCreate(_props) {
       form={form}
       errors={errors}
       isView={false}
+      isEdit={true}
       handleChange={(key: string, value: string | number) => {
         handleChange(key as keyof IIncome, value)
       }}

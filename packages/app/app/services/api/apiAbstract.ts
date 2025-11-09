@@ -117,7 +117,6 @@ export abstract class ApiAbstract {
   ): Promise<GeneralApiProblem<T>> {
     try {
       const response: ApiResponse<IResponse<T>> = await this.apisauce.post(url, body)
-      console.log(response)
       if (response.ok) {
         return {
           kind: GeneralApiProblemKind.Ok,

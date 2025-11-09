@@ -157,6 +157,10 @@ const en = {
       "Are you sure you want to delete this transaction? This action cannot be undone.",
     deleteSuccess: "Transaction has been successfully deleted.",
     deleteFailed: "Could not delete the transaction. Please try again.",
+    updateSuccess: "Transaction has been successfully update.",
+    updateFailed: "Could not update the transaction. Please try again.",
+    createSuccess: "Transaction has been successfully created.",
+    createFailed: "Could not create the transaction. Please try again.",
   },
   welcomeScreen: {
     postscript:

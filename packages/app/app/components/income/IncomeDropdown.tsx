@@ -2,6 +2,7 @@ import { ViewStyle } from "react-native"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 
 import { Dropdown } from "@/components/Dropdown"
+import { TxKeyPath } from "@/i18n"
 import { fetchIncomes } from "@/screens/IncomeScreens/IncomesScreen"
 
 type IncomeDropdownProps = {
@@ -9,6 +10,8 @@ type IncomeDropdownProps = {
   onChange?: (item: IIncome) => void
   style?: ViewStyle
   disabled?: boolean
+  helperTx?: TxKeyPath
+  status?: "error" | "disabled"
 }
 
 export const IncomeDropdown: React.FC<IncomeDropdownProps> = ({
@@ -16,9 +19,13 @@ export const IncomeDropdown: React.FC<IncomeDropdownProps> = ({
   onChange,
   style,
   disabled,
+  helperTx,
+  status,
 }) => {
   return (
     <Dropdown
+      helperTx={helperTx}
+      status={status}
       style={style}
       onChange={onChange}
       value={value}

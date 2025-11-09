@@ -2,6 +2,7 @@ import { createContext, FC, PropsWithChildren, useContext, useEffect, useState }
 import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
 import Utils from "tenpercent/shared/src/Utils"
 
+import { useAppQuery } from "@/hooks/useAppQuery"
 import { buildGeneralApiBaseHandler, GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { CurrencyService } from "@/services/CurrencyService"
 import { ValidationError } from "@/utils/errors/ValidationError"
@@ -46,6 +47,7 @@ export interface CurrencyProviderProps {}
 const _logger = Logger.Of("CurrencyContext")
 
 export const CurrencyProvider: FC<PropsWithChildren<CurrencyProviderProps>> = ({ children }) => {
+  const { data } = useAppQuery<ICurrency[] | undefined>("currencies", fetchCurrencies)
   const [currencies, setCurrencies] = useState<Map<number, ICurrency>>(new Map())
   const getDefaultCurrency = (): ICurrency => {
     return {
@@ -72,16 +74,13 @@ export const CurrencyProvider: FC<PropsWithChildren<CurrencyProviderProps>> = ({
   }
 
   useEffect(() => {
-    ;(async () => {
-      const data = await fetchCurrencies()
-      if (!data) return
-      const result: Map<number, ICurrency> = new Map()
-      data?.forEach((currency) => {
-        result.set(currency.currencyId, currency)
-      })
-      setCurrencies(result)
-    })()
-  }, [])
+    if (!data) return
+    const result: Map<number, ICurrency> = new Map()
+    data?.forEach((currency) => {
+      result.set(currency.currencyId, currency)
+    })
+    setCurrencies(result)
+  }, [data])
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>
 }

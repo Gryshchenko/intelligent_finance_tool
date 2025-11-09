@@ -2,7 +2,9 @@ import { useState } from "react"
 import { View, Pressable, Platform, ViewStyle, TextStyle } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
-import { Text } from "@/components/Text"
+import { Text, TextProps } from "@/components/Text"
+import { TxKeyPath } from "@/i18n"
+import { colors } from "@/theme/colors"
 import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
 
@@ -21,6 +23,11 @@ type IgniteDatePickerProps = {
   maximumDate?: Date
   style?: ViewStyle
   disabled?: boolean
+  helperTx?: TxKeyPath
+  status?: "error" | "disabled"
+  HelperTextProps?: TextProps
+  helper?: string
+  helperTxOptions?: TextProps["txOptions"]
 }
 
 export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
@@ -32,6 +39,11 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
   maximumDate = new Date(2030, 11, 31),
   disabled,
   style,
+  helperTx,
+  status,
+  HelperTextProps,
+  helper,
+  helperTxOptions,
 }) => {
   const { themed } = useAppTheme()
   const [show, setShow] = useState(false)
@@ -41,6 +53,11 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
     if (selectedDate) onChange(selectedDate)
   }
 
+  const $helperStyles = [
+    $helperStyle,
+    status === "error" && { color: colors.error },
+    HelperTextProps?.style,
+  ]
   const formattedDate = value ? value.toLocaleDateString() : placeholder
 
   return (
@@ -49,6 +66,16 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
       <Pressable disabled={disabled} style={themed($input)} onPress={() => setShow(true)}>
         <Text style={themed($text)}>{formattedDate}</Text>
       </Pressable>
+      {!!(helper || helperTx) && (
+        <Text
+          preset="formHelper"
+          text={helper}
+          tx={helperTx}
+          txOptions={helperTxOptions}
+          {...HelperTextProps}
+          style={themed($helperStyles)}
+        />
+      )}
 
       {show && (
         <DateTimePicker
@@ -77,4 +104,7 @@ const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   marginVertical: 8,
   marginHorizontal: 12,
+})
+const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
 })

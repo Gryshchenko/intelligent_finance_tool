@@ -1,9 +1,11 @@
 import { FC } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
+import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
 
 import { Field } from "@/components/Field"
 import { GeneralDetailView } from "@/components/GeneralDetailViewю"
+import { CurrencyDropdown } from "@/components/Toggle/CurrencyDropdown"
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 
@@ -20,7 +22,7 @@ interface IProps {
 }
 
 export const CategoryFields: FC<IProps> = function CategoryFields(_props) {
-  const { isView, form, handleChange, handleSave, edit, cancel, onDelete, errors } = _props
+  const { isView, form, handleChange, handleSave, edit, cancel, onDelete, errors, isEdit } = _props
   return (
     <GeneralDetailView
       isView={isView}
@@ -43,6 +45,18 @@ export const CategoryFields: FC<IProps> = function CategoryFields(_props) {
             }
           }}
         />
+        <CurrencyDropdown
+          style={$fieldCurrency}
+          disabled={isView || isEdit}
+          helperTx={errors?.currencyId}
+          status={errors?.currencyId ? "error" : undefined}
+          value={form.currencyId}
+          onChange={(item: ICurrency) => {
+            if (handleChange) {
+              handleChange("currencyId", item.currencyId)
+            }
+          }}
+        />
       </view>
     </GeneralDetailView>
   )
@@ -52,5 +66,8 @@ const $fieldWrapper: StyleProp<ViewStyle> = {
   justifyContent: "space-between",
 }
 const $fieldName: StyleProp<TextStyle> = {
-  width: "100%",
+  width: "60%",
+}
+const $fieldCurrency: StyleProp<TextStyle> = {
+  width: "38%",
 }

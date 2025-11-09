@@ -37,10 +37,7 @@ type Props = NativeStackScreenProps<OverviewTabParamList, "accounts">
 
 export const IncomesScreen = function IncomesScreen(_props: Props) {
   const navigation = useNavigation()
-  const { isError, data, isPending } = useAppQuery<IIncome[] | undefined>(
-    "income_accounts",
-    fetchIncomes,
-  )
+  const { isError, data, isPending } = useAppQuery<IIncome[] | undefined>("incomes", fetchIncomes)
 
   return (
     <GenericListScreen

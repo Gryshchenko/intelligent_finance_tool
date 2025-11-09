@@ -9,7 +9,7 @@ import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { TransactionsService } from "@/services/TransactionsService"
+import { TransactionService } from "@/services/TransactionService"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchTransactions(
@@ -19,7 +19,7 @@ export async function fetchTransactions(
   limit: number,
 ): Promise<IPagination<ITransactionListItem> | undefined> {
   try {
-    const transactionsService = TransactionsService.instance()
+    const transactionsService = TransactionService.instance()
     const response = await transactionsService.doGetTransactions({
       cursor,
       limit,

@@ -2,6 +2,7 @@ import { ViewStyle } from "react-native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 
 import { Dropdown } from "@/components/Dropdown"
+import { TxKeyPath } from "@/i18n"
 import { fetchCategories } from "@/screens/CategoryScreens/CategoriesScreen"
 
 type CategoryDropdownProps = {
@@ -9,6 +10,8 @@ type CategoryDropdownProps = {
   onChange?: (item: ICategory) => void
   style?: ViewStyle
   disabled?: boolean
+  helperTx?: TxKeyPath
+  status?: "error" | "disabled"
 }
 
 export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
@@ -16,9 +19,13 @@ export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   onChange,
   style,
   disabled,
+  helperTx,
+  status,
 }) => {
   return (
     <Dropdown
+      helperTx={helperTx}
+      status={status}
       style={style}
       onChange={onChange}
       value={value}

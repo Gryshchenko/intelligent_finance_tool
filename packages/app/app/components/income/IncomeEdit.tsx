@@ -37,8 +37,8 @@ export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:updateAccountSuccess"))
-      invalidateQuery([["income_accounts"]])
-      invalidateQuery([["income_account", form.incomeId]])
+      invalidateQuery([["incomes"]])
+      invalidateQuery([["income", form.incomeId]])
       navigation.getParent()?.navigate("incomes", {
         screen: "accounts",
       })
@@ -48,7 +48,7 @@ export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
   }
 
   const handleSave = async () => {
-    save()
+    await save()
     await handlePatch()
   }
   if (!data) {
@@ -58,6 +58,7 @@ export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
   return (
     <IncomeFields
       form={form}
+      isEdit={true}
       errors={errors}
       isView={false}
       handleChange={(key: string, value: string | number) => {

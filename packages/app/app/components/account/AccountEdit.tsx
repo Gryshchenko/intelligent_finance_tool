@@ -49,7 +49,7 @@ export const AccountEdit: FC<IAccountPros> = function AccountEdit(_props) {
   }
 
   const handleSave = async () => {
-    save()
+    await save()
     await handlePatch()
   }
   if (!data) {

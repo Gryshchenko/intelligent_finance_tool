@@ -1,72 +1,34 @@
 import { FC } from "react"
-import { StyleSheet } from "react-native"
-import { useNavigation } from "@react-navigation/native"
 import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
 import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { AccountDropdown } from "@/components/account/AccountDropdown"
 import { CategoryDropdown } from "@/components/category/CateogryDropdown"
-import { EmptyState } from "@/components/EmptyState"
 import { Field } from "@/components/Field"
 import { GeneralDetailView } from "@/components/GeneralDetailViewю"
 import { DatePickerType, IgniteDatePicker } from "@/components/IgniteDatePicker"
 import IgniteSwitcher from "@/components/IgniteSwitcher"
 import { IncomeDropdown } from "@/components/income/IncomeDropdown"
 import { useCurrency } from "@/context/CurrencyContext"
-import { useInvalidateQuery } from "@/hooks/useAppQuery"
-import { useEditView } from "@/hooks/useEditView"
+import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
-import AlertService from "@/services/AlertService"
-import { GeneralApiProblemKind } from "@/services/api/apiProblem"
-import { TransactionsService } from "@/services/TransactionsService"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
-interface ITransactionPros {
-  data: ITransaction | undefined
+interface IProps {
+  form: Partial<ITransaction>
+  errors?: Partial<Record<keyof ITransaction, TxKeyPath>>
+  handleChange?: (key: string, value: string | number) => void
+  isView: boolean
+  isEdit: boolean
+  edit?: () => void
+  cancel?: () => void
+  onDelete?: () => void
+  handleSave?: () => void
 }
 
-export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
-  const { data } = _props
+export const TransactionFields: FC<IProps> = function TransactionFields(_props) {
+  const { isView, form, handleChange, handleSave, edit, cancel, onDelete, errors } = _props
   const { getCurrencySymbol } = useCurrency()
-  const navigation = useNavigation()
-  const invalidateQuery = useInvalidateQuery()
-
-  const { isView, form, handleChange, edit, cancel, save } = useEditView<ITransaction>(data!)
-
-  const handleDelete = async () => {
-    const transactionService = TransactionsService.instance()
-    if (!form.transactionId) return
-
-    const response = await transactionService.doDeleteTransaction(form.transactionId)
-    if (response.kind === GeneralApiProblemKind.Ok) {
-      AlertService.info(translate("common:info"), translate("transactionScreen:deleteSuccess"))
-      invalidateQuery([["transactions"]])
-      invalidateQuery([["transaction", form.transactionId]])
-    } else {
-      AlertService.error(translate("common:error"), translate("transactionScreen:deleteFailed"))
-    }
-  }
-
-  const onDelete = () => {
-    AlertService.confirm(
-      translate("transactionScreen:deleteTitle"),
-      translate("transactionScreen:deleteMessage"),
-      handleDelete,
-    )
-  }
-
-  const handleSave = () => {
-    save()
-  }
-
-  if (!data?.transactionId) {
-    return (
-      <EmptyState
-        style={$styles.containerStyleOverride}
-        buttonOnPress={() => navigation.goBack()}
-      />
-    )
-  }
 
   const renderInputs = () => {
     switch (form.transactionTypeId) {
@@ -76,12 +38,16 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
             <AccountDropdown
               value={form.accountId}
               disabled={isView}
-              onChange={(v) => handleChange("accountId", v.accountId)}
+              helperTx={errors?.accountId}
+              status={errors?.accountId ? "error" : undefined}
+              onChange={(v) => handleChange?.("accountId", v.accountId)}
             />
             <AccountDropdown
               value={form.targetAccountId}
               disabled={isView}
-              onChange={(v) => handleChange("targetAccountId", v.accountId)}
+              helperTx={errors?.targetAccountId}
+              status={errors?.targetAccountId ? "error" : undefined}
+              onChange={(v) => handleChange?.("targetAccountId", v.accountId)}
             />
           </>
         )
@@ -91,12 +57,16 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
             <AccountDropdown
               value={form.accountId}
               disabled={isView}
-              onChange={(v) => handleChange("accountId", v.accountId)}
+              helperTx={errors?.accountId}
+              status={errors?.accountId ? "error" : undefined}
+              onChange={(v) => handleChange?.("accountId", v.accountId)}
             />
             <CategoryDropdown
               value={form.categoryId}
               disabled={isView}
-              onChange={(v) => handleChange("categoryId", v.categoryId)}
+              helperTx={errors?.categoryId}
+              status={errors?.categoryId ? "error" : undefined}
+              onChange={(v) => handleChange?.("categoryId", v.categoryId)}
             />
           </>
         )
@@ -106,12 +76,16 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
             <IncomeDropdown
               value={form.incomeId}
               disabled={isView}
-              onChange={(v) => handleChange("incomeId", v.incomeId)}
+              helperTx={errors?.incomeId}
+              status={errors?.incomeId ? "error" : undefined}
+              onChange={(v) => handleChange?.("incomeId", v.incomeId)}
             />
             <AccountDropdown
               value={form.accountId}
               disabled={isView}
-              onChange={(v) => handleChange("accountId", v.accountId)}
+              helperTx={errors?.accountId}
+              status={errors?.accountId ? "error" : undefined}
+              onChange={(v) => handleChange?.("accountId", v.accountId)}
             />
           </>
         )
@@ -119,7 +93,6 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
         return null
     }
   }
-
   return (
     <GeneralDetailView
       isView={isView}
@@ -148,7 +121,7 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
           },
         ]}
         value={form.transactionTypeId}
-        onChange={(opt) => handleChange("transactionTypeId", opt.value as number)}
+        onChange={(opt) => handleChange?.("transactionTypeId", opt.value as number)}
       />
 
       {renderInputs()}
@@ -157,28 +130,28 @@ export const Transaction: FC<ITransactionPros> = function Transaction(_props) {
         label="Amount"
         value={CurrencyUtils.formatWithDelimiter(form.amount!, getCurrencySymbol(form.currencyId!))}
         editable={!isView}
-        onChangeText={(v) => handleChange("amount", Number(v))}
+        onChangeText={(v) => handleChange?.("amount", Number(v))}
+        helperTx={errors?.amount}
+        status={errors?.amount ? "error" : undefined}
       />
 
       <Field
         label={translate("transactionScreen:description")}
         value={form.description!}
         editable={!isView}
-        onChangeText={(v) => handleChange("description", v)}
+        helperTx={errors?.description}
+        status={errors?.description ? "error" : undefined}
+        onChangeText={(v) => handleChange?.("description", v)}
       />
 
       <IgniteDatePicker
         disabled={isView}
         mode={DatePickerType.Datetime}
         value={new Date(form.createAt!)}
+        helperTx={errors?.createAt}
+        status={errors?.createAt ? "error" : undefined}
         onChange={() => null}
       />
     </GeneralDetailView>
   )
 }
-
-const $styles = StyleSheet.create({
-  containerStyleOverride: {
-    margin: "auto",
-  },
-})

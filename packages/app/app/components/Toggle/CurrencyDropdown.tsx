@@ -34,7 +34,7 @@ export const CurrencyDropdown: React.FC<CurrencyDropdownProps> = ({
       value={value}
       labelTx={"common:currency"}
       disabled={disabled}
-      queryKey={"accounts"}
+      queryKey={"currencies"}
       fetcher={fetchCurrencies}
       filter={filter}
       keyExtractor={(item: ICurrency) => {

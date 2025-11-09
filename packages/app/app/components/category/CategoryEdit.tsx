@@ -39,7 +39,7 @@ export const CategoryEdit: FC<ICategoryPros> = function CategoryEdit(_props) {
       AlertService.info(translate("common:info"), translate("categoryScreen:updateCategorySuccess"))
       invalidateQuery([["categories"]])
       invalidateQuery([["category", form.categoryId]])
-      navigation.getParent()?.navigate("expanses", {
+      navigation.getParent()?.navigate("expenses", {
         screen: "categories",
       })
     } else {
@@ -51,7 +51,7 @@ export const CategoryEdit: FC<ICategoryPros> = function CategoryEdit(_props) {
   }
 
   const handleSave = async () => {
-    save()
+    await save()
     await handlePatch()
   }
   if (!data) {
@@ -68,7 +68,7 @@ export const CategoryEdit: FC<ICategoryPros> = function CategoryEdit(_props) {
         handleChange(key as keyof ICategory, value)
       }}
       cancel={() => {
-        navigation.getParent()?.navigate("expanses", {
+        navigation.getParent()?.navigate("expenses", {
           screen: "view",
           params: { id: form.categoryId, name: form.categoryName },
         })

@@ -24,7 +24,6 @@ function BalancesStackNavigator() {
     <BalancesStack.Navigator screenOptions={{ headerShown: false }}>
       <BalancesStack.Screen name="accounts" component={AccountsScreen} />
       <BalancesStack.Screen name="transactions" component={TransactionsScreen} />
-      <BalancesStack.Screen name="transaction" component={TransactionScreen} />
       <BalancesStack.Screen name="view" component={AccountViewScreen} />
       <BalancesStack.Screen name="create" component={AccountCreateScreen} />
       <BalancesStack.Screen name="edit" component={AccountEditScreen} />

@@ -64,7 +64,6 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
         orderBy,
     }: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>> {
         try {
-            this._logger.info(`Fetching all transactions for userId: ${userId}`);
             const cleanFilters =
                 Object.fromEntries(
                     Object.entries({
@@ -73,6 +72,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                         'transactions.incomeId': incomeId,
                     }).filter(([_, value]) => value !== undefined),
                 ) ?? {};
+            this._logger.info(`Fetching transactions {${Object.entries(cleanFilters).join(': ')}} for userId: ${userId}`);
             const orderArr = parseSortBy(orderBy as string, ['amount', 'createAt']);
 
             const query = this._db

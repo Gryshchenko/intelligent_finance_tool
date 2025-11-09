@@ -32,6 +32,9 @@ export const IncomeView: FC<IIncomePros> = function IncomeView(_props) {
       AlertService.info(translate("common:info"), translate("common:deleteAccountSuccess"))
       invalidateQuery([["income_accounts"]])
       invalidateQuery([["income_account", form.incomeId]])
+      navigation.getParent()?.navigate("incomes", {
+        screen: "accounts",
+      })
     } else {
       AlertService.error(translate("common:error"), translate("common:deleteAccountFailed"))
     }
