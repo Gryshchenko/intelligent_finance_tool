@@ -5,35 +5,31 @@ import { TextField } from "@/components/TextField"
 import { TxKeyPath } from "@/i18n"
 import { spacing } from "@/theme/spacing"
 
-interface FieldProps {
-  label: string
-  value: string
-  editable?: boolean
-  onChangeText?: (text: string) => void
+interface FieldProps<T> {
   style?: StyleProp<TextStyle>
-  helperTx?: TxKeyPath
-  status?: "error" | "disabled"
+  label: string
+  Component?: React.FC<T>
+  componentProps?: {
+    value: string | undefined
+    editable?: boolean
+    onChangeText?: (text: string) => void
+    style?: StyleProp<TextStyle>
+    helperTx?: TxKeyPath
+    status?: "error" | "disabled"
+    [key: string]: unknown
+  }
 }
 
-export const Field: React.FC<FieldProps> = ({
+export const Field: React.FC<FieldProps<unknown>> = ({
   label,
-  value,
-  editable = false,
-  onChangeText,
   style,
-  helperTx,
-  status,
+  Component = TextField,
+  componentProps,
 }) => {
   return (
     <View style={[$wrapper, style]}>
       <Text text={label} preset="subheading" size={"xs"} />
-      <TextField
-        value={value}
-        editable={editable}
-        onChangeText={onChangeText}
-        helperTx={helperTx}
-        status={status}
-      />
+      <Component {...componentProps} />
     </View>
   )
 }

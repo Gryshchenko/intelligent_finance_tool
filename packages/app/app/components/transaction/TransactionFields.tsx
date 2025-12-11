@@ -1,9 +1,10 @@
-import { FC } from "react"
+import { FC, FunctionComponent } from "react"
 import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
 import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { AccountDropdown } from "@/components/account/AccountDropdown"
 import { CategoryDropdown } from "@/components/category/CateogryDropdown"
+import { CurrencyField } from "@/components/CurrencyField"
 import { Field } from "@/components/Field"
 import { GeneralDetailView } from "@/components/GeneralDetailViewю"
 import { DatePickerType, IgniteDatePicker } from "@/components/IgniteDatePicker"
@@ -12,7 +13,6 @@ import { IncomeDropdown } from "@/components/income/IncomeDropdown"
 import { useCurrency } from "@/context/CurrencyContext"
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
-import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IProps {
   form: Partial<ITransaction>
@@ -127,27 +127,33 @@ export const TransactionFields: FC<IProps> = function TransactionFields(_props) 
       {renderInputs()}
 
       <Field
-        label="Amount"
-        value={CurrencyUtils.formatWithDelimiter(form.amount!, getCurrencySymbol(form.currencyId!))}
-        editable={!isView}
-        onChangeText={(v) => handleChange?.("amount", Number(v))}
-        helperTx={errors?.amount}
-        status={errors?.amount ? "error" : undefined}
+        label={translate("common:amount")}
+        Component={CurrencyField as FunctionComponent<unknown>}
+        componentProps={{
+          onChangeCleaned: (v: string) => handleChange?.("amount", v),
+          currency: getCurrencySymbol(form.currencyId!),
+          value: String(form.amount!),
+          editable: !isView,
+          helperTx: errors?.amount,
+          status: errors?.amount ? "error" : undefined,
+        }}
       />
 
       <Field
         label={translate("transactionScreen:description")}
-        value={form.description!}
-        editable={!isView}
-        helperTx={errors?.description}
-        status={errors?.description ? "error" : undefined}
-        onChangeText={(v) => handleChange?.("description", v)}
+        componentProps={{
+          value: form.description!,
+          editable: !isView,
+          helperTx: errors?.description,
+          status: errors?.description ? "error" : undefined,
+          onChangeText: (v) => handleChange?.("description", v),
+        }}
       />
 
       <IgniteDatePicker
         disabled={isView}
         mode={DatePickerType.Datetime}
-        value={new Date(form.createAt!)}
+        value={form.createAt!}
         helperTx={errors?.createAt}
         status={errors?.createAt ? "error" : undefined}
         onChange={() => null}

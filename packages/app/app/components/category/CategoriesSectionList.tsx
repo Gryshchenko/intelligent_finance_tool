@@ -9,9 +9,11 @@ import { EmptyState } from "@/components/EmptyState"
 import { Text } from "@/components/Text"
 import { ViewButton } from "@/components/ViewButton"
 import { useCurrency } from "@/context/CurrencyContext"
+import { CategoriesPath } from "@/navigators/CategoriesStackNavigator"
 import SectionListWithKeyboardAwareScrollView from "@/screens/DemoShowroomScreen/SectionListWithKeyboardAwareScrollView"
 import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
+import { OverviewPath } from "@/types/OverviewPath"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 import { ListItem } from "../ListItem"
@@ -53,7 +55,7 @@ const CategorySectionList = forwardRef<SectionList<ICategory>, Props>(
           disabled={!Utils.isNumber(currencyId as unknown as string)}
           bottomSeparator
           onPress={() => {
-            if (onPress) onPress?.(currencyId, categoryName)
+            if (onPress) onPress?.(categoryId, categoryName)
           }}
           RightComponent={
             <>
@@ -64,8 +66,8 @@ const CategorySectionList = forwardRef<SectionList<ICategory>, Props>(
                 <ViewButton
                   style={$button}
                   onPress={() => {
-                    navigation.getParent()?.navigate("expenses", {
-                      screen: "view",
+                    navigation.getParent()?.navigate(OverviewPath.Expenses, {
+                      screen: CategoriesPath.CategoryView,
                       params: { id: categoryId, name: categoryName },
                     })
                   }}

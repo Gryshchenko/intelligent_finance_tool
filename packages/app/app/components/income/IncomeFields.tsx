@@ -35,14 +35,16 @@ export const IncomeFields: FC<IProps> = function IncomeFields(_props) {
         <Field
           style={$fieldName}
           label={translate("common:name")}
-          value={String(form.incomeName)}
-          helperTx={errors?.incomeName}
-          status={errors?.incomeName ? "error" : undefined}
-          editable={!isView}
-          onChangeText={(v) => {
-            if (handleChange) {
-              handleChange("incomeName", v)
-            }
+          componentProps={{
+            value: String(form.incomeName),
+            helperTx: errors?.incomeName,
+            status: errors?.incomeName ? "error" : undefined,
+            editable: !isView,
+            onChangeText: (v) => {
+              if (handleChange) {
+                handleChange("incomeName", v)
+              }
+            },
           }}
         />
         <CurrencyDropdown

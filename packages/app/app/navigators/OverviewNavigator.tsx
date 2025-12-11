@@ -10,24 +10,35 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "@/components/Icon"
 import { CurrencyProvider } from "@/context/CurrencyContext"
 import { translate } from "@/i18n/translate"
-import { BalancesStackNavigator, BalanceStackParamList } from "@/navigators/BalancesStackNavigator"
 import {
+  AccountsPath,
+  AccountsStackNavigator,
+  AccountsStackParamList,
+} from "@/navigators/AccountsStackNavigator"
+import {
+  CategoriesPath,
   CategoriesStackNavigator,
   CategoriesStackParamList,
 } from "@/navigators/CategoriesStackNavigator"
 import { HistoryStackNavigator, HistoryStackParamList } from "@/navigators/HistoryStackNavigator"
-import { IncomesStackNavigator, IncomesStackParamList } from "@/navigators/IncomesStackNavigator"
+import {
+  IncomePath,
+  IncomesStackNavigator,
+  IncomesStackParamList,
+} from "@/navigators/IncomesStackNavigator"
 import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type OverviewTabParamList = {
   incomes: NavigatorScreenParams<IncomesStackParamList> | {}
-  balances: NavigatorScreenParams<BalanceStackParamList> | {}
-  expenses: NavigatorScreenParams<CategoriesStackParamList | {}>
+  balances: NavigatorScreenParams<AccountsStackParamList> | {}
+  expenses: NavigatorScreenParams<CategoriesStackParamList> | {}
   history: NavigatorScreenParams<HistoryStackParamList> | {}
   settings: undefined
   demo: undefined
@@ -75,6 +86,12 @@ export function OverviewNavigator() {
         <Tab.Screen
           name="incomes"
           component={IncomesStackNavigator}
+          listeners={({ navigation }) => ({
+            tabPress: (event) => {
+              event.preventDefault()
+              navigation.navigate(OverviewPath.Incomes, { screen: IncomePath.Incomes })
+            },
+          })}
           options={{
             tabBarLabel: translate("common:incomes"),
             tabBarIcon: ({ focused }) => (
@@ -88,7 +105,13 @@ export function OverviewNavigator() {
         />
         <Tab.Screen
           name="balances"
-          component={BalancesStackNavigator}
+          component={AccountsStackNavigator}
+          listeners={({ navigation }) => ({
+            tabPress: (event) => {
+              event.preventDefault()
+              navigation.navigate(OverviewPath.Balances, { screen: AccountsPath.Accounts })
+            },
+          })}
           options={{
             tabBarLabel: translate("common:balance"),
             tabBarIcon: ({ focused }) => (
@@ -104,6 +127,12 @@ export function OverviewNavigator() {
         <Tab.Screen
           name="expenses"
           component={CategoriesStackNavigator}
+          listeners={({ navigation }) => ({
+            tabPress: (event) => {
+              event.preventDefault()
+              navigation.navigate(OverviewPath.Expenses, { screen: CategoriesPath.Categories })
+            },
+          })}
           options={{
             tabBarLabel: translate("common:expenses"),
             tabBarIcon: ({ focused }) => (
@@ -119,6 +148,12 @@ export function OverviewNavigator() {
         <Tab.Screen
           name="history"
           component={HistoryStackNavigator}
+          listeners={({ navigation }) => ({
+            tabPress: (event) => {
+              event.preventDefault()
+              navigation.navigate(OverviewPath.History, { screen: TransactionPath.Transactions })
+            },
+          })}
           options={{
             tabBarLabel: translate("common:history"),
             tabBarIcon: ({ focused }) => (

@@ -30,8 +30,8 @@ export const AccountView: FC<IAccountPros> = function AccountView(_props) {
     const response = await accountService.doDeleteAccount(form.accountId)
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:deleteAccountSuccess"))
-      invalidateQuery([["account_accounts"]])
-      invalidateQuery([["account_account", form.accountId]])
+      await invalidateQuery([["account_accounts"]])
+      await invalidateQuery([["account_account", form.accountId]])
     } else {
       AlertService.error(translate("common:error"), translate("common:deleteAccountFailed"))
     }

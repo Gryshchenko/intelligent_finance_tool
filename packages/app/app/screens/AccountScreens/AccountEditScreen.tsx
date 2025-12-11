@@ -4,10 +4,11 @@ import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { AccountEdit } from "@/components/account/AccountEdit"
+import { AccountsPath } from "@/navigators/BalancesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "edit">
+type Props = NativeStackScreenProps<OverviewTabParamList, AccountsPath.AccountEdit>
 
 export const AccountEditScreen = function AccountEditScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string; payload: string }

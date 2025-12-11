@@ -5,6 +5,7 @@ import Utils from "tenpercent/shared/src/Utils"
 
 import { IncomeView } from "@/components/income/IncomeView"
 import { useAppQuery } from "@/hooks/useAppQuery"
+import { IncomePath } from "@/navigators/IncomesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
@@ -37,7 +38,7 @@ export async function fetchIncome(id: number): Promise<IIncome | undefined> {
   }
 }
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "view">
+type Props = NativeStackScreenProps<OverviewTabParamList, IncomePath.IncomeView>
 
 export const IncomeViewScreen = function IncomeViewScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string }

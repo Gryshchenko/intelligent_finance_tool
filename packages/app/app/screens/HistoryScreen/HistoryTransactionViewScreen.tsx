@@ -6,11 +6,13 @@ import { TransactionView } from "@/components/transaction/TransactionView"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
-import { fetchTransaction } from "@/screens/TransactionsScreen/TransactionScreen"
+import { fetchTransaction } from "@/screens/TransactionsScreen/TransactionViewScreen"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "view">
+type Props = NativeStackScreenProps<OverviewTabParamList, TransactionPath.TransactionView>
 
-export const TransactionViewScreen = function TransactionViewScreen(_props: Props) {
+export const HistoryTransactionViewScreen = function TransactionViewScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string }
   const navigation = useNavigation()
   const { id, name } = params
@@ -27,7 +29,11 @@ export const TransactionViewScreen = function TransactionViewScreen(_props: Prop
       props={{
         data,
       }}
-      onBack={() => navigation.getParent()?.navigate("overview", { screen: "history" })}
+      onBack={() =>
+        navigation.getParent()?.navigate(OverviewPath.History, {
+          screen: TransactionPath.Transactions,
+        })
+      }
       RenderComponent={TransactionView}
     />
   )

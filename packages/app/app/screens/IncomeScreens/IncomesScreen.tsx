@@ -2,15 +2,19 @@ import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Incomes } from "@/components/income/Incomes"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
+import { IncomePath } from "@/navigators/IncomesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { IncomeService } from "@/services/IncomeService"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchIncomes(): Promise<IIncome[]> {
@@ -33,7 +37,7 @@ export async function fetchIncomes(): Promise<IIncome[]> {
   }
 }
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "accounts">
+type Props = NativeStackScreenProps<OverviewTabParamList, IncomePath.Incomes>
 
 export const IncomesScreen = function IncomesScreen(_props: Props) {
   const navigation = useNavigation()
@@ -48,17 +52,23 @@ export const IncomesScreen = function IncomesScreen(_props: Props) {
         data,
         fetch: fetchIncomes,
         onPress: (id: number, name: string) => {
-          navigation.getParent()?.navigate("incomes", {
-            screen: "transactions",
-            params: { id, name, type: TransactionFieldType.Income },
+          navigation.getParent()?.navigate(OverviewPath.Incomes, {
+            screen: TransactionPath.Transactions,
+            params: { id, name, type: TransactionFieldType.Income, path: OverviewPath.Incomes },
           })
         },
       }}
       RightActionComponent={
         <AddButton
           onPress={() => {
-            navigation.getParent()?.navigate("incomes", {
-              screen: "create",
+            navigation.getParent()?.navigate(OverviewPath.Incomes, {
+              screen: TransactionPath.TransactionCreate,
+              params: {
+                path: OverviewPath.Incomes,
+                payload: {
+                  transactionTypeId: TransactionType.Income,
+                },
+              },
             })
           }}
         />

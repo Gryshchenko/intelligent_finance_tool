@@ -9,8 +9,10 @@ import { ListItem } from "@/components/ListItem"
 import { Text } from "@/components/Text"
 import { ViewButton } from "@/components/ViewButton"
 import { useCurrency } from "@/context/CurrencyContext"
+import { AccountsPath } from "@/navigators/AccountsStackNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { OverviewPath } from "@/types/OverviewPath"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IAccountsPros {
@@ -53,8 +55,8 @@ export const Accounts: FC<IAccountsPros> = function Accounts(_props) {
                   <ViewButton
                     style={$button}
                     onPress={() => {
-                      navigation.getParent()?.navigate("balances", {
-                        screen: "view",
+                      navigation.getParent()?.navigate(OverviewPath.Balances, {
+                        screen: AccountsPath.AccountView,
                         params: { id: accountId, name: accountName },
                       })
                     }}

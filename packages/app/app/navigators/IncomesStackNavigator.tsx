@@ -1,33 +1,57 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
+import { HistoryTransactionEditScreen } from "@/screens/HistoryScreen/HistoryTransactionEditScreen"
 import { IncomeCreateScreen } from "@/screens/IncomeScreens/IncomeCreateScreen"
 import { IncomeEditScreen } from "@/screens/IncomeScreens/IncomeEditScreen"
 import { IncomesScreen } from "@/screens/IncomeScreens/IncomesScreen"
 import { IncomeViewScreen } from "@/screens/IncomeScreens/IncomeViewScreen"
-import { TransactionScreen } from "@/screens/TransactionsScreen/TransactionScreen"
+import { TransactionCreateScreen } from "@/screens/TransactionsScreen/TransactionCreateScreen"
 import { TransactionsScreen } from "@/screens/TransactionsScreen/TransactionsScreen"
+import { TransactionViewScreen } from "@/screens/TransactionsScreen/TransactionViewScreen"
+import { TransactionPath } from "@/types/TransactionPath"
 
 const IncomesStack = createNativeStackNavigator()
+
+export enum IncomePath {
+  Incomes = "accounts",
+  IncomeView = "incomeView",
+  IncomeEdit = "incomeEdit",
+  IncomeCreate = "incomeCreate",
+  Transactions = "transactions",
+}
 
 export interface IncomesStackParamList {
   accounts: undefined
   transactions: { id: number; type: TransactionFieldType; name: string }
-  transaction: { id: number }
-  view: { id: number; name: string }
-  edit: { id: number; name: string; payload: string }
-  create: { payload: string }
+  transactionCreate: { id: number }
+  transactionEdit: { id: number }
+  transactionView: { id: number }
+  incomeView: { id: number; name: string }
+  incomeEdit: { id: number; name: string; payload: string }
+  incomeCreate: { payload: string }
 }
 
 function IncomesStackNavigator() {
   return (
     <IncomesStack.Navigator screenOptions={{ headerShown: false }}>
-      <IncomesStack.Screen name="accounts" component={IncomesScreen} />
-      <IncomesStack.Screen name="view" component={IncomeViewScreen} />
-      <IncomesStack.Screen name="create" component={IncomeCreateScreen} />
-      <IncomesStack.Screen name="edit" component={IncomeEditScreen} />
-      <IncomesStack.Screen name="transactions" component={TransactionsScreen} />
-      <IncomesStack.Screen name="transaction" component={TransactionScreen} />
+      <IncomesStack.Screen name={IncomePath.Incomes} component={IncomesScreen} />
+      <IncomesStack.Screen name={IncomePath.IncomeView} component={IncomeViewScreen} />
+      <IncomesStack.Screen name={IncomePath.IncomeCreate} component={IncomeCreateScreen} />
+      <IncomesStack.Screen name={IncomePath.IncomeEdit} component={IncomeEditScreen} />
+      <IncomesStack.Screen name={TransactionPath.Transactions} component={TransactionsScreen} />
+      <IncomesStack.Screen
+        name={TransactionPath.TransactionEdit}
+        component={HistoryTransactionEditScreen}
+      />
+      <IncomesStack.Screen
+        name={TransactionPath.TransactionView}
+        component={TransactionViewScreen}
+      />
+      <IncomesStack.Screen
+        name={TransactionPath.TransactionCreate}
+        component={TransactionCreateScreen}
+      />
     </IncomesStack.Navigator>
   )
 }

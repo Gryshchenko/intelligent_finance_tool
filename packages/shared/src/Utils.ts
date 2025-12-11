@@ -15,6 +15,9 @@ export default class Utils {
     }
     public static parseObject<T>(value: string): T {
         try {
+            if (typeof value === 'object') {
+                return value;
+            }
             return JSON.parse(value);
         } catch (e) {
             return undefined;

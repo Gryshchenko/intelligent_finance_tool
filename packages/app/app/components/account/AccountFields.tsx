@@ -35,14 +35,16 @@ export const AccountFields: FC<IProps> = function AccountFields(_props) {
         <Field
           style={$fieldName}
           label={translate("common:name")}
-          value={String(form.accountName)}
-          helperTx={errors?.accountName}
-          status={errors?.accountName ? "error" : undefined}
-          editable={!isView}
-          onChangeText={(v) => {
-            if (handleChange) {
-              handleChange("accountName", v)
-            }
+          componentProps={{
+            value: String(form.accountName),
+            helperTx: errors?.accountName,
+            status: errors?.accountName ? "error" : undefined,
+            editable: !isView,
+            onChangeText: (v) => {
+              if (handleChange) {
+                handleChange("accountName", v)
+              }
+            },
           }}
         />
         <CurrencyDropdown
@@ -62,14 +64,16 @@ export const AccountFields: FC<IProps> = function AccountFields(_props) {
         <Field
           style={$fieldName}
           label={translate("common:amount")}
-          value={String(form.amount)}
-          helperTx={errors?.amount}
-          status={errors?.amount ? "error" : undefined}
-          editable={!isView}
-          onChangeText={(v) => {
-            if (handleChange) {
-              handleChange("amount", v)
-            }
+          componentProps={{
+            value: String(form.amount),
+            helperTx: errors?.amount,
+            status: errors?.amount ? "error" : undefined,
+            editable: !isView,
+            onChangeText: (v) => {
+              if (handleChange) {
+                handleChange("amount", v)
+              }
+            },
           }}
         />
       </view>

@@ -37,8 +37,8 @@ export const CategoryEdit: FC<ICategoryPros> = function CategoryEdit(_props) {
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("categoryScreen:updateCategorySuccess"))
-      invalidateQuery([["categories"]])
-      invalidateQuery([["category", form.categoryId]])
+      await invalidateQuery([["categories"]])
+      await invalidateQuery([["category", form.categoryId]])
       navigation.getParent()?.navigate("expenses", {
         screen: "categories",
       })

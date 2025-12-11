@@ -4,6 +4,8 @@ export enum TimeDuration {
   Hour = "hour",
 }
 export enum DateFormat {
+  /** 8/ 6/ 2014, 1:07:04 PM */
+  DATE_WITH_TIME_SECONDS = "F",
   /** 2025-09-27 */
   YYYY_MM_DD = "yyyy-MM-dd",
   /** 27/09/2025 */
@@ -34,6 +36,14 @@ export class Time {
     const interval = Interval.fromDateTimes(startLuxon, endLuxon)
 
     return interval.length(duration)
+  }
+
+  public static getISODateNow(): string {
+    return DateTime.now().toISO()
+  }
+
+  public static toJSDate(time: string): Date {
+    return DateTime.fromISO(time).toJSDate()
   }
 
   public static formatDate(isoString: string, format: DateFormat): string {

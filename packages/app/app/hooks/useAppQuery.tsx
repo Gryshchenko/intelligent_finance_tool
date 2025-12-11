@@ -17,10 +17,15 @@ export function useAppQuery<TData>(
   })
 }
 
-export function useInvalidateQuery() {
+export function useInvalidateQuery(): (keys: (string | readonly unknown[])[]) => Promise<void[]> {
   const queryClient = useQueryClient()
 
-  return (keys: (string | readonly unknown[])[]) => {
-    keys.forEach((key) => queryClient.invalidateQueries(Array.isArray(key) ? key : [key]))
+  return async (keys: (string | readonly unknown[])[]): Promise<void[]> => {
+    return Promise.all(
+      keys.map(
+        async (key) =>
+          await queryClient.invalidateQueries({ queryKey: Array.isArray(key) ? key : [key] }),
+      ),
+    )
   }
 }

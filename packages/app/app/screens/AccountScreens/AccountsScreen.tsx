@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native"
 import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { Accounts } from "@/components/account/Accounts"
 import { AddButton } from "@/components/buttons/AddButton"
@@ -12,6 +13,8 @@ import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { AccountService } from "@/services/AccountService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchAccounts(): Promise<IAccountListItem[] | undefined> {
@@ -52,17 +55,22 @@ export const AccountsScreen = function AccountsScreen(_props: Props) {
         data,
         fetch: fetchAccounts,
         onPress: (id: number, name: string) => {
-          navigation.getParent()?.navigate("balances", {
-            screen: "transactions",
-            params: { id, name, type: TransactionFieldType.Account },
+          navigation.getParent()?.navigate(OverviewPath.Balances, {
+            screen: TransactionPath.Transactions,
+            params: { id, name, type: TransactionFieldType.Account, path: OverviewPath.Balances },
           })
         },
       }}
       RightActionComponent={
         <AddButton
           onPress={() => {
-            navigation.getParent()?.navigate("balances", {
-              screen: "create",
+            navigation.getParent()?.navigate(OverviewPath.Balances, {
+              screen: TransactionPath.TransactionCreate,
+              params: {
+                payload: {
+                  transactionTypeId: TransactionType.Transafer,
+                },
+              },
             })
           }}
         />

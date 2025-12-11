@@ -5,6 +5,7 @@ import Utils from "tenpercent/shared/src/Utils"
 
 import { CategoryView } from "@/components/category/CategoryView"
 import { useAppQuery } from "@/hooks/useAppQuery"
+import { CategoriesPath } from "@/navigators/CategoriesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
@@ -37,7 +38,7 @@ export async function fetchCategory(id: number): Promise<ICategory | undefined> 
   }
 }
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "view">
+type Props = NativeStackScreenProps<OverviewTabParamList, CategoriesPath.CategoryView>
 
 export const CategoryViewScreen = function CategoryViewScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string }

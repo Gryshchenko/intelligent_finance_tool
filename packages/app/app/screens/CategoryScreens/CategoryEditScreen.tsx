@@ -4,10 +4,11 @@ import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { CategoryEdit } from "@/components/category/CategoryEdit"
+import { CategoriesPath } from "@/navigators/CategoriesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "edit">
+type Props = NativeStackScreenProps<OverviewTabParamList, CategoriesPath.CategoryEdit>
 
 export const CategoryEditScreen = function CategoryEditScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string; payload: string }

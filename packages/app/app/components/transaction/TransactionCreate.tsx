@@ -10,12 +10,21 @@ import AlertService from "@/services/AlertService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { TransactionService } from "@/services/TransactionService"
 import { Logger } from "@/utils/logger/Logger"
+import { Time } from "@/utils/Time"
 
-export const TransactionCreate: FC = function TransactionCreate(_props) {
+interface IProps {
+  data: Partial<ITransaction> | undefined
+}
+
+export const TransactionCreate: FC<IProps> = function TransactionCreate(_props: IProps) {
+  const { data } = _props
   const navigation = useNavigation()
   const { form, handleChange, save, errors } = useEditView<Partial<ITransaction>>(
     {
+      amount: 0,
       currencyId: 1,
+      transactionTypeId: data?.transactionTypeId,
+      createAt: data?.createAt || Time.getISODateNow(),
     },
     buildTransactionCreateSchema(),
   )

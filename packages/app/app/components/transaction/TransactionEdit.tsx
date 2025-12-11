@@ -41,8 +41,8 @@ export const TransactionEdit: FC<ITransactionPros> = function TransactionEdit(_p
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("transactionScreen:updateSuccess"))
-      invalidateQuery([["transactions"]])
-      invalidateQuery([["transaction", form.transactionId]])
+      await invalidateQuery([["transactions"]])
+      await invalidateQuery([["transaction", form.transactionId]])
       navigation.getParent()?.navigate("transactions", {
         screen: "accounts",
       })

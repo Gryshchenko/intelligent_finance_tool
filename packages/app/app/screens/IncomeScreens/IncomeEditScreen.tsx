@@ -4,10 +4,11 @@ import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { IncomeEdit } from "@/components/income/IncomeEdit"
+import { IncomePath } from "@/navigators/IncomesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "edit">
+type Props = NativeStackScreenProps<OverviewTabParamList, IncomePath.IncomeEdit>
 
 export const IncomeEditScreen = function IncomeEditScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string; payload: string }

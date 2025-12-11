@@ -30,8 +30,8 @@ export const IncomeView: FC<IIncomePros> = function IncomeView(_props) {
     const response = await incomeService.doDeleteIncome(form.incomeId)
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:deleteAccountSuccess"))
-      invalidateQuery([["income_accounts"]])
-      invalidateQuery([["income_account", form.incomeId]])
+      await invalidateQuery([["income_accounts"]])
+      await invalidateQuery([["income_account", form.incomeId]])
       navigation.getParent()?.navigate("incomes", {
         screen: "accounts",
       })

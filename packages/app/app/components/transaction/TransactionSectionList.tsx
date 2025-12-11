@@ -178,7 +178,9 @@ const TransactionSectionList = forwardRef<SectionList<ITransactionListItem>, Pro
                 "transactionScreen:to" as TxKeyPath,
               )}: ${getToName(transaction)}`}
             </Text>
-            <Text style={themed([$description])}>{transaction.description.slice(0, 15)}</Text>
+            <Text style={themed([$description])}>
+              {transaction.description?.slice(0, 15) ?? ""}
+            </Text>
           </View>
         </ListItem>
       )

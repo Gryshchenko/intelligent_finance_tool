@@ -37,8 +37,8 @@ export const IncomeEdit: FC<IIncomePros> = function IncomeEdit(_props) {
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:updateAccountSuccess"))
-      invalidateQuery([["incomes"]])
-      invalidateQuery([["income", form.incomeId]])
+      await invalidateQuery([["incomes"]])
+      await invalidateQuery([["income", form.incomeId]])
       navigation.getParent()?.navigate("incomes", {
         screen: "accounts",
       })

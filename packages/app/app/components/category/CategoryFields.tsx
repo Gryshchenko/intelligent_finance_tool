@@ -35,14 +35,16 @@ export const CategoryFields: FC<IProps> = function CategoryFields(_props) {
         <Field
           style={$fieldName}
           label={translate("common:name")}
-          value={String(form.categoryName)}
-          helperTx={errors?.categoryName}
-          status={errors?.categoryName ? "error" : undefined}
-          editable={!isView}
-          onChangeText={(v) => {
-            if (handleChange) {
-              handleChange("categoryName", v)
-            }
+          componentProps={{
+            value: String(form.categoryName),
+            helperTx: errors?.categoryName,
+            status: errors?.categoryName ? "error" : undefined,
+            editable: !isView,
+            onChangeText: (v) => {
+              if (handleChange) {
+                handleChange("categoryName", v)
+              }
+            },
           }}
         />
         <CurrencyDropdown

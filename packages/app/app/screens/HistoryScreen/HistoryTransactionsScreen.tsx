@@ -2,15 +2,19 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import { useNavigation } from "@react-navigation/native"
 import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
+import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
+import { AddButton } from "@/components/buttons/AddButton"
 import { Transactions } from "@/components/transaction/Transactions"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { translate } from "@/i18n/translate"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { fetchTransactions } from "@/screens/TransactionsScreen/TransactionsScreen"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 
-type Props = BottomTabScreenProps<OverviewTabParamList, "transactions">
+type Props = BottomTabScreenProps<OverviewTabParamList, TransactionPath.Transactions>
 
 export const HistoryTransactionsScreen = function HistoryScreen(_props: Props) {
   const navigation = useNavigation()
@@ -29,12 +33,26 @@ export const HistoryTransactionsScreen = function HistoryScreen(_props: Props) {
         fetch: async ({ cursor, limit }) =>
           await fetchTransactions(undefined, undefined, cursor, limit),
         onPress: (id: number, name: string) => {
-          navigation.getParent()?.navigate("history", {
-            screen: "transaction",
+          navigation.getParent()?.navigate(OverviewPath.History, {
+            screen: TransactionPath.TransactionView,
             params: { id, name },
           })
         },
       }}
+      RightActionComponent={
+        <AddButton
+          onPress={() => {
+            navigation.getParent()?.navigate(OverviewPath.History, {
+              screen: TransactionPath.TransactionCreate,
+              params: {
+                payload: {
+                  transactionTypeId: TransactionType.Expense,
+                },
+              },
+            })
+          }}
+        />
+      }
       RenderComponent={Transactions}
     />
   )

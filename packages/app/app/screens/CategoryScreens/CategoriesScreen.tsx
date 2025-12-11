@@ -2,6 +2,7 @@ import { FC } from "react"
 import { useNavigation } from "@react-navigation/native"
 import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Categories } from "@/components/category/Categories"
@@ -11,6 +12,8 @@ import { MainTabScreenProps } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { CategoryService } from "@/services/CategoryService"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchCategories(): Promise<ICategory[]> {
@@ -50,9 +53,9 @@ export const CategoriesScreen: FC<MainTabScreenProps<"categories">> = function E
       props={{
         data,
         onPress: (id: number, name: string) => {
-          navigation.getParent()?.navigate("expenses", {
-            screen: "transactions",
-            params: { id, name, type: TransactionFieldType.Category },
+          navigation.getParent()?.navigate(OverviewPath.Expenses, {
+            screen: TransactionPath.Transactions,
+            params: { id, name, type: TransactionFieldType.Category, path: OverviewPath.Expenses },
           })
         },
       }}
@@ -60,8 +63,13 @@ export const CategoriesScreen: FC<MainTabScreenProps<"categories">> = function E
       RightActionComponent={
         <AddButton
           onPress={() => {
-            navigation.getParent()?.navigate("expenses", {
-              screen: "create",
+            navigation.getParent()?.navigate(OverviewPath.Expenses, {
+              screen: TransactionPath.TransactionCreate,
+              params: {
+                payload: {
+                  transactionTypeId: TransactionType.Expense,
+                },
+              },
             })
           }}
         />

@@ -4,12 +4,15 @@ import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
 
+import { AddButton } from "@/components/buttons/AddButton"
 import { Transactions } from "@/components/transaction/Transactions"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { TransactionService } from "@/services/TransactionService"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 import { Logger } from "@/utils/logger/Logger"
 
 export async function fetchTransactions(
@@ -42,12 +45,17 @@ export async function fetchTransactions(
   }
 }
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "transactions">
+type Props = NativeStackScreenProps<OverviewTabParamList, TransactionPath.Transactions>
 
 export const TransactionsScreen = function TransactionsScreen(_props: Props) {
-  const params = _props?.route?.params as { id: number; name: string; type: TransactionFieldType }
+  const params = _props?.route?.params as {
+    id: number
+    name: string
+    type: TransactionFieldType
+    path: OverviewPath
+  }
   const navigation = useNavigation()
-  const { id, type, name } = params
+  const { id, type, name, path } = params
   const { isError, data, isPending } = useAppQuery<IPagination<ITransactionListItem> | undefined>(
     ["transactions", id, type],
     async () => fetchTransactions(id, type, 0, 10),
@@ -60,17 +68,30 @@ export const TransactionsScreen = function TransactionsScreen(_props: Props) {
       isPending={isPending}
       props={{
         onPress: (id: number, name: string) => {
-          navigation.getParent()?.navigate("balances", {
-            screen: "transactions",
-            params: { id, name, type: TransactionFieldType.Account },
+          navigation.getParent()?.navigate(path, {
+            screen: TransactionPath.TransactionView,
+            params: { id, name, type },
           })
         },
         data,
-        fetch: async ({ cursor, limit }) =>
-          await fetchTransactions(undefined, undefined, cursor, limit),
+        fetch: async ({ cursor, limit }) => await fetchTransactions(id, type, cursor, limit),
       }}
       onBack={() => navigation.goBack()}
       RenderComponent={Transactions}
+      RightActionComponent={
+        <AddButton
+          onPress={() => {
+            navigation.getParent()?.navigate(path, {
+              screen: TransactionPath.TransactionCreate,
+              params: {
+                payload: {
+                  transactionTypeId: type,
+                },
+              },
+            })
+          }}
+        />
+      }
     />
   )
 }

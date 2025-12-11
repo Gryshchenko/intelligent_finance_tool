@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View, Pressable, Platform, ViewStyle, TextStyle } from "react-native"
+import { Platform, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
 import { Text, TextProps } from "@/components/Text"
@@ -7,6 +7,9 @@ import { TxKeyPath } from "@/i18n"
 import { colors } from "@/theme/colors"
 import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
+import { DateFormat, Time } from "@/utils/Time"
+
+type IOSMode = "date" | "time" | "datetime" | "countdown"
 
 export enum DatePickerType {
   Date = "date",
@@ -15,7 +18,7 @@ export enum DatePickerType {
 }
 
 type IgniteDatePickerProps = {
-  value: Date | null
+  value: string | null
   onChange: (date: Date) => void
   placeholder?: string
   mode?: DatePickerType
@@ -34,7 +37,7 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
   value,
   onChange,
   placeholder = "Select date",
-  mode = "date",
+  mode = DatePickerType.Date,
   minimumDate = new Date(2000, 0, 1),
   maximumDate = new Date(2030, 11, 31),
   disabled,
@@ -58,13 +61,21 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
     status === "error" && { color: colors.error },
     HelperTextProps?.style,
   ]
-  const formattedDate = value ? value.toLocaleDateString() : placeholder
+  const formattedDate = value ? value : placeholder
+
+  const iosModeMap: Record<DatePickerType, IOSMode> = {
+    [DatePickerType.Date]: "date",
+    [DatePickerType.Time]: "time",
+    [DatePickerType.Datetime]: "datetime",
+  }
 
   return (
     <View style={style}>
       <Text preset="formLabel" tx={"common:date"} />
       <Pressable disabled={disabled} style={themed($input)} onPress={() => setShow(true)}>
-        <Text style={themed($text)}>{formattedDate}</Text>
+        <Text style={themed($text)}>
+          {Time.formatDate(formattedDate, DateFormat.DATE_WITH_TIME_SECONDS)}
+        </Text>
       </Pressable>
       {!!(helper || helperTx) && (
         <Text
@@ -80,8 +91,8 @@ export const IgniteDatePicker: React.FC<IgniteDatePickerProps> = ({
       {show && (
         <DateTimePicker
           disabled={disabled}
-          value={value || new Date()}
-          mode={mode === "datetime" ? "date" : mode}
+          value={Time.toJSDate(value || Time.getISODateNow())}
+          mode={iosModeMap[mode]}
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleChange}
           minimumDate={minimumDate}

@@ -10,7 +10,10 @@ import { ListItem } from "@/components/ListItem"
 import { Text } from "@/components/Text"
 import { ViewButton } from "@/components/ViewButton"
 import { useCurrency } from "@/context/CurrencyContext"
+import { IncomePath } from "@/navigators/IncomesStackNavigator"
 import { useAppTheme } from "@/theme/context"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IIncomesPros {
@@ -46,8 +49,8 @@ export const Incomes: FC<IIncomesPros> = function Incomes(_props) {
                   <ViewButton
                     style={$button}
                     onPress={() => {
-                      navigation.getParent()?.navigate("incomes", {
-                        screen: "view",
+                      navigation.getParent()?.navigate(OverviewPath.Incomes, {
+                        screen: IncomePath.IncomeView,
                         params: { id: incomeId, name: incomeName },
                       })
                     }}

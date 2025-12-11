@@ -3,10 +3,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import { CategoryCreate } from "@/components/category/CategoryCreate"
 import { translate } from "@/i18n/translate"
+import { CategoriesPath } from "@/navigators/CategoriesStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "create">
+type Props = NativeStackScreenProps<OverviewTabParamList, CategoriesPath.CategoriesCreate>
 
 export const CategoryCreateScreen = function CategoryCreateScreen(_props: Props) {
   const navigation = useNavigation()

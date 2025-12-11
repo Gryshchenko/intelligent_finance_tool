@@ -30,8 +30,8 @@ export const CategoryView: FC<ICategoryPros> = function CategoryView(_props) {
     const response = await categoryService.doDeleteCategory(form.categoryId)
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("categoryScreen:deleteCategorySuccess"))
-      invalidateQuery([["categories"]])
-      invalidateQuery([["category", form.categoryId]])
+      await invalidateQuery([["categories"]])
+      await invalidateQuery([["category", form.categoryId]])
       navigation.getParent()?.navigate("expenses", {
         screen: "categories",
       })

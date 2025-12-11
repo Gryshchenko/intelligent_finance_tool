@@ -6,10 +6,12 @@ import Utils from "tenpercent/shared/src/Utils"
 import { TransactionEdit } from "@/components/transaction/TransactionEdit"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
+import { OverviewPath } from "@/types/OverviewPath"
+import { TransactionPath } from "@/types/TransactionPath"
 
-type Props = NativeStackScreenProps<OverviewTabParamList, "edit">
+type Props = NativeStackScreenProps<OverviewTabParamList, TransactionPath.TransactionEdit>
 
-export const TransactionEditScreen = function TransactionEditScreen(_props: Props) {
+export const HistoryTransactionEditScreen = function TransactionEditScreen(_props: Props) {
   const params = _props?.route?.params as { id: number; name: string; payload: string }
   const navigation = useNavigation()
   const data = Utils.parseObject<ITransaction | undefined>(params.payload)
@@ -19,8 +21,8 @@ export const TransactionEditScreen = function TransactionEditScreen(_props: Prop
       isError={false}
       isPending={false}
       onBack={() =>
-        navigation.getParent()?.navigate("history", {
-          screen: "transactions",
+        navigation.getParent()?.navigate(OverviewPath.History, {
+          screen: TransactionPath.Transactions,
         })
       }
       props={{

@@ -109,6 +109,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             }
 
             query.limit(limit);
+            console.log(query.toSQL());
 
             const data = await query;
 

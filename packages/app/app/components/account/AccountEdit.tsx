@@ -38,8 +38,8 @@ export const AccountEdit: FC<IAccountPros> = function AccountEdit(_props) {
     })
     if (response.kind === GeneralApiProblemKind.Ok) {
       AlertService.info(translate("common:info"), translate("common:updateAccountSuccess"))
-      invalidateQuery([["income_accounts"]])
-      invalidateQuery([["income_account", form.accountId]])
+      await invalidateQuery([["income_accounts"]])
+      await invalidateQuery([["income_account", form.accountId]])
       navigation.getParent()?.navigate("balances", {
         screen: "accounts",
       })
