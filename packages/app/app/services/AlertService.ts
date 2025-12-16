@@ -22,7 +22,11 @@ class AlertService {
   static confirm(title: string, message: string, onConfirm: () => void, onCancel?: () => void) {
     if (Platform.OS === "web") {
       const result = window.confirm(`${title}\n\n${message}`)
-      result ? onConfirm() : onCancel?.()
+      if (result) {
+        onConfirm?.()
+      } else {
+        onCancel?.()
+      }
     } else {
       Alert.alert(title, message, [
         { text: translate("common:cancel"), onPress: onCancel, style: "cancel" },

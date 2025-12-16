@@ -5,6 +5,7 @@ import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusTy
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import Utils from 'src/utils/Utils';
 import Logger from 'helper/logger/Logger';
+import { Time } from 'src/utils/time/Time';
 
 const validateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -37,8 +38,14 @@ const validateQuery = (schema: Record<string, string>) => {
             if (expectedType === 'string' && typeof value !== 'string' && String(value).length <= 0) {
                 errors.push(`Invalid type for ${key}: expected string`);
             }
+            if (expectedType === 'date') {
+                try {
+                    Time.parseUTC(String(value));
+                } catch {
+                    errors.push(`Invalid type for ${key}: expected valid date string`);
+                }
+            }
         });
-
         if (errors.length) {
             Logger.Of('validateQuery').error(`Validate query failed due reason`, errors);
             return res.status(HttpCode.BAD_REQUEST).json(

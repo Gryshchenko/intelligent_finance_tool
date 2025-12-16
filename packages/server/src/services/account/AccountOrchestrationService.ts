@@ -1,4 +1,3 @@
-import { IAccountService } from 'interfaces/IAccountService';
 import { ICurrencyService } from 'interfaces/ICurrencyService';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { LoggerBase } from 'helper/logger/LoggerBase';
@@ -13,7 +12,8 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
-import { ITransactionService } from 'interfaces/ITransactionService';
+import { IAccountService } from 'services/account/AccountService';
+import { ITransactionService } from 'services/transaction/TransactionService';
 
 export class AccountOrchestrationService extends LoggerBase {
     private readonly _accountService: IAccountService;

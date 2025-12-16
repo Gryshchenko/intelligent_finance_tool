@@ -1,5 +1,3 @@
-import { ICategoryDataAccess } from 'interfaces/ICategoryDataAccess';
-import { ICategoryService } from 'interfaces/ICategoryService';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
 import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
@@ -7,6 +5,16 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import Utils from 'src/utils/Utils';
+import { ICategoryDataAccess } from 'services/category/CategoryDataAccess';
+
+export interface ICategoryService {
+    create(userId: number, incomes: ICreateCategory, trx?: IDBTransaction): Promise<ICategory>;
+    delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean>;
+    patch(userId: number, incomeId: number, properties: Partial<ICategory>, trx?: IDBTransaction): Promise<number>;
+    creates(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]>;
+    gets(userId: number): Promise<ICategory[] | undefined>;
+    get(userId: number, categoryId: number): Promise<ICategory | undefined>;
+}
 
 export default class CategoryService extends LoggerBase implements ICategoryService {
     private readonly _categoryDataAccess: ICategoryDataAccess;

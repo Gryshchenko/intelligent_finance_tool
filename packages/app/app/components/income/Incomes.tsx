@@ -13,7 +13,6 @@ import { useCurrency } from "@/context/CurrencyContext"
 import { IncomePath } from "@/navigators/IncomesStackNavigator"
 import { useAppTheme } from "@/theme/context"
 import { OverviewPath } from "@/types/OverviewPath"
-import { TransactionPath } from "@/types/TransactionPath"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 
 interface IIncomesPros {

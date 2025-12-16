@@ -4,7 +4,7 @@ import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
 import Utils from "tenpercent/shared/src/Utils"
 
 import { AccountEdit } from "@/components/account/AccountEdit"
-import { AccountsPath } from "@/navigators/BalancesStackNavigator"
+import { AccountsPath } from "@/navigators/AccountsStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 

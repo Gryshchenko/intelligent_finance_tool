@@ -1,4 +1,3 @@
-import { ICategoryDataAccess } from 'interfaces/ICategoryDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
@@ -9,6 +8,13 @@ import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 
+export interface ICategoryDataAccess {
+    delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean>;
+    patch(userId: number, incomeId: number, properties: Partial<ICategory>, trx?: IDBTransaction): Promise<number>;
+    create(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]>;
+    gets(userId: number): Promise<ICategory[] | undefined>;
+    get(userId: number, categoryId: number): Promise<ICategory | undefined>;
+}
 export default class CategoryDataAccess extends LoggerBase implements ICategoryDataAccess {
     private readonly _db: IDatabaseConnection;
 

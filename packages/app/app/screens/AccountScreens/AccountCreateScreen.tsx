@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import { AccountCreate } from "@/components/account/AccountCreate"
 import { translate } from "@/i18n/translate"
-import { AccountsPath } from "@/navigators/BalancesStackNavigator"
+import { AccountsPath } from "@/navigators/AccountsStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 

@@ -5,7 +5,7 @@ import Utils from "tenpercent/shared/src/Utils"
 
 import { AccountView } from "@/components/account/AccountView"
 import { useAppQuery } from "@/hooks/useAppQuery"
-import { AccountsPath } from "@/navigators/BalancesStackNavigator"
+import { AccountsPath } from "@/navigators/AccountsStackNavigator"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"
 import { GenericListScreen } from "@/screens/GenericListScreen"
 import { AccountService } from "@/services/AccountService"

@@ -1,5 +1,3 @@
-import { IAccountService } from 'interfaces/IAccountService';
-import { ICategoryService } from 'interfaces/ICategoryService';
 import { IUserService } from 'interfaces/IUserService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IGroupService } from 'interfaces/IGroupService';
@@ -31,6 +29,8 @@ import { IBalanceService } from 'interfaces/IBalanceService';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { getConfig } from 'src/config/config';
+import { IAccountService } from 'services/account/AccountService';
+import { ICategoryService } from 'services/category/CategoryService';
 
 interface IDefaultData {
     group: string;

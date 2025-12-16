@@ -4,7 +4,7 @@ import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusTy
 
 export default class ResponseBuilder {
     protected _response: IResponse = {
-        status: null,
+        status: undefined,
         data: {},
         errors: [],
     };
@@ -15,7 +15,7 @@ export default class ResponseBuilder {
 
     public reset() {
         this._response = {
-            status: null,
+            status: undefined,
             data: {},
             errors: [],
         };

@@ -1,4 +1,3 @@
-import { ITransactionDataAccess } from 'interfaces/ITransactionDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
@@ -13,6 +12,15 @@ import { validateAllowedProperties } from 'src/utils/validation/validateAllowedP
 import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 import { parseSortBy } from 'src/utils/validation/parseSortBy';
+
+export interface ITransactionDataAccess {
+    createTransaction(transaction: ICreateTransaction, trx?: IDBTransaction): Promise<number>;
+    getTransactions(data: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>>;
+    getTransaction(userId: number, transactionId: number, trx?: IDBTransaction): Promise<ITransaction | undefined>;
+    patchTransaction(userId: number, properties: Partial<ITransaction>, trx?: IDBTransaction): Promise<number>;
+    deleteTransaction(userId: number, transactionId: number, trx?: IDBTransaction): Promise<boolean>;
+    deleteTransactionsForAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean>;
+}
 
 export default class TransactionDataAccess extends LoggerBase implements ITransactionDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -102,6 +110,13 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             if (cursor) {
                 query.andWhere('transactions.transactionId', '<', cursor);
             }
+            // if (from && Time.isValidISODate(from)) {
+            //     query.andWhere('transactions.createdAt', '>=', Time.toInclusiveFrom(from));
+            // }
+            //
+            // if (to && Time.isValidISODate(to)) {
+            //     query.andWhere('transactions.createdAt', '<', Time.toExclusiveTo(to));
+            // }
             if (Utils.isArrayNotEmpty(orderArr)) {
                 for (const { column, order } of orderArr) {
                     query.orderBy(`transactions.${column}`, order);
@@ -109,7 +124,6 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             }
 
             query.limit(limit);
-            console.log(query.toSQL());
 
             const data = await query;
 

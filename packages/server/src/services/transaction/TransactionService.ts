@@ -1,6 +1,4 @@
-import { ITransactionService } from 'interfaces/ITransactionService';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
-import { ITransactionDataAccess } from 'interfaces/ITransactionDataAccess';
 import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { TransactionType } from 'types/TransactionType';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
@@ -11,30 +9,44 @@ import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { IAccountService } from 'interfaces/IAccountService';
 import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
 import { IPagination } from 'tenpercent/shared/src/interfaces/IPagination';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
+import { IAccountService } from 'services/account/AccountService';
+import { IStatsOrchestratorService } from 'services/StatsOrchestrator/StatsOrchestratorService';
+import { ITransactionDataAccess } from 'services/transaction/TransactionDataAccess';
+
+export interface ITransactionService {
+    createTransaction(transactions: ICreateTransaction): Promise<number | null>;
+    getTransactions({ userId, limit, cursor }: ITransactionListItemsRequest): Promise<IPagination<ITransactionListItem | null>>;
+    getTransaction(userId: number, transactionId: number): Promise<ITransaction | undefined>;
+    deleteTransaction(userId: number, transactionId: number): Promise<boolean>;
+    patchTransaction(userId: number, transaction: IPatchTransaction): Promise<number | null>;
+    deleteTransactionsForAccount(userId: number, accountId: number, trx?: IDBTransaction): Promise<boolean>;
+}
 
 export default class TransactionService extends LoggerBase implements ITransactionService {
     private readonly _transactionDataAccess: ITransactionDataAccess;
     private readonly _accountService: IAccountService;
     private readonly _balanceService: IBalanceService;
+    private readonly _statsOrchestratorService: IStatsOrchestratorService;
     private readonly _db: IDatabaseConnection;
 
     public constructor(
         transactionDataAccess: ITransactionDataAccess,
         accountService: IAccountService,
         balanceService: IBalanceService,
+        statsOrchestratorService: IStatsOrchestratorService,
         db: IDatabaseConnection,
     ) {
         super();
         this._transactionDataAccess = transactionDataAccess;
         this._accountService = accountService;
         this._balanceService = balanceService;
+        this._statsOrchestratorService = statsOrchestratorService;
         this._db = db;
     }
 
@@ -65,9 +77,9 @@ export default class TransactionService extends LoggerBase implements ITransacti
 
             const trx = trxInProcess as IDBTransaction;
 
-            const transaction = await this._transactionDataAccess.getTransaction(userId, transactionId, trx);
+            const trs = await this._transactionDataAccess.getTransaction(userId, transactionId, trx);
             const result = await this._transactionDataAccess.deleteTransaction(userId, transactionId, trx);
-            if (!transaction) {
+            if (!trs) {
                 throw new ValidationError({
                     message: 'Transaction could not be deleted',
                 });
@@ -75,11 +87,46 @@ export default class TransactionService extends LoggerBase implements ITransacti
             await this._balanceService.patch(
                 userId,
                 {
-                    amount: transaction?.amount * -1,
-                    currencyCode: transaction.currencyCode,
+                    amount: trs?.amount * -1,
+                    currencyCode: trs.currencyCode,
                 },
                 trx,
             );
+            switch (trs.transactionTypeId) {
+                case TransactionType.Expense: {
+                    await this._statsOrchestratorService.handleExpanse(
+                        userId,
+                        trs.createAt,
+                        trs.accountId,
+                        trs.categoryId as number,
+                        trs?.amount * -1,
+                        trx,
+                    );
+                    break;
+                }
+                case TransactionType.Income: {
+                    await this._statsOrchestratorService.handleIncomes(
+                        userId,
+                        trs.createAt,
+                        trs.incomeId as number,
+                        trs.accountId as number,
+                        trs?.amount * -1,
+                        trx,
+                    );
+                    break;
+                }
+                case TransactionType.Transafer: {
+                    await this._statsOrchestratorService.handleTransfer(
+                        userId,
+                        trs.createAt,
+                        trs.accountId as number,
+                        trs.targetAccountId as number,
+                        trs?.amount * -1,
+                        trx,
+                    );
+                    break;
+                }
+            }
             await uow.commit();
             return result;
         } catch (e) {
@@ -118,6 +165,41 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     },
                     trx,
                 );
+                switch (trs.transactionTypeId) {
+                    case TransactionType.Expense: {
+                        await this._statsOrchestratorService.handleExpanse(
+                            userId,
+                            transaction.createAt,
+                            trs.accountId,
+                            trs.categoryId as number,
+                            delta,
+                            trx,
+                        );
+                        break;
+                    }
+                    case TransactionType.Income: {
+                        await this._statsOrchestratorService.handleIncomes(
+                            userId,
+                            transaction.createAt,
+                            trs.incomeId as number,
+                            trs.accountId as number,
+                            delta,
+                            trx,
+                        );
+                        break;
+                    }
+                    case TransactionType.Transafer: {
+                        await this._statsOrchestratorService.handleTransfer(
+                            userId,
+                            transaction.createAt,
+                            trs.accountId as number,
+                            trs.targetAccountId as number,
+                            delta,
+                            trx,
+                        );
+                        break;
+                    }
+                }
             }
             await uow.commit();
             return result;
@@ -151,8 +233,15 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     { amount: transactionAmount, currencyCode: accountInWork?.currencyCode as string },
                     trx,
                 );
-
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
+                await this._statsOrchestratorService.handleIncomes(
+                    userId,
+                    transaction.createAt,
+                    transaction.incomeId as number,
+                    accountId,
+                    transactionAmount,
+                    trx,
+                );
             },
             'income',
         );
@@ -173,8 +262,15 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     { amount: transactionAmount * -1, currencyCode: accountInWork?.currencyCode as string },
                     trx,
                 );
-
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
+                await this._statsOrchestratorService.handleExpanse(
+                    userId,
+                    transaction.createAt,
+                    accountId,
+                    transaction.categoryId as number,
+                    transactionAmount * -1,
+                    trx,
+                );
             },
             'expense',
         );
@@ -206,6 +302,14 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 const newTargetAmount =
                     Utils.roundNumber((targetAccount as IAccount).amount) + Utils.roundNumber(transactionAmount);
 
+                await this._statsOrchestratorService.handleTransfer(
+                    userId,
+                    transaction.createAt,
+                    accountId,
+                    targetAccountId,
+                    newTargetAmount,
+                    trx,
+                );
                 await this._accountService.patchAccount(userId, accountId, { amount: newSourceAmount }, trx);
                 await this._accountService.patchAccount(userId, targetAccountId, { amount: newTargetAmount }, trx);
             },
