@@ -7,7 +7,7 @@ import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import AccountServiceBuilder from 'services/account/AccountServiceBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { AccountOrchestrationServiceBuilder } from 'services/account/AccountOrchestrationServiceBuilder';
 

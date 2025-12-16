@@ -24,6 +24,13 @@ export class Time {
     public static utc(): DateTime<boolean> {
         return DateTime.utc();
     }
+    public static getISODateNow(): string {
+        return DateTime.now().toISO();
+    }
+
+    public static toJSDate(time: string): Date {
+        return DateTime.fromISO(time).toJSDate();
+    }
     public static fromISO(isoString: string, throwOnInvalid = true): DateTime {
         const dt = DateTime.fromISO(isoString, { zone: 'utc' });
 
@@ -88,6 +95,22 @@ export class Time {
         const dtTo = DateTime.fromSeconds(to).toUTC();
         const duration = dtTo.diff(dtFrom);
         return duration.toISO();
+    }
+    public static getSecondsLeft(isoString: string): number {
+        const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const target = DateTime.fromISO(isoString, { zone: userZone });
+        const now = DateTime.now().setZone(userZone);
+
+        const diff = target.toSeconds() - now.toSeconds();
+        return Math.max(0, Math.floor(diff));
+    }
+    public static secondsToMinutes(seconds: number): string {
+        const minutes = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+
+        const secStr = sec < 10 ? `0${sec}` : `${sec}`;
+
+        return `${minutes}:${secStr}`;
     }
 
     public static formatDate(isoString: string, format: DateFormat): string {

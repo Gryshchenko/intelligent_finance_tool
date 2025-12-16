@@ -3,7 +3,7 @@ import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { DBError } from 'src/utils/errors/DBError';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';

@@ -1,6 +1,7 @@
 import { FC } from "react"
 import { useNavigation } from "@react-navigation/native"
 import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
+import { Time } from "tenpercent/shared/src/utils/time/Time"
 
 import { TransactionFields } from "@/components/transaction/TransactionFields"
 import { useEditView } from "@/hooks/useEditView"
@@ -10,7 +11,6 @@ import AlertService from "@/services/AlertService"
 import { GeneralApiProblemKind } from "@/services/api/apiProblem"
 import { TransactionService } from "@/services/TransactionService"
 import { Logger } from "@/utils/logger/Logger"
-import { Time } from "@/utils/Time"
 
 interface IProps {
   data: Partial<ITransaction> | undefined

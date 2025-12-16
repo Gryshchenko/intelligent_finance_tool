@@ -14,8 +14,8 @@ import jwt, { Algorithm, DecodeOptions, JwtPayload } from 'jsonwebtoken';
 import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { JwtPayloadCustom } from 'services/auth/passport-setup';
 import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
-import Utils from 'src/utils/Utils';
-import { Time } from 'src/utils/time/Time';
+import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Time } from 'tenpercent/shared/src/utils/time/Time';
 
 export default class AuthService extends LoggerBase implements IAuthService {
     protected userService: IUserService;

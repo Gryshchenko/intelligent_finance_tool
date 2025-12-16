@@ -7,7 +7,7 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
 
 export class TransactionController {

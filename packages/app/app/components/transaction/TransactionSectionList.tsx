@@ -5,6 +5,7 @@ import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
 import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
 import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
 import Utils from "tenpercent/shared/src/Utils"
+import { DateFormat, Time } from "tenpercent/shared/src/utils/time/Time"
 
 import { EmptyState } from "@/components/EmptyState"
 import { Text } from "@/components/Text"
@@ -18,7 +19,6 @@ import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
 import { CurrencyUtils } from "@/utils/CurrencyUtils"
 import { Logger } from "@/utils/logger/Logger"
-import { DateFormat, Time } from "@/utils/Time"
 
 import { ListItem } from "../ListItem"
 

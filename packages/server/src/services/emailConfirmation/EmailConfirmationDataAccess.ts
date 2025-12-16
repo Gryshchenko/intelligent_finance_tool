@@ -2,7 +2,7 @@ import { IEmailConfirmationDataAccess } from 'interfaces/IEmailConfirmationDataA
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { DBError } from 'src/utils/errors/DBError';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';

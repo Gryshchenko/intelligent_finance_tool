@@ -4,7 +4,7 @@ import { TransactionType } from 'types/TransactionType';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';

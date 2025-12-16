@@ -4,7 +4,7 @@ import { IOverview } from 'tenpercent/shared/src/interfaces/IOverview';
 import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';

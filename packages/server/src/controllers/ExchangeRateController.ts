@@ -6,7 +6,7 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
 

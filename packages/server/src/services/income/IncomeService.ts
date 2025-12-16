@@ -5,7 +5,7 @@ import { ICreateIncome } from 'interfaces/ICreateIncome';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 
 export default class IncomeService extends LoggerBase implements IIncomeService {

@@ -3,7 +3,7 @@ import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { DBError } from 'src/utils/errors/DBError';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';

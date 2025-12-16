@@ -4,9 +4,11 @@
         "declaration": true,
         "declarationMap": true,
         "emitDeclarationOnly": true,
+        "moduleResolution": "NodeNext",
         "paths": {
             "interfaces/*": ["src/interfaces/*"],
-            "types/*": ["src/types/*"]
+            "types/*": ["src/types/*"],
+            "utils/*": ["src/utils/*"]
         }
     }
 }

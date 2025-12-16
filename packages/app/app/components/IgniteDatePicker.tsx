@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { Platform, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import { DateFormat, Time } from "tenpercent/shared/src/utils/time/Time"
 
 import { Text, TextProps } from "@/components/Text"
 import { TxKeyPath } from "@/i18n"
 import { colors } from "@/theme/colors"
 import { useAppTheme } from "@/theme/context"
 import { ThemedStyle } from "@/theme/types"
-import { DateFormat, Time } from "@/utils/Time"
 
 type IOSMode = "date" | "time" | "datetime" | "countdown"
 

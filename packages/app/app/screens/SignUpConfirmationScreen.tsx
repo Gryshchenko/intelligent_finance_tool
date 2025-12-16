@@ -4,6 +4,7 @@ import { IEmailConfirmationResponse } from "tenpercent/shared/src/interfaces/IEm
 import { IEmailResendResponse } from "tenpercent/shared/src/interfaces/IEmailResendResponse"
 import { EmailConfirmationStatusType } from "tenpercent/shared/src/types/EmailConfirmationStatusType"
 import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { Time } from "tenpercent/shared/src/utils/time/Time"
 
 import { Button } from "@/components/buttons/Button"
 import { Screen } from "@/components/Screen"
@@ -20,7 +21,6 @@ import { SignupService } from "@/services/SignUpService"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { Logger } from "@/utils/logger/Logger"
-import { Time } from "@/utils/Time"
 import { useHeader } from "@/utils/useHeader"
 import { validateCode } from "@/utils/validation"
 

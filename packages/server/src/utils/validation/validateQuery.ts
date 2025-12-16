@@ -3,9 +3,9 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import Logger from 'helper/logger/Logger';
-import { Time } from 'src/utils/time/Time';
+import { Time } from 'tenpercent/shared/src/utils/time/Time';
 
 const validateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {

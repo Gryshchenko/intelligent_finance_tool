@@ -1,7 +1,7 @@
 import { ICurrencyService } from 'interfaces/ICurrencyService';
 import { IBalanceService } from 'interfaces/IBalanceService';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { DBError } from 'src/utils/errors/DBError';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';

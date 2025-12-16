@@ -5,7 +5,7 @@ import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { IUser } from 'interfaces/IUser';
 
 const _logger = Logger.Of('UserStatusVerify');

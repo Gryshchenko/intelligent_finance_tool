@@ -1,7 +1,7 @@
 import { IDailyIncomeStatsDataAccess } from 'services/dailyIncomeStats/DailyIncomeStatsDataAccess';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { DateFormat, Time } from 'src/utils/time/Time';
+import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
 
 export interface IDailyIncomeStatsService {
     updateTotal(userId: number, date: string, incomeId: number, amount: number, trx?: IDBTransaction): Promise<boolean>;

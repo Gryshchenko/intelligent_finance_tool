@@ -4,7 +4,7 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IBalance } from 'interfaces/IBalance';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IProfileService } from 'interfaces/IProfileService';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { IRate } from 'interfaces/IRate';
 import { CustomError } from 'src/utils/errors/CustomError';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';

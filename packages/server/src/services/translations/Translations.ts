@@ -1,6 +1,6 @@
 import Logger from 'helper/logger/Logger';
 
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import Parameter from 'src/services/translations/Parameter';
 import { TranslationUnit } from './TranslationUnit';
 import { TranslationLoader } from './TranslationLoader';

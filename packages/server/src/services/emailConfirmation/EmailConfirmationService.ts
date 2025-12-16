@@ -17,7 +17,7 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 
 import { randomBytes } from 'crypto';
 import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import { IEmailVerifyResponse } from 'tenpercent/shared/src/interfaces/IEmailVerifyResponse';
 

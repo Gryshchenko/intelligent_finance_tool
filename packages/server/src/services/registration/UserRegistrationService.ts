@@ -18,7 +18,7 @@ import { IUserRoleService } from 'interfaces/IUserRoleService';
 import { ICurrencyService } from 'interfaces/ICurrencyService';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { IProfile } from 'interfaces/IProfile';
 import { user_initial } from 'src/config/user_initial';
 import currency_initial from 'src/config/currency_initial';

@@ -1,5 +1,5 @@
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { DateFormat, Time } from 'src/utils/time/Time';
+import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
 import { IDailyAccountStatsDataAccess } from 'services/dailyAccountStats/DailyAccountStatsDataAccess';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { StatsTransactionType } from 'types/StatsTransactionType';

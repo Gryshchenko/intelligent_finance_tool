@@ -4,7 +4,7 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 
 const _logger = Logger.Of('UserIdVerify');
 

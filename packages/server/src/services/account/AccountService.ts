@@ -2,7 +2,7 @@ import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import Utils from 'src/utils/Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { DBError } from 'src/utils/errors/DBError';

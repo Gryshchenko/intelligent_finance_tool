@@ -1,7 +1,7 @@
 import { IDailyTransferStatsDataAccess } from 'services/dailyTransferStats/DailyTransferStatsDataAccess';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { DateFormat, Time } from 'src/utils/time/Time';
+import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
 
 export interface IDailyTransferStatsService {
     updateTotal(
