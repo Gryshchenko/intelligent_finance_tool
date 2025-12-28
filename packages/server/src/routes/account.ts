@@ -11,6 +11,7 @@ import {
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 
 const accountRouter = express.Router({ mergeParams: true });
+const accountsRouter = express.Router({ mergeParams: true });
 
 accountRouter.post(
     '/',
@@ -43,6 +44,6 @@ accountRouter.patch(
     AccountController.patch,
 );
 
-accountRouter.get('/', validateQuery({}), AccountController.gets);
+accountsRouter.get('/', validateQuery({}), AccountController.gets);
 
-export default accountRouter;
+export { accountRouter, accountsRouter };

@@ -6,8 +6,12 @@ import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import Utils from 'tenpercent/shared/src/utils/Utils';
 import { ICategoryDataAccess } from 'services/category/CategoryDataAccess';
+import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
+import { IStatsResponse } from 'tenpercent/shared/src/interfaces/IStatsResponse';
+import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
 
 export interface ICategoryService {
+    getStats(userId: number, properties: IGetStatsProperties): Promise<IStatsResponse<ICategoryStats>>;
     create(userId: number, incomes: ICreateCategory, trx?: IDBTransaction): Promise<ICategory>;
     delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean>;
     patch(userId: number, incomeId: number, properties: Partial<ICategory>, trx?: IDBTransaction): Promise<number>;
@@ -22,6 +26,17 @@ export default class CategoryService extends LoggerBase implements ICategoryServ
     public constructor(accountDataAccess: ICategoryDataAccess) {
         super();
         this._categoryDataAccess = accountDataAccess;
+    }
+    async getStats(userId: number, properties: IGetStatsProperties): Promise<IStatsResponse<ICategoryStats>> {
+        validateAllowedProperties(properties as unknown as Record<string, string | number>, ['from', 'to', 'period']);
+        const response = await this._categoryDataAccess.getStats(userId, properties);
+        const total = response.reduce((prev, current) => prev + Number(current.amount), 0);
+        return {
+            from: properties.from,
+            to: properties.to,
+            total,
+            items: response,
+        };
     }
 
     async create(userId: number, category: ICreateCategory, trx?: IDBTransaction): Promise<ICategory> {

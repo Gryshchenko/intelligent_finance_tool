@@ -2,7 +2,6 @@ import { IUserService } from 'interfaces/IUserService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IGroupService } from 'interfaces/IGroupService';
 import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
-import { IIncomeService } from 'interfaces/IIncomeService';
 import { IMailService } from 'interfaces/IMailService';
 import { IMailTemplateService } from 'interfaces/IMailTemplateService';
 import { IEmailConfirmationService } from 'interfaces/IEmailConfirmationService';
@@ -31,6 +30,7 @@ import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { getConfig } from 'src/config/config';
 import { IAccountService } from 'services/account/AccountService';
 import { ICategoryService } from 'services/category/CategoryService';
+import { IIncomeService } from 'services/income/IncomeService';
 
 interface IDefaultData {
     group: string;

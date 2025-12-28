@@ -11,6 +11,7 @@ import { validateQuery } from 'src/utils/validation/validateQuery';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 
 const transactionRouter = express.Router({ mergeParams: true });
+const transactionsRouter = express.Router({ mergeParams: true });
 
 transactionRouter.post(
     '/',
@@ -30,7 +31,7 @@ transactionRouter.post(
     TransactionController.create,
 );
 
-transactionRouter.get(
+transactionsRouter.get(
     '/',
     validateQuery({
         cursor: 'number',
@@ -75,4 +76,4 @@ transactionRouter.patch(
     TransactionController.patch,
 );
 
-export default transactionRouter;
+export { transactionRouter, transactionsRouter };

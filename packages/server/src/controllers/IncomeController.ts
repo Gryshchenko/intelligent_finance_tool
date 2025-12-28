@@ -14,9 +14,27 @@ import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilde
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
 import { CustomError } from 'src/utils/errors/CustomError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
+import { StatsPeriod } from 'tenpercent/shared/src/types/StatsPeriod';
 
 export class IncomeController {
     private static readonly logger = Logger.Of('IncomeController');
+    public static async getStats(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const from = String(req.query?.from);
+            const to = String(req.query?.to);
+            const period = String(req.query?.period) as StatsPeriod;
+            const category = await IncomeServiceBuilder.build().getStats(req.user?.userId as number, {
+                from,
+                to,
+                period,
+            });
+            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(category).build());
+        } catch (e: unknown) {
+            IncomeController.logger.error(`Get income stats failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.INCOME_ERROR);
+        }
+    }
     public static async get(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {

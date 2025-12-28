@@ -1,4 +1,3 @@
-import { IIncomeDataAccess } from 'interfaces/IIncomeDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
@@ -10,6 +9,19 @@ import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
+import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
+import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
+import { IIncomeStats } from 'tenpercent/shared/src/interfaces/IIncomeStats';
+import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
+
+export interface IIncomeDataAccess {
+    getStats(userId: number, properties: IGetStatsProperties): Promise<IIncomeStats[]>;
+    create(userId: number, incomes: ICreateIncome[], trx?: IDBTransaction): Promise<IIncome[]>;
+    gets(userId: number): Promise<IIncome[] | undefined>;
+    get(userId: number, categoryId: number): Promise<IIncome | undefined>;
+    patch(userId: number, incomeId: number, properties: Partial<IIncome>, trx?: IDBTransaction): Promise<number>;
+    delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean>;
+}
 
 export default class IncomeDataAccess extends LoggerBase implements IIncomeDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -19,6 +31,45 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         this._db = db;
     }
 
+    async getStats(userId: number, properties: IGetStatsProperties): Promise<ICategoryStats[]> {
+        this._logger.info(`Retrieving income stats for user: ${userId}`);
+        try {
+            const { from, to } = properties;
+            const data = await this._db
+                .engine()('incomes')
+                .select(
+                    'incomes.incomeId',
+                    'incomes.userId',
+                    'incomes.incomeName',
+                    'incomes.currencyId',
+                    this._db.engine().raw('COALESCE(SUM(dis.amount_total), 0) as amount'),
+                )
+                .innerJoin('daily_incomes_stats as dis', function () {
+                    this.on('incomes.incomeId', '=', 'dis.incomeId')
+                        .andOnVal('dis.userId', '=', userId)
+                        .andOnBetween('dis.date', [
+                            Time.formatDate(from, DateFormat.YYYY_MM_DD),
+                            Time.formatDate(to, DateFormat.YYYY_MM_DD),
+                        ]);
+                })
+                .where('incomes.userId', userId)
+                .groupBy('incomes.incomeId', 'incomes.userId', 'incomes.incomeName', 'incomes.currencyId');
+            if (data) {
+                this._logger.info(`Fetched ${data.length} incomes retrieved successfully for user: ${userId}`);
+            } else {
+                this._logger.warn(`Incomes stats not found for user: ${userId}`);
+            }
+            return data;
+        } catch (e) {
+            this._logger.error(
+                `Failed to retrieve incomes stats for user: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Failed to retrieve incomes stats for user: ${userId}. Error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
+    }
     public async create(userId: number, incomes: ICreateIncome[], trx?: IDBTransaction): Promise<IIncome[]> {
         this._logger.info(`Starting creation of incomes for userId ${userId}`);
 

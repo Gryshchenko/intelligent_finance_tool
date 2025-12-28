@@ -1,5 +1,4 @@
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IIncomeService } from 'interfaces/IIncomeService';
 import { IOverview } from 'tenpercent/shared/src/interfaces/IOverview';
 import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
 import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
@@ -10,6 +9,7 @@ import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
 import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';
 import { IAccountService } from 'services/account/AccountService';
 import { ICategoryService } from 'services/category/CategoryService';
+import { IIncomeService } from 'services/income/IncomeService';
 
 export default class OverviewService extends LoggerBase {
     protected accountService: IAccountService;

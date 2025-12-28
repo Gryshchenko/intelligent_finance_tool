@@ -10,6 +10,7 @@ import { Time } from 'tenpercent/shared/src/utils/time/Time';
 const validateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const errors: string[] = [];
+        console.log(req.path);
         Object.keys(req.query).forEach((key) => {
             if (!schema[key]) {
                 errors.push(`Unexpected query parameter: ${key}`);
@@ -35,7 +36,11 @@ const validateQuery = (schema: Record<string, string>) => {
                 }
             }
 
-            if (expectedType === 'string' && typeof value !== 'string' && String(value).length <= 0) {
+            if (
+                expectedType === 'string' &&
+                typeof value !== 'string' &&
+                (String(value).length <= 0 || String(value).length >= 500)
+            ) {
                 errors.push(`Invalid type for ${key}: expected string`);
             }
             if (expectedType === 'date') {

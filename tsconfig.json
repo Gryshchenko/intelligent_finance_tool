@@ -5,6 +5,7 @@
         "moduleResolution": "Node",
         "baseUrl": ".",
         "strict": true,
+        "composite": true,
         "paths": {
             "tenpercent/shared": ["packages/shared/src"]
         },

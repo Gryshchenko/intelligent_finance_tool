@@ -3,7 +3,8 @@ import { body } from 'express-validator';
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import { ValidationError } from '../errors/ValidationError';
 import { TransactionType } from 'types/TransactionType';
-import Utils from '../Utils';
+import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Time } from 'tenpercent/shared/src/utils/time/Time';
 
 const baseAtLeastOneFieldRequired = ({
     accountId,
@@ -107,6 +108,20 @@ const createTransactionValidationRules = [
     ...createSignupValidationRules('createAt', 'date', {
         optional: true,
     }),
+    body('createAt')
+        .custom((_, { req }) => {
+            const { createAt } = req.body;
+            try {
+                Time.parseUTC(createAt);
+            } catch (e) {
+                throw new ValidationError({
+                    message: `Validation failed at createAt': ${(e as { message: string }).message}`,
+                    errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+                });
+            }
+            return true;
+        })
+        .bail(),
 ];
 
 const patchTransactionValidationRules = [

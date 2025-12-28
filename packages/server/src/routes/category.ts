@@ -9,8 +9,10 @@ import {
     patchCategoryValidationRules,
 } from 'src/utils/validation/categoryValidationRules';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
+import { validateTransactionFromToDateQuery } from 'src/utils/validation/validateTransactionFromToDateQuery';
 
 const categoryRouter = express.Router({ mergeParams: true });
+const categoriesRouter = express.Router({ mergeParams: true });
 
 categoryRouter.post(
     '/',
@@ -18,6 +20,13 @@ categoryRouter.post(
     sanitizeRequestBody(['currencyId', 'categoryName']),
     routesInputValidation(createCategoryValidationRules, categoryConvertValidationMessageToErrorCode),
     CategoryController.post,
+);
+
+categoryRouter.get(
+    '/stats',
+    validateQuery({ from: 'date', to: 'date', period: 'string' }),
+    validateTransactionFromToDateQuery({ from: 'date', to: 'date' }),
+    CategoryController.getStats,
 );
 
 categoryRouter.get(
@@ -43,6 +52,6 @@ categoryRouter.patch(
     CategoryController.patch,
 );
 
-categoryRouter.get('/', validateQuery({}), CategoryController.gets);
+categoriesRouter.get('/', validateQuery({}), CategoryController.gets);
 
-export default categoryRouter;
+export { categoriesRouter, categoryRouter };

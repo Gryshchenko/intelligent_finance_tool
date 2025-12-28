@@ -5,39 +5,52 @@ import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusTy
 import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
 import Logger from 'helper/logger/Logger';
 import { Time } from 'tenpercent/shared/src/utils/time/Time';
+import { ValidationError } from 'src/utils/errors/ValidationError';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { DateTime } from 'luxon';
 
 const validateTransactionFromToDateQuery = (schema: Record<string, string>) => {
-    return (_: Request, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         try {
-            let from: Time | null = null;
-            let to: Time | null = null;
+            let from: DateTime | null = null;
+            let to: DateTime | null = null;
             const now = Time.utc();
 
             if (schema['from']) {
-                from = Time.fromISO(schema['from'], true);
-                if (from > now) {
-                    throw new Error('"from" should not be greater than current time');
+                from = Time.fromISO(String(req.query?.from), true);
+                if (from?.toSeconds() > now?.toSeconds()) {
+                    throw new ValidationError({
+                        message: '"from" should not be greater than current time',
+                        payload: { reason: null, field: 'from' },
+                    });
                 }
             }
 
             if (schema['to']) {
-                to = Time.fromISO(schema['to'], true);
-                if (to > now) {
-                    throw new Error('"to" should not be greater than current time');
+                to = Time.fromISO(String(req.query?.to), true);
+                if (to?.toSeconds() > now?.toSeconds()) {
+                    throw new ValidationError({
+                        message: '"to" should not be greater than current time',
+                        payload: { reason: null, field: 'to' },
+                    });
                 }
             }
 
-            if (from && to && from > to) {
-                throw new Error('"from" should not be greater than "to"');
+            if (from && to && from?.toSeconds() > to?.toSeconds()) {
+                throw new ValidationError({
+                    message: '"from" should not be greater than "to"',
+                });
             }
         } catch (e) {
-            Logger.Of('validateQuery').error(`Validate query failed due reason`, e);
+            const error = e as BaseError;
+            Logger.Of('validateQuery').error(`Validate query failed due reason`, JSON.stringify(error.message));
             return res.status(HttpCode.BAD_REQUEST).json(
                 new ResponseBuilder()
                     .setStatus(ResponseStatusType.INTERNAL)
                     .setError({
                         errorCode: ErrorCode.UNEXPECTED_PROPERTY,
-                        msg: '',
+                        msg: error.message,
+                        payload: error?.getPayload(),
                     })
                     .build(),
             );

@@ -7,8 +7,12 @@ import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
+import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
+import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
+import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
 
 export interface ICategoryDataAccess {
+    getStats(userId: number, properties: IGetStatsProperties): Promise<ICategoryStats[]>;
     delete(userId: number, incomeId: number, trx?: IDBTransaction): Promise<boolean>;
     patch(userId: number, incomeId: number, properties: Partial<ICategory>, trx?: IDBTransaction): Promise<number>;
     create(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]>;
@@ -21,6 +25,45 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
     public constructor(db: IDatabaseConnection) {
         super();
         this._db = db;
+    }
+    async getStats(userId: number, properties: IGetStatsProperties): Promise<ICategoryStats[]> {
+        this._logger.info(`Retrieving categories stats for user: ${userId}`);
+        try {
+            const { from, to } = properties;
+            const data = await this._db
+                .engine()('categories')
+                .select(
+                    'categories.categoryId',
+                    'categories.userId',
+                    'categories.categoryName',
+                    'categories.currencyId',
+                    this._db.engine().raw('COALESCE(SUM(dcs.amount_total), 0) as amount'),
+                )
+                .innerJoin('daily_categories_stats as dcs', function () {
+                    this.on('categories.categoryId', '=', 'dcs.categoryId')
+                        .andOnVal('dcs.userId', '=', userId)
+                        .andOnBetween('dcs.date', [
+                            Time.formatDate(from, DateFormat.YYYY_MM_DD),
+                            Time.formatDate(to, DateFormat.YYYY_MM_DD),
+                        ]);
+                })
+                .where('categories.userId', userId)
+                .groupBy('categories.categoryId', 'categories.userId', 'categories.categoryName', 'categories.currencyId');
+            if (data) {
+                this._logger.info(`Fetched ${data.length} categories retrieved successfully for user: ${userId}`);
+            } else {
+                this._logger.warn(`Categories stats not found for user: ${userId}`);
+            }
+            return data;
+        } catch (e) {
+            this._logger.error(
+                `Failed to retrieve categories stats for user: ${userId}. Error: ${(e as { message: string }).message}`,
+            );
+            throw new DBError({
+                message: `Failed to retrieve categories stats for user: ${userId}. Error: ${(e as { message: string }).message}`,
+                statusCode: isBaseError(e) ? (e as unknown as BaseError)?.getStatusCode() : undefined,
+            });
+        }
     }
 
     async create(userId: number, categories: ICreateCategory[], trx?: IDBTransaction): Promise<ICategory[]> {
