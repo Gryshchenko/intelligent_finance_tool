@@ -51,6 +51,7 @@ export const AccountView: FC<IAccountPros> = function AccountView(_props) {
 
   return (
     <AccountFields
+      isEdit={false}
       form={form}
       isView={true}
       edit={() => {

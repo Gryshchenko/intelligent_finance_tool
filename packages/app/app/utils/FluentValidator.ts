@@ -43,7 +43,7 @@ export class FluentValidator<T = any> {
     if (typeof this.value !== "string") this.errors.push("Value must be a string")
     else {
       let str = this.value
-      if (options?.trim) str = str.trim()
+      if (options?.trim) str = str.trim() as T & string
       if (options?.minLength !== undefined && str.length < options.minLength)
         this.errors.push(`String must be at least ${options.minLength} characters`)
       if (options?.maxLength !== undefined && str.length > options.maxLength)

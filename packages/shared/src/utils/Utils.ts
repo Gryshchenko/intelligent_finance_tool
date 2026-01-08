@@ -5,7 +5,23 @@ export class Utils {
     public static isNumber(value: string): boolean {
         return /^\d+$/.test(value);
     }
-
+    public static objectToString(value: Record<string, unknown>): string | undefined {
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            return undefined;
+        }
+    }
+    public static parseObject<T>(value: string): T {
+        try {
+            if (typeof value === 'object') {
+                return value;
+            }
+            return JSON.parse(value);
+        } catch (e) {
+            return undefined;
+        }
+    }
     public static parseNumber(v: string): number | null {
         if (Utils.isNotEmpty(v)) {
             const result: number = parseFloat(v);

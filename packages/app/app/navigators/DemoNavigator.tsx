@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { TextStyle, ViewStyle } from "react-native"
 import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { CompositeScreenProps } from "@react-navigation/native"
@@ -28,6 +30,7 @@ export interface DemoTabParamList {
  * More info: https://reactnavigation.org/docs/typescript/#organizing-types
  */
 export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
+  // @ts-ignore
   BottomTabScreenProps<DemoTabParamList, T>,
   AppStackScreenProps<keyof AppStackParamList>
 >

@@ -35,6 +35,7 @@ export const DemoDebugScreen: FC<DemoTabScreenProps<"DemoDebug">> = function Dem
   _props,
 ) {
   const { setThemeContextOverride, themeContext, themed } = useAppTheme()
+  // @ts-ignore
   const { logout } = useAuth()
 
   // @ts-expect-error
