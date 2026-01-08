@@ -4,11 +4,11 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IBalance } from 'interfaces/IBalance';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IProfileService } from 'interfaces/IProfileService';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import { IRate } from 'interfaces/IRate';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import { IExchangeRateService } from 'interfaces/IExchangeRateService';
 import { ICurrencyService } from 'interfaces/ICurrencyService';
 

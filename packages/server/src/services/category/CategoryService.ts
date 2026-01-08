@@ -1,14 +1,14 @@
 import { ICreateCategory } from 'interfaces/ICreateCategory';
-import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
+import { ICategory } from 'tenpercent/shared';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import { ICategoryDataAccess } from 'services/category/CategoryDataAccess';
-import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
-import { IStatsResponse } from 'tenpercent/shared/src/interfaces/IStatsResponse';
-import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
+import { IGetStatsProperties } from 'tenpercent/shared';
+import { IStatsResponse } from 'tenpercent/shared';
+import { ICategoryStats } from 'tenpercent/shared';
 
 export interface ICategoryService {
     getStats(userId: number, properties: IGetStatsProperties): Promise<IStatsResponse<ICategoryStats>>;

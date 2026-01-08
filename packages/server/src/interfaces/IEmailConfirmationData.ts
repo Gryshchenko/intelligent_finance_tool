@@ -1,4 +1,4 @@
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 
 export interface IEmailConfirmationData {
     confirmationId: number;

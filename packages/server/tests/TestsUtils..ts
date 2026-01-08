@@ -1,11 +1,11 @@
 import { IDatabaseConnection } from '../src/interfaces/IDatabaseConnection';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import DatabaseConnection from '../src/repositories/DatabaseConnection';
 import config from '../src/config/dbConfig';
 import { Agent } from 'supertest';
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { LanguageType } from 'tenpercent/shared';
+import { UserStatus } from '../../shared/src/types/UserStatus';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const crypto = require('crypto');
 

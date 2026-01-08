@@ -20,7 +20,8 @@ export enum DateFormat {
     /** 27 Sep 17:14 */
     SHORT_WITH_TIME = 'dd LLL HH:mm',
 }
-export class Time {
+
+class Time {
     public static utc(): DateTime<boolean> {
         return DateTime.utc();
     }
@@ -153,3 +154,5 @@ export class Time {
         return Time.parseISO(dateISO).startOf('month').plus({ months: 1 }).toISO();
     }
 }
+
+export { Time, DateTime };

@@ -1,8 +1,8 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
-import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { IPagination } from "tenpercent/shared"
+import { ITransactionListItem } from "tenpercent/shared"
+import { TransactionFieldType } from "tenpercent/shared"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Transactions } from "@/components/transaction/Transactions"

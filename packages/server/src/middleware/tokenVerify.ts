@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { ResponseBuilderPreset } from 'helper/responseBuilder/ResponseBuilderPreset';
 import Logger from 'helper/logger/Logger';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import passport from 'passport';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { extractToken } from 'tenpercent/shared/src/utils/extractToken';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { extractToken } from 'tenpercent/shared';
 import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import jwt, { Algorithm } from 'jsonwebtoken';
 import { getConfig } from 'src/config/config';
 import { JwtPayloadCustom } from 'services/auth/passport-setup';

@@ -1,7 +1,7 @@
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared';
 import ResponseBuilder from './ResponseBuilder';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { IResponse } from 'tenpercent/shared/src/interfaces/IResponse';
+import { ErrorCode } from 'tenpercent/shared';
+import { IResponse } from 'tenpercent/shared';
 
 export class ResponseBuilderPreset {
     public static getSuccess(): IResponse {

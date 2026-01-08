@@ -13,7 +13,7 @@ import { UserController } from 'controllers/UserController';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
 import { validateQuery } from 'src/utils/validation/validateQuery';
 import userStatusVerify from 'middleware/userStatusVerify';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 import { categoriesRouter, categoryRouter } from 'routes/category';
 
 const userRouter = express.Router({ mergeParams: true });

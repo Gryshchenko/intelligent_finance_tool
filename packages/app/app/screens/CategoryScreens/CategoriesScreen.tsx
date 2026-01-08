@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { useNavigation } from "@react-navigation/native"
-import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
+import { ICategory } from "tenpercent/shared"
+import { TransactionFieldType } from "tenpercent/shared"
+import { TransactionType } from "tenpercent/shared"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Categories } from "@/components/category/Categories"

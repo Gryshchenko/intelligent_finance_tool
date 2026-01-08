@@ -7,10 +7,9 @@ import {
   useEffect,
   useState,
 } from "react"
-import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
-import { UserStatus } from "tenpercent/shared/src/interfaces/UserStatus"
-import { ResponseStatusType } from "tenpercent/shared/src/types/ResponseStatusType"
-import Utils from "tenpercent/shared/src/Utils"
+import { IUserClient } from "tenpercent/shared"
+import { ResponseStatusType } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { translate } from "@/i18n/translate"
 import AlertService from "@/services/AlertService"
@@ -26,6 +25,8 @@ import { StorageKey } from "@/types/StorageKey"
 import { ValidationError } from "@/utils/errors/ValidationError"
 import { Logger } from "@/utils/logger/Logger"
 import { loadString, saveString } from "@/utils/storage"
+
+import { UserStatus } from "../../../shared/src/types/UserStatus"
 
 export interface AuthContextType {
   isAuthenticated: boolean

@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { getConfig } from '../src/config/config';
 import { tokenLongVerify } from '../src/middleware/tokenVerify';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
+import { ResponseStatusType } from 'tenpercent/shared';
 
 jest.mock('../src/config/config', () => ({
     getConfig: () => ({

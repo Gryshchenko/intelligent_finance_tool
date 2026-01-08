@@ -1,20 +1,20 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import Logger from 'helper/logger/Logger';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import IncomeServiceBuilder from 'services/income/IncomeServiceBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { ResponseStatusType } from 'tenpercent/shared';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
 import { CustomError } from 'src/utils/errors/CustomError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
-import { StatsPeriod } from 'tenpercent/shared/src/types/StatsPeriod';
+import { StatsPeriod } from 'tenpercent/shared';
+import { Utils } from 'tenpercent/shared';
 
 export class IncomeController {
     private static readonly logger = Logger.Of('IncomeController');

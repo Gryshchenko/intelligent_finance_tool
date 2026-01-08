@@ -7,7 +7,7 @@ import { DBError } from 'src/utils/errors/DBError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 
 export default class BalanceDataAccess extends LoggerBase implements IBalanceDataAccess {
     private readonly _db: IDatabaseConnection;

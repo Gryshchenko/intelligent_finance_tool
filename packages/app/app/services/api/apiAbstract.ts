@@ -1,8 +1,8 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
-import { IResponse } from "tenpercent/shared/src/interfaces/IResponse"
-import { IResponseError } from "tenpercent/shared/src/interfaces/IResponseError"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
-import { ResponseStatusType } from "tenpercent/shared/src/types/ResponseStatusType"
+import { IResponse } from "tenpercent/shared"
+import { IResponseError } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
+import { ResponseStatusType } from "tenpercent/shared"
 
 import Config from "@/config"
 import { IRefreshResponse } from "@/interfaces/IRefreshResponse"

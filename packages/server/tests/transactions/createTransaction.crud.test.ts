@@ -1,7 +1,7 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom, getOverview } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import { createAllTransactions, fetchTransactions, fetchTransactionsAll, fetchTransactionsBad } from './TransactionsTestUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports

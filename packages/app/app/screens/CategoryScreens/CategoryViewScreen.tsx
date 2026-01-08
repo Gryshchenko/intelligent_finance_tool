@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
-import Utils from "tenpercent/shared/src/Utils"
+import { ICategory } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { CategoryView } from "@/components/category/CategoryView"
 import { useAppQuery } from "@/hooks/useAppQuery"

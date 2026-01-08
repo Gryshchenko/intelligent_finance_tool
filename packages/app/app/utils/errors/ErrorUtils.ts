@@ -1,5 +1,5 @@
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
-import Utils from "tenpercent/shared/src/Utils"
+import { Utils } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
 
 import { BaseError } from "@/utils/errors/BaseError"
 import { ValidationError } from "@/utils/errors/ValidationError"

@@ -1,5 +1,5 @@
 import { ViewStyle } from "react-native"
-import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
+import { IAccountListItem } from "tenpercent/shared"
 
 import { Dropdown } from "@/components/Dropdown"
 import { TxKeyPath } from "@/i18n"

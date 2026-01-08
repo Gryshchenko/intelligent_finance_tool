@@ -1,4 +1,4 @@
-import { UserStatus } from 'interfaces/UserStatus';
+import { UserStatus } from 'types/UserStatus';
 
 export interface IUserClient {
     userId: number;

@@ -1,5 +1,5 @@
 import { IProfile } from 'interfaces/IProfile';
-import { IProfileClient } from 'tenpercent/shared/src/interfaces/IProfileClient';
+import { IProfileClient } from 'tenpercent/shared';
 
 export default class ProfileServiceUtils {
     public static convertServerUserToClientUser(profile: Partial<IProfile> | undefined = {}): IProfileClient {

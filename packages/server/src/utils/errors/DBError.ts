@@ -1,7 +1,7 @@
-import { IError } from 'tenpercent/shared/src/interfaces/IError';
+import { IError } from 'tenpercent/shared';
 import { BaseError } from './BaseError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 
 export class DBError extends BaseError {
     constructor({

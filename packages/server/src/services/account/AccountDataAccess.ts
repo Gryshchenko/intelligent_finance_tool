@@ -1,16 +1,16 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IAccount } from 'tenpercent/shared/src/interfaces/IAccount';
+import { IAccount } from 'tenpercent/shared';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { DBError } from 'src/utils/errors/DBError';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
-import { IAccountListItem } from 'tenpercent/shared/src/interfaces/IAccountListItem';
+import { IAccountListItem } from 'tenpercent/shared';
 
 export interface IAccountDataAccess {
     createAccounts(userId: number, accounts: ICreateAccount[], trx?: IDBTransaction): Promise<IAccount[]>;

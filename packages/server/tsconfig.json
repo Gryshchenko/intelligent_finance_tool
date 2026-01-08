@@ -7,7 +7,7 @@
         "moduleResolution": "node",
         "outDir": "./dist",
         "baseUrl": "./",
-        "rootDir": "./src",
+        "rootDir": "./",
         "strict": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,

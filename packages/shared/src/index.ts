@@ -1,0 +1,45 @@
+// shared/src/index.ts
+
+// --- Interfaces ---
+export * from './interfaces/IAccount';
+export * from './interfaces/IAccountListItem';
+export * from './interfaces/ICategory';
+export * from './interfaces/ICategoryStats';
+export * from './interfaces/ICurrency';
+export * from './interfaces/IEmailConfirmationResponse';
+export * from './interfaces/IEmailResendResponse';
+export * from './interfaces/IEmailVerifyResponse';
+export * from './interfaces/IError';
+export * from './interfaces/IGetStatsProperties';
+export * from './interfaces/IIncome';
+export * from './interfaces/IIncomeStats';
+export * from './interfaces/IOverview';
+export * from './interfaces/IPagination';
+export * from './interfaces/IProfileClient';
+export * from './interfaces/IProfilePatchRequest';
+export * from './interfaces/IResponse';
+export * from './interfaces/IResponseError';
+export * from './interfaces/IStatsResponse';
+export * from './interfaces/ITransaction';
+export * from './interfaces/ITransactionListItem';
+export * from './interfaces/ITransactionListItemsRequest';
+export * from './interfaces/IUserClient';
+
+// --- Types ---
+export * from './types/AccountStatusType';
+export * from './types/CurrencyType';
+export * from './types/EmailConfirmationStatusType';
+export * from './types/ErrorCode';
+export * from './types/HttpCode';
+export * from './types/LanguageType';
+export * from './types/ResponseStatusType';
+export * from './types/RoleType';
+export * from './types/StatsPeriod';
+export * from './types/TransactionFieldType';
+export * from './types/TransactionType';
+export * from './types/UserStatus';
+
+// --- Utils ---
+export * from './utils/Utils';
+export * from './utils/extractToken';
+export * from './utils/time/Time';

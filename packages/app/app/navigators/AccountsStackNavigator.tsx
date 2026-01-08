@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { TransactionFieldType } from "tenpercent/shared"
 
 import { AccountCreateScreen } from "@/screens/AccountScreens/AccountCreateScreen"
 import { AccountEditScreen } from "@/screens/AccountScreens/AccountEditScreen"

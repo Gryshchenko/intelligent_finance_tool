@@ -1,18 +1,17 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IIncome } from 'tenpercent/shared/src/interfaces/IIncome';
+import { IIncome } from 'tenpercent/shared';
 import { ICreateIncome } from 'interfaces/ICreateIncome';
 import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { AccountStatusType } from 'tenpercent/shared/src/types/AccountStatusType';
+import { AccountStatusType } from 'tenpercent/shared';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
-import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
-import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
-import { IIncomeStats } from 'tenpercent/shared/src/interfaces/IIncomeStats';
-import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
+import { DateFormat, Time } from 'tenpercent/shared';
+import { IIncomeStats } from 'tenpercent/shared';
+import { IGetStatsProperties } from 'tenpercent/shared';
 
 export interface IIncomeDataAccess {
     getStats(userId: number, properties: IGetStatsProperties): Promise<IIncomeStats[]>;
@@ -31,7 +30,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         this._db = db;
     }
 
-    async getStats(userId: number, properties: IGetStatsProperties): Promise<ICategoryStats[]> {
+    async getStats(userId: number, properties: IGetStatsProperties): Promise<IIncomeStats[]> {
         this._logger.info(`Retrieving income stats for user: ${userId}`);
         try {
             const { from, to } = properties;

@@ -6,7 +6,7 @@ import { ICreateUser } from 'interfaces/ICreateUser';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 
 export default class UserService extends LoggerBase implements IUserService {
     private readonly _userDataAccess: IUserDataAccess;

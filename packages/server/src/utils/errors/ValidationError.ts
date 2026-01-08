@@ -1,5 +1,5 @@
-import { IError } from 'tenpercent/shared/src/interfaces/IError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { IError } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import { BaseError } from './BaseError';
 
 export class ValidationError extends BaseError {

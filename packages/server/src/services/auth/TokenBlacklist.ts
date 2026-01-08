@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 
 class TokenBlacklist {

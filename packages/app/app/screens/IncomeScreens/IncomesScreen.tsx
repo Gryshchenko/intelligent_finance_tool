@@ -1,8 +1,8 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
+import { IIncome } from "tenpercent/shared"
+import { TransactionFieldType } from "tenpercent/shared"
+import { TransactionType } from "tenpercent/shared"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Incomes } from "@/components/income/Incomes"

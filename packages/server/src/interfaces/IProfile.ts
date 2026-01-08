@@ -1,4 +1,4 @@
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
+import { LanguageType } from 'tenpercent/shared';
 
 export interface IProfile {
     profileId: number;

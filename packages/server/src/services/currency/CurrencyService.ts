@@ -1,6 +1,6 @@
 import { ICurrencyDataAccess } from 'interfaces/ICurrencyDataAccess';
 import { ICurrencyService } from 'interfaces/ICurrencyService';
-import { ICurrency } from 'tenpercent/shared/src/interfaces/ICurrency';
+import { ICurrency } from 'tenpercent/shared';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 
 export default class CurrencyService extends LoggerBase implements ICurrencyService {

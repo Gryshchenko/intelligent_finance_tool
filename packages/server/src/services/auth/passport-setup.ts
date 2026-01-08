@@ -6,7 +6,7 @@ import UserServiceBuilder from 'src/services/user/UserServiceBuilder';
 
 import { ExtractJwt } from 'passport-jwt';
 import { Algorithm, JwtPayload } from 'jsonwebtoken';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 
 export interface JwtPayloadCustom extends JwtPayload {
     sub: string;

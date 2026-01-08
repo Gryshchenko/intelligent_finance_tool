@@ -1,4 +1,4 @@
-import { ICurrency } from 'tenpercent/shared/src/interfaces/ICurrency';
+import { ICurrency } from 'tenpercent/shared';
 
 export interface ICurrencyService {
     getByName(symbol: string): Promise<ICurrency | undefined>;

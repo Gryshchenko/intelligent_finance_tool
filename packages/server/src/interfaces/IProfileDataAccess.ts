@@ -1,7 +1,7 @@
 import { IProfile } from 'interfaces/IProfile';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
+import { IProfilePatchRequest } from 'tenpercent/shared';
 
 export interface IProfileDataAccess {
     post(data: ICreateProfile, trx?: IDBTransaction): Promise<IProfile | undefined>;

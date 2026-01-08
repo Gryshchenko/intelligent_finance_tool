@@ -1,4 +1,4 @@
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
+import { LanguageType } from 'tenpercent/shared';
 import { TranslationLoader } from 'src/services/translations/TranslationLoader';
 
 export default class TranslationLoaderImpl implements TranslationLoader {

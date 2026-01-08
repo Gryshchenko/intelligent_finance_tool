@@ -1,4 +1,4 @@
-export default class Utils {
+export class Utils {
     public static roundNumber(value: number): number {
         return Number.parseFloat(Number(value).toFixed(2));
     }

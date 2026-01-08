@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
-import Utils from "tenpercent/shared/src/Utils"
+import { ITransaction } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { TransactionEdit } from "@/components/transaction/TransactionEdit"
 import { OverviewTabParamList } from "@/navigators/OverviewNavigator"

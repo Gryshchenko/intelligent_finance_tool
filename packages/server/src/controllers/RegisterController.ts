@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 import Logger from 'helper/logger/Logger';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import UserRegistrationServiceBuilder from 'services/registration/UserRegistrationServiceBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 import { IUser } from 'interfaces/IUser';
 
 export class RegisterController {

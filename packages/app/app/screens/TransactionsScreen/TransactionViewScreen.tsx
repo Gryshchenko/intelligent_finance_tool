@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
+import { ITransaction } from "tenpercent/shared"
 
 import { TransactionView } from "@/components/transaction/TransactionView"
 import { useAppQuery } from "@/hooks/useAppQuery"

@@ -359,9 +359,6 @@ importers:
       '@types/jsonwebtoken':
         specifier: 9.0.5
         version: 9.0.5
-      '@types/luxon':
-        specifier: ^3.6.2
-        version: 3.6.2
       '@types/node':
         specifier: 20.11.0
         version: 20.11.0
@@ -1309,7 +1306,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {'0': node >=0.10.0}
+    engines: {node: '>=0.10.0'}
 
   '@expo/cli@0.24.20':
     resolution: {integrity: sha512-uF1pOVcd+xizNtVTuZqNGzy7I6IJon5YMmQidsURds1Ww96AFDxrR/NEACqeATNAmY60m8wy1VZZpSg5zLNkpw==}
@@ -7639,6 +7636,7 @@ packages:
 
   ua-parser-js@2.0.0-beta.3:
     resolution: {integrity: sha512-vZkEG/GplLRxj4XVrjLUQpSNg9Qj9RdnIqrOy8dqrLP1e5x7i2N8RfVYlWRbKEZdDSWfeWNcWS38gmieX03/5A==}
+    deprecated: You are using an early pre-release version of ua-parser-js v2.x which may be unstable. Please update to the latest stable ua-parser-js v2.x release (https://uaparser.dev)
     hasBin: true
 
   uid-safe@2.1.5:

@@ -1,16 +1,16 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ITransaction } from 'tenpercent/shared/src/interfaces/ITransaction';
+import { ITransaction } from 'tenpercent/shared';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { DBError } from 'src/utils/errors/DBError';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
-import { IPagination } from 'tenpercent/shared/src/interfaces/IPagination';
+import { IPagination } from 'tenpercent/shared';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { ITransactionListItemsRequest } from 'tenpercent/shared/src/interfaces/ITransactionListItemsRequest';
-import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
+import { ITransactionListItemsRequest } from 'tenpercent/shared';
+import { ITransactionListItem } from 'tenpercent/shared';
 import { parseSortBy } from 'src/utils/validation/parseSortBy';
 
 export interface ITransactionDataAccess {

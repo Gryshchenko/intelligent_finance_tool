@@ -2,14 +2,14 @@ import { IEmailConfirmationDataAccess } from 'interfaces/IEmailConfirmationDataA
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import { DBError } from 'src/utils/errors/DBError';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { HttpCode } from 'tenpercent/shared';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';

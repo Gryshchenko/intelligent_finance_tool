@@ -1,7 +1,7 @@
 import { ApiResponse } from "apisauce"
-import { IResponse } from "tenpercent/shared/src/interfaces/IResponse"
-import { HttpCode } from "tenpercent/shared/src/types/HttpCode"
-import { ResponseStatusType } from "tenpercent/shared/src/types/ResponseStatusType"
+import { IResponse } from "tenpercent/shared"
+import { HttpCode } from "tenpercent/shared"
+import { ResponseStatusType } from "tenpercent/shared"
 
 import { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"

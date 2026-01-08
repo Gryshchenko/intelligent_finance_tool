@@ -1,6 +1,6 @@
 import { IEmailConfirmationData } from './IEmailConfirmationData';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 
 export interface IEmailConfirmationDataAccess {
     getUserConfirmation(userId: number, email: string): Promise<IEmailConfirmationData | undefined>;

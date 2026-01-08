@@ -1,15 +1,15 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateCategory } from 'interfaces/ICreateCategory';
-import { ICategory } from 'tenpercent/shared/src/interfaces/ICategory';
+import { ICategory } from 'tenpercent/shared';
 import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { IGetStatsProperties } from 'tenpercent/shared/src/interfaces/IGetStatsProperties';
-import { ICategoryStats } from 'tenpercent/shared/src/interfaces/ICategoryStats';
-import { DateFormat, Time } from 'tenpercent/shared/src/utils/time/Time';
+import { IGetStatsProperties } from 'tenpercent/shared';
+import { ICategoryStats } from 'tenpercent/shared';
+import { DateFormat, Time } from 'tenpercent/shared';
 
 export interface ICategoryDataAccess {
     getStats(userId: number, properties: IGetStatsProperties): Promise<ICategoryStats[]>;

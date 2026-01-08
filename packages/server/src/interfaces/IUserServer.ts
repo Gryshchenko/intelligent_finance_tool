@@ -1,4 +1,4 @@
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from '../../../shared/src/types/UserStatus';
 
 export interface IUserServer {
     email: string;

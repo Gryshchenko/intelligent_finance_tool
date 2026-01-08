@@ -1,6 +1,6 @@
 import { IEmailConfirmationData } from './IEmailConfirmationData';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { IEmailVerifyResponse } from 'tenpercent/shared/src/interfaces/IEmailVerifyResponse';
+import { IEmailVerifyResponse } from 'tenpercent/shared';
 
 export interface IEmailConfirmationService {
     createEmailConfirmation(userId: number, email: string, trx?: IDBTransaction): Promise<IEmailConfirmationData>;

@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { useNavigation } from "@react-navigation/native"
-import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
-import Utils from "tenpercent/shared/src/Utils"
+import { IAccount } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { AccountFields } from "@/components/account/AccountFields"
 import { useEditView } from "@/hooks/useEditView"
@@ -49,6 +49,7 @@ export const AccountCreate: FC = function AccountCreate(_props) {
 
   return (
     <AccountFields
+      isEdit={true}
       form={form}
       errors={errors}
       isView={false}

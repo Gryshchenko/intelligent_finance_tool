@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { StyleProp, View, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
-import Utils from "tenpercent/shared/src/Utils"
+import { IIncome } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { $center } from "@/components/category/CategoriesSectionList"
 import { EmptyState } from "@/components/EmptyState"

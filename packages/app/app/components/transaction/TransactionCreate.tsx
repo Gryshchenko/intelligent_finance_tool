@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { useNavigation } from "@react-navigation/native"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
-import { Time } from "tenpercent/shared/src/utils/time/Time"
+import { ITransaction } from "tenpercent/shared"
+import { Time } from "tenpercent/shared"
 
 import { TransactionFields } from "@/components/transaction/TransactionFields"
 import { useEditView } from "@/hooks/useEditView"

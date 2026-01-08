@@ -1,8 +1,8 @@
 import { IEmailConfirmationDataAccess } from 'interfaces/IEmailConfirmationDataAccess';
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 import { IEmailConfirmationService } from 'interfaces/IEmailConfirmationService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import { IMailService } from 'interfaces/IMailService';
 import { IMailTemplateService } from 'interfaces/IMailTemplateService';
 import { TranslationKey } from 'types/TranslationKey';
@@ -16,10 +16,10 @@ import { CustomError } from 'src/utils/errors/CustomError';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 
 import { randomBytes } from 'crypto';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import Utils from 'tenpercent/shared/src/utils/Utils';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
-import { IEmailVerifyResponse } from 'tenpercent/shared/src/interfaces/IEmailVerifyResponse';
+import { HttpCode } from 'tenpercent/shared';
+import { Utils } from 'tenpercent/shared';
+import { UserStatus } from 'tenpercent/shared';
+import { IEmailVerifyResponse } from 'tenpercent/shared';
 
 const CONFIRMATION_MAIL_EXPIRED_TIME = [0, 1, 0];
 

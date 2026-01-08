@@ -4,7 +4,7 @@ import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { EmailConfirmationController } from 'controllers/EmailConfirmationController';
 import tokenVerify from 'middleware/tokenVerify';
 import userStatusVerify from 'middleware/userStatusVerify';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 import { validatePathConfirmationCodeProperty } from 'src/utils/validation/validatePathConfirmationCodeProperty';
 import userIdVerify from 'middleware/userIdVerify';
 

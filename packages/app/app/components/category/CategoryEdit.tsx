@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { StyleProp, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { ICategory } from "tenpercent/shared/src/interfaces/ICategory"
-import Utils from "tenpercent/shared/src/Utils"
+import { ICategory } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { CategoryFields } from "@/components/category/CategoryFields"
 import { EmptyState } from "@/components/EmptyState"

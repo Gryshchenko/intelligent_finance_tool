@@ -1,7 +1,7 @@
 import { ICurrencyDataAccess } from 'interfaces/ICurrencyDataAccess';
 import { IDatabaseConnection } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ICurrency } from 'tenpercent/shared/src/interfaces/ICurrency';
+import { ICurrency } from 'tenpercent/shared';
 import { DBError } from 'src/utils/errors/DBError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { NotFoundError } from 'src/utils/errors/NotFoundError';

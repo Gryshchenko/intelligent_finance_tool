@@ -4,7 +4,7 @@ import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { ExchangeRateController } from 'controllers/ExchangeRateController';
 import tokenVerify from 'middleware/tokenVerify';
 import userStatusVerify from 'middleware/userStatusVerify';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 
 const exchangeRates = express.Router({ mergeParams: true });
 

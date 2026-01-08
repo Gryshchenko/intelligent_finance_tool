@@ -3,6 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "allowJs": false,
+    "emitDeclarationOnly": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "jsx": "react-native",

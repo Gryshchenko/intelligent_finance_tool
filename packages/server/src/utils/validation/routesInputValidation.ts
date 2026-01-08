@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, ValidationChain, validationResult } from 'express-validator';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
 import Logger from 'helper/logger/Logger';
 

@@ -1,8 +1,8 @@
-import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
-import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
+import { IPagination } from "tenpercent/shared"
+import { ITransaction } from "tenpercent/shared"
+import { ITransactionListItem } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
+import { TransactionFieldType } from "tenpercent/shared"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
 import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProblem"

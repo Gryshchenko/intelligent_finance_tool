@@ -1,7 +1,7 @@
 import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { ErrorCode } from "tenpercent/shared"
 
 import { Button } from "@/components/buttons/Button"
 import { PressableIcon } from "@/components/Icon"

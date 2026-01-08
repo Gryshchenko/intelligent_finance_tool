@@ -2,7 +2,7 @@ import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from '../../../shared/src/types/UserStatus';
 
 export interface IUserDataAccess {
     getUserAuthenticationData(email: string): Promise<IGetUserAuthenticationData | undefined>;

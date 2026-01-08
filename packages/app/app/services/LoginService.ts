@@ -1,5 +1,5 @@
-import { IUserClient } from "tenpercent/shared/src/interfaces/IUserClient"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { IUserClient } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
 import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProblem"

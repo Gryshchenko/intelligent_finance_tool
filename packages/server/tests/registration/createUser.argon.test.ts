@@ -1,7 +1,7 @@
 import { generateRandomEmail, generateRandomName, generateRandomPassword, generateSecureRandom } from '../TestsUtils.';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');

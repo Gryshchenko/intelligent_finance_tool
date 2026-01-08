@@ -1,6 +1,6 @@
 import { createContext, FC, PropsWithChildren, useContext, useEffect, useState } from "react"
-import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
-import Utils from "tenpercent/shared/src/Utils"
+import { ICurrency } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { buildGeneralApiBaseHandler, GeneralApiProblemKind } from "@/services/api/apiProblem"

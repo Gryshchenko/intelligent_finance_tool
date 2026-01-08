@@ -6,6 +6,6 @@ const config = {
     password: getConfig().dbPass,
     user: getConfig().dbUser,
     host: getConfig().dbHost,
-    cert: getConfig().dbCACert,
+    // cert: getConfig().dbCACert,
 };
 export default config;

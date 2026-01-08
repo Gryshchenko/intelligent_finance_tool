@@ -3,7 +3,7 @@ import routesInputValidation from 'src/utils/validation/routesInputValidation';
 import { CurrencyController } from 'controllers/CurrencyController';
 import tokenVerify from 'middleware/tokenVerify';
 import userStatusVerify from 'middleware/userStatusVerify';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared';
 
 const currencyRouter = express.Router({ mergeParams: true });
 

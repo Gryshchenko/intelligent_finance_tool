@@ -8,11 +8,11 @@ import {
 } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { LanguageType } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import TimeManagerUTC from '../../src/utils/TimeManagerUTC';
-import { EmailConfirmationStatusType } from 'tenpercent/shared/src/types/EmailConfirmationStatusType';
+import { EmailConfirmationStatusType } from 'tenpercent/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');

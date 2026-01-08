@@ -3,17 +3,17 @@ import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
 import Logger from 'helper/logger/Logger';
 import { validationResult } from 'express-validator';
 import AuthServiceBuilder from 'services/auth/AuthServiceBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared';
 import UserServiceUtils from 'services/user/UserServiceUtils';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { extractToken } from 'tenpercent/shared/src/utils/extractToken';
+import { HttpCode } from 'tenpercent/shared';
+import { extractToken } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { IUser } from 'interfaces/IUser';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { RoleType } from 'tenpercent/shared/src/types/RoleType';
+import { RoleType } from 'tenpercent/shared';
 
 export class AuthController {
     private static readonly logger = Logger.Of('AuthController');

@@ -9,7 +9,7 @@ import registerRouter from './routes/register';
 import userRouter from './routes/user';
 import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
-import { swaggerInit } from 'src/swagger/swagger';
+// import { swaggerInit } from 'src/swagger/swagger';
 import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
@@ -18,8 +18,8 @@ import currencyRouter from 'routes/currency';
 import exchangeRates from 'routes/exchangeRates';
 import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
 import Logger from 'helper/logger/Logger';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import * as process from 'node:process';
 import { createServer } from 'src/createServer';
 
@@ -28,7 +28,7 @@ const app = express();
 const port = getConfig().appPort ?? 3000;
 
 passportSetup(passport);
-swaggerInit(app);
+// swaggerInit(app);
 
 if (process.env.NODE_ENV !== '') {
     const limiter = rateLimit({

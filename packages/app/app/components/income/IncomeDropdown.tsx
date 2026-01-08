@@ -1,5 +1,5 @@
 import { ViewStyle } from "react-native"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import { IIncome } from "tenpercent/shared"
 
 import { Dropdown } from "@/components/Dropdown"
 import { TxKeyPath } from "@/i18n"

@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
-import { ICurrency } from "tenpercent/shared/src/interfaces/ICurrency"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
+import { ICurrency } from "tenpercent/shared"
+import { IIncome } from "tenpercent/shared"
 
 import { Field } from "@/components/Field"
 import { GeneralDetailView } from "@/components/GeneralDetailViewю"

@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { StyleSheet } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
-import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
+import { IPagination } from "tenpercent/shared"
+import { ITransactionListItem } from "tenpercent/shared"
 
 import { EmptyState } from "@/components/EmptyState"
 import TransactionSectionList, {

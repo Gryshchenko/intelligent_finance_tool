@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { StyleProp, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
+import { ITransaction } from "tenpercent/shared"
 
 import { EmptyState } from "@/components/EmptyState"
 import { TransactionFields } from "@/components/transaction/TransactionFields"

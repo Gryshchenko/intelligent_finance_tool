@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Platform, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import { DateFormat, Time } from "tenpercent/shared/src/utils/time/Time"
+import { DateFormat, Time } from "tenpercent/shared"
 
 import { Text, TextProps } from "@/components/Text"
 import { TxKeyPath } from "@/i18n"

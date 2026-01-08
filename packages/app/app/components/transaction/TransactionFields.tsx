@@ -1,6 +1,6 @@
 import { FC, FunctionComponent } from "react"
-import { ITransaction } from "tenpercent/shared/src/interfaces/ITransaction"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
+import { ITransaction } from "tenpercent/shared"
+import { TransactionType } from "tenpercent/shared"
 
 import { AccountDropdown } from "@/components/account/AccountDropdown"
 import { CategoryDropdown } from "@/components/category/CateogryDropdown"

@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
-import Utils from "tenpercent/shared/src/Utils"
+import { IAccount } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { AccountView } from "@/components/account/AccountView"
 import { useAppQuery } from "@/hooks/useAppQuery"

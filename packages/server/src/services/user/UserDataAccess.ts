@@ -2,7 +2,6 @@ import { IUserDataAccess } from 'interfaces/IUserDataAccess';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IUser } from 'interfaces/IUser';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
 import { IUserServer } from 'interfaces/IUserServer';
 import { ICreateUserServer } from 'interfaces/ICreateUserServer';
 import { IGetUserAuthenticationData } from 'interfaces/IGetUserAuthenticationData';
@@ -11,10 +10,11 @@ import { validateAllowedProperties } from 'src/utils/validation/validateAllowedP
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ErrorCode } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
+import { UserStatus } from 'tenpercent/shared';
 
 export default class UserDataService extends LoggerBase implements IUserDataAccess {
     private readonly _db: IDatabaseConnection;

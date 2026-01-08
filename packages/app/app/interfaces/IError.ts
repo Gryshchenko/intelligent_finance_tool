@@ -1,4 +1,4 @@
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { ErrorCode } from "tenpercent/shared"
 
 export interface IError {
   message: string

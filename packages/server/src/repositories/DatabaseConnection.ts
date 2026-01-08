@@ -9,7 +9,7 @@ interface IDatabaseConnectionConstructor {
     database: string | undefined;
     user: string | undefined;
     password: string | undefined;
-    cert: string | undefined;
+    // cert: string | undefined;
 }
 
 export default class DatabaseConnection implements IDatabaseConnection {

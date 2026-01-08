@@ -1,10 +1,10 @@
 import { createSignupValidationRules } from 'src/utils/validation/routesInputValidation';
 import { body } from 'express-validator';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import { ValidationError } from '../errors/ValidationError';
 import { TransactionType } from 'types/TransactionType';
-import Utils from 'tenpercent/shared/src/utils/Utils';
-import { Time } from 'tenpercent/shared/src/utils/time/Time';
+import { Utils } from 'tenpercent/shared';
+import { Time } from 'tenpercent/shared';
 
 const baseAtLeastOneFieldRequired = ({
     accountId,

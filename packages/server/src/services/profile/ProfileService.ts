@@ -4,7 +4,7 @@ import { IProfile } from 'interfaces/IProfile';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
-import { IProfilePatchRequest } from 'tenpercent/shared/src/interfaces/IProfilePatchRequest';
+import { IProfilePatchRequest } from 'tenpercent/shared';
 
 export default class ProfileService extends LoggerBase implements IProfileService {
     private readonly _profileDataAccess: IProfileDataAccess;

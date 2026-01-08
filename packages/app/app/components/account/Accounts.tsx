@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { StyleProp, View, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
-import Utils from "tenpercent/shared/src/Utils"
+import { IAccountListItem } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"

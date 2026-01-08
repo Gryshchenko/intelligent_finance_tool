@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import Logger from 'helper/logger/Logger';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import UserServiceBuilder from 'services/user/UserServiceBuilder';

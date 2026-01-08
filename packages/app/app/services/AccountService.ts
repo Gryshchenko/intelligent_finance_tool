@@ -1,6 +1,6 @@
-import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
-import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { IAccount } from "tenpercent/shared"
+import { IAccountListItem } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
 import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProblem"

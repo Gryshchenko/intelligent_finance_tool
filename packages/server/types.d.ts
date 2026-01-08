@@ -1,5 +1,5 @@
 import 'express-session';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
+import { UserStatus } from 'tenpercent/shared'
 
 
 declare global {

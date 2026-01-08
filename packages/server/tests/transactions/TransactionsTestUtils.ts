@@ -1,5 +1,5 @@
-import { TransactionType } from 'tenpercent/shared/src/types/TransactionType';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { TransactionType } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import { Agent } from 'supertest';
 import { generateRandomString, generateSecureRandom } from '../TestsUtils.';
 

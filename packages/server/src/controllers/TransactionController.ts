@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
 import Logger from 'helper/logger/Logger';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
 import TransactionServiceBuilder from 'services/transaction/TransactionServiceBuilder';
-import Utils from 'tenpercent/shared/src/utils/Utils';
-import { ITransactionListItem } from 'tenpercent/shared/src/interfaces/ITransactionListItem';
+import { Utils } from 'tenpercent/shared';
+import { ITransactionListItem } from 'tenpercent/shared';
 
 export class TransactionController {
     private static readonly logger = Logger.Of('TransactionController');

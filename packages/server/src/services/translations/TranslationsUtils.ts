@@ -1,4 +1,4 @@
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
+import { LanguageType } from 'tenpercent/shared';
 
 export default class TranslationsUtils {
     public static convertToSupportLocale(locale: string): LanguageType {

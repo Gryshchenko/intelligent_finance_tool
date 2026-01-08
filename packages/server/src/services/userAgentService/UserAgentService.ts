@@ -1,5 +1,5 @@
 import { IUserAgentInfo } from 'interfaces/IUserAgentInfo';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 import uap from 'ua-parser-js';
 import Logger from 'helper/logger/Logger';
 

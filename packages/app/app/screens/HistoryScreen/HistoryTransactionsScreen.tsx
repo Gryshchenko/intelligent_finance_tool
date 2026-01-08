@@ -1,8 +1,8 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import { useNavigation } from "@react-navigation/native"
-import { IPagination } from "tenpercent/shared/src/interfaces/IPagination"
-import { ITransactionListItem } from "tenpercent/shared/src/interfaces/ITransactionListItem"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
+import { IPagination } from "tenpercent/shared"
+import { ITransactionListItem } from "tenpercent/shared"
+import { TransactionType } from "tenpercent/shared"
 
 import { AddButton } from "@/components/buttons/AddButton"
 import { Transactions } from "@/components/transaction/Transactions"

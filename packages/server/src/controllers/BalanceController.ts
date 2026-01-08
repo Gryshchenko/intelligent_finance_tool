@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import Logger from 'helper/logger/Logger';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import { generateErrorResponse } from 'src/utils/generateErrorResponse';
 import { BaseError } from 'src/utils/errors/BaseError';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared';
 import BalanceServiceBuilder from 'services/balance/BalanceServiceBuilder';
 
 export class BalanceController {

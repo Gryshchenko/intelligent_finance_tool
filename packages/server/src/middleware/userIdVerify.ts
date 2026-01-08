@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import Logger from 'helper/logger/Logger';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { HttpCode } from 'tenpercent/shared';
+import { ErrorCode } from 'tenpercent/shared';
+import { ResponseStatusType } from 'tenpercent/shared';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import Utils from 'tenpercent/shared/src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 
 const _logger = Logger.Of('UserIdVerify');
 

@@ -1,7 +1,7 @@
-import { IEmailConfirmationResponse } from "tenpercent/shared/src/interfaces/IEmailConfirmationResponse"
-import { IEmailResendResponse } from "tenpercent/shared/src/interfaces/IEmailResendResponse"
-import { IEmailVerifyResponse } from "tenpercent/shared/src/interfaces/IEmailVerifyResponse"
-import { ErrorCode } from "tenpercent/shared/src/types/ErrorCode"
+import { IEmailConfirmationResponse } from "tenpercent/shared"
+import { IEmailResendResponse } from "tenpercent/shared"
+import { IEmailVerifyResponse } from "tenpercent/shared"
+import { ErrorCode } from "tenpercent/shared"
 
 import { ApiAbstract } from "@/services/api/apiAbstract"
 import { GeneralApiProblem, GeneralApiProblemKind } from "@/services/api/apiProblem"

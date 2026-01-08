@@ -1,11 +1,11 @@
-import { readFileSync } from 'fs';
+// import { readFileSync } from 'fs';
 import * as process from 'process';
 
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const caCert = readFileSync('./src/certs/cert.pem').toString();
+// const caCert = readFileSync('./src/certs/cert.pem').toString();
 
 interface IConfig {
     appName: string;
@@ -15,7 +15,7 @@ interface IConfig {
     dbPass: string;
     dbPort: string;
     dbHost: string;
-    dbCACert: string;
+    // dbCACert: string;
     jwtSecret: string;
     jwtLongSecret: string;
     jwtIssuer: string;
@@ -44,7 +44,7 @@ export function getConfig(): IConfig {
         dbPass: (process.env.TEST_DB_PASS ?? process.env.DB_PASS) as string,
         dbPort: (process.env.TEST_DB_PORT ?? process.env.DB_PORT) as string,
         dbHost: (process.env.TEST_DB_HOST ?? process.env.DB_HOST) as string,
-        dbCACert: caCert,
+        // dbCACert: caCert,
         jwtSecret: (process.env.TEST_JWT_SECRET ?? process.env.JWT_SECRET) as string,
         jwtLongSecret: (process.env.TEST_JWT_LONG_SECRET ?? process.env.JWT_LONG_SECRET) as string,
         jwtIssuer: (process.env.TEST_JWT_ISSUER ?? process.env.JWT_ISSUER) as string,

@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import tokenVerify from '../src/middleware/tokenVerify';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 import { ResponseBuilderPreset } from '../src/helper/responseBuilder/ResponseBuilderPreset';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import TokenBlacklistBuilder from '../src/services/auth/TokenBlacklistBuilder';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
+import { ResponseStatusType } from 'tenpercent/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const passport = require('passport');

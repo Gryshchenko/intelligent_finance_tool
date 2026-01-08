@@ -6,13 +6,13 @@ import {
     generateRandomPassword,
     generateSecureRandom,
 } from '../TestsUtils.';
-import { ResponseStatusType } from 'tenpercent/shared/src/types/ResponseStatusType';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { HttpCode } from 'tenpercent/shared';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { LanguageType } from 'tenpercent/shared/src/types/LanguageType';
-import { UserStatus } from 'tenpercent/shared/src/interfaces/UserStatus';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { LanguageType } from 'tenpercent/shared';
+import { UserStatus } from '../../../shared/src/types/UserStatus';
+import { ErrorCode } from 'tenpercent/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const jwt = require('jsonwebtoken');

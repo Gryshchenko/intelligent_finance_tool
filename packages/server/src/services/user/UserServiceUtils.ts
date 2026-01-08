@@ -6,8 +6,8 @@ import Logger from 'helper/logger/Logger';
 import argon2 from 'argon2';
 
 import cryptoModule from 'crypto';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
-import { IUserClient } from 'tenpercent/shared/src/interfaces/IUserClient';
+import { ErrorCode } from 'tenpercent/shared';
+import { IUserClient } from 'tenpercent/shared';
 
 const _logger = Logger.Of('UserServiceUtils');
 

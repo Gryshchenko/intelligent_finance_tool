@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { IIncome } from "tenpercent/shared/src/interfaces/IIncome"
-import Utils from "tenpercent/shared/src/Utils"
+import { IIncome } from "tenpercent/shared"
+import { Utils } from "tenpercent/shared"
 
 import { IncomeEdit } from "@/components/income/IncomeEdit"
 import { IncomePath } from "@/navigators/IncomesStackNavigator"

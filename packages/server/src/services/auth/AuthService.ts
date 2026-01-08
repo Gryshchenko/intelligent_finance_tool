@@ -1,21 +1,21 @@
-import { RoleType } from 'tenpercent/shared/src/types/RoleType';
+import { RoleType } from 'tenpercent/shared';
 import { IUserService } from 'interfaces/IUserService';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IAuthService } from 'interfaces/IAuthService';
 import { IUser } from 'interfaces/IUser';
-import { ErrorCode } from 'tenpercent/shared/src/types/ErrorCode';
+import { ErrorCode } from 'tenpercent/shared';
 import UserServiceUtils from 'src/services/user/UserServiceUtils';
 import { getConfig } from 'src/config/config';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'tenpercent/shared/src/types/HttpCode';
+import { HttpCode } from 'tenpercent/shared';
 
 import jwt, { Algorithm, DecodeOptions, JwtPayload } from 'jsonwebtoken';
 import { IKeyValueStore } from 'src/repositories/keyValueStore/KeyValueStore';
 import { JwtPayloadCustom } from 'services/auth/passport-setup';
 import TokenBlacklistBuilder from 'services/auth/TokenBlacklistBuilder';
-import Utils from 'tenpercent/shared/src/utils/Utils';
-import { Time } from 'tenpercent/shared/src/utils/time/Time';
+import { Time } from 'tenpercent/shared';
+import { Utils } from 'tenpercent/shared';
 
 export default class AuthService extends LoggerBase implements IAuthService {
     protected userService: IUserService;

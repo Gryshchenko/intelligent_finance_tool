@@ -1,9 +1,9 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import { useNavigation } from "@react-navigation/native"
-import { IAccount } from "tenpercent/shared/src/interfaces/IAccount"
-import { IAccountListItem } from "tenpercent/shared/src/interfaces/IAccountListItem"
-import { TransactionFieldType } from "tenpercent/shared/src/types/TransactionFieldType"
-import { TransactionType } from "tenpercent/shared/src/types/TransactionType"
+import { IAccount } from "tenpercent/shared"
+import { IAccountListItem } from "tenpercent/shared"
+import { TransactionFieldType } from "tenpercent/shared"
+import { TransactionType } from "tenpercent/shared"
 
 import { Accounts } from "@/components/account/Accounts"
 import { AddButton } from "@/components/buttons/AddButton"
