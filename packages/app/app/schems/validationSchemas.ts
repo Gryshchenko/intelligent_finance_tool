@@ -85,7 +85,7 @@ const buildTransactionCreateSchema = () => {
     currencyId: Yup.number()
       .min(Number.MIN_VALUE, translationsKeys.valueTooShort)
       .max(Number.MAX_VALUE, translationsKeys.valueTooLong),
-    createAt: Yup.date()
+    createdAt: Yup.date()
       .min(twentyYearsAgo, translationsKeys.valueTooShort)
       .max(now, translationsKeys.valueTooLong),
     accountId: Yup.string().when("transactionType", (transactionType, schema) => {
@@ -137,7 +137,7 @@ const buildTransactionEditSchema = () => {
       .max(Number.MAX_VALUE, translationsKeys.valueTooLong)
       .notRequired(),
 
-    createAt: Yup.date()
+    createdAt: Yup.date()
       .min(twentyYearsAgo, translationsKeys.valueTooShort)
       .max(now, translationsKeys.valueTooLong)
       .notRequired(),

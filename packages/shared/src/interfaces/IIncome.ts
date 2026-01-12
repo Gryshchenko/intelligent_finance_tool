@@ -6,6 +6,6 @@ export interface IIncome {
     incomeName: string;
     currencyId: number;
     status: AccountStatusType;
-    createAt: Date;
+    createdAt: Date;
     updatedAt: Date;
 }

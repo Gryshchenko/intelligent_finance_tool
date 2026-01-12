@@ -1,0 +1,73 @@
+services:
+    ten-percent:
+        build:
+            context: ../../
+            dockerfile: docker/tests/Dockerfile
+        image: node:20-alpine
+        container_name: ten-percent
+        environment:
+            # ====================
+            # App
+            # ====================
+            - ENV=test
+            - APP_NAME=Tenpercent
+            - PORT=3001
+            - ORIGN=localhost:3001
+
+            # ====================
+            # JWT
+            # ====================
+            - JWT_SECRET=42bb61fa5d10c2181b619abbff42ea877d01490f32825dbfcbaa73ee33d2520470bec00c1b318ac01f333f942d9e4bf3b256a65ffa4d4a286eb2e7002f477a13
+            - JWT_LONG_SECRET=ef2f22b0b1650bb61fa5d10c2181b619abbff42ea877d01490f32825dbfcbaa73ee33d2520470bec00c1b318ac01f333f94d47479b5cdece47c814f18dcc6e264fc677449
+            - JWT_ISSUER=test
+            - JWT_AUDIENCE=test.net
+            - JWT_ALGORITHM=HS384
+            - JWT_EXPIRES_IN=1h
+            - JWT_LONG_EXPIRES_IN=1m
+            - JWT_EXPIRES_SEC=540
+
+            # ====================
+            # PostgreSQL (Neon)
+            # ====================
+            - DB_NAME=test_db
+            - DB_USER=test_user
+            - DB_PASS=test_password
+            - DB_PORT=5432
+            - DB_HOST=postgres
+        ports:
+            - '3000:3000'
+        volumes:
+            - ./../../:/app
+        networks:
+            - app-tier
+    redis-master:
+        container_name: redis-master
+        image: 'bitnami/redis:latest'
+        environment:
+            - REDIS_REPLICATION_MODE=master
+            - REDIS_PASSWORD=redispassword
+        ports:
+            - '6379:6379'
+        networks:
+            - app-tier
+    postgres:
+        container_name: postgres
+        image: postgres:16-alpine
+        volumes:
+            - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+        environment:
+            - POSTGRES_DB=test_db
+            - POSTGRES_USER=test_user
+            - POSTGRES_PASSWORD=test_password
+        ports:
+            - '5432:5432'
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U test_user -d test_db']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - app-tier
+networks:
+    app-tier:
+        driver: bridge

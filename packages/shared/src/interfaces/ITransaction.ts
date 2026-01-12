@@ -11,5 +11,5 @@ export interface ITransaction {
     transactionTypeId: number;
     amount: number;
     description: string;
-    createAt: string;
+    createdAt: string;
 }

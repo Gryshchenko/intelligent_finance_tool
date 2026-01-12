@@ -35,7 +35,7 @@ export const TransactionEdit: FC<ITransactionPros> = function TransactionEdit(_p
       categoryId: form.categoryId,
       currencyId: form.currencyId,
       amount: form.amount,
-      createAt: form.createAt,
+      createdAt: form.createdAt,
       targetAccountId: form.targetAccountId,
       description: form.description,
     })

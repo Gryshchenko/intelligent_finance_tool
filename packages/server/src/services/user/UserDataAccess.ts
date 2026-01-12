@@ -10,7 +10,7 @@ import { validateAllowedProperties } from 'src/utils/validation/validateAllowedP
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
 import { IEmailConfirmationData } from 'interfaces/IEmailConfirmationData';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { ErrorCode } from 'tenpercent/shared';
+import { ErrorCode, Time } from 'tenpercent/shared';
 import { HttpCode } from 'tenpercent/shared';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
@@ -131,7 +131,7 @@ export default class UserDataService extends LoggerBase implements IUserDataAcce
         trx?: IDBTransaction,
     ): Promise<void> {
         const allowedProperties = {
-            updatedAt: new Date().toISOString(),
+            updatedAt: Time.getISODateNowUTC(),
             status: properties.status,
             email: properties.email,
         };

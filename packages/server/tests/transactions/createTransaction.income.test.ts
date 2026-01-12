@@ -1,7 +1,7 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { ErrorCode } from 'tenpercent/shared';
+import { ErrorCode, TransactionType } from 'tenpercent/shared';
 import { ResponseStatusType } from 'tenpercent/shared';
 import { HttpCode } from 'tenpercent/shared';
 
@@ -72,7 +72,7 @@ describe('POST /transaction/create - income', () => {
                     incomeId,
                     accountId,
                     currencyId,
-                    transactionTypeId: 1,
+                    transactionTypeId: TransactionType.Income,
                     amount: num,
                     description: 'Test',
                 })

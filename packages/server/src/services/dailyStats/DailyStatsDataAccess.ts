@@ -36,9 +36,9 @@ export default class DailyStatsDataAccess extends LoggerBase implements IDailySt
                 `
                     INSERT INTO daily_stats ("userId", date, income_total, expense_total, transfer_total)
                     VALUES (?, ?::date,
-                            CASE WHEN ? = 'income' THEN ? ELSE 0 END,
-                            CASE WHEN ? = 'expense' THEN ? ELSE 0 END,
-                            CASE WHEN ? = 'transfer' THEN ? ELSE 0 END)
+                            CASE WHEN ? = 'income' THEN ? ELSE 0::numeric END,
+                            CASE WHEN ? = 'expense' THEN ? ELSE 0::numeric END,
+                            CASE WHEN ? = 'transfer' THEN ? ELSE 0::numeric END)
                     ON CONFLICT ("userId", date)
                     DO UPDATE SET
                         income_total = daily_stats.income_total + CASE WHEN EXCLUDED.income_total   <> 0 THEN EXCLUDED.income_total   ELSE 0 END,

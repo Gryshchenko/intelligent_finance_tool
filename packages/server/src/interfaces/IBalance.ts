@@ -3,5 +3,5 @@ export interface IBalance {
     balance: string;
     userId: string;
     updatedAt: Date;
-    createAt: Date;
+    createdAt: Date;
 }

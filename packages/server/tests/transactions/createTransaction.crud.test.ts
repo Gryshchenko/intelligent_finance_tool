@@ -1,7 +1,7 @@
 import { createUser, deleteUserAfterTest, generateSecureRandom, getOverview } from '../TestsUtils.';
 import DatabaseConnection from '../../src/repositories/DatabaseConnection';
 import config from '../../src/config/dbConfig';
-import { HttpCode } from 'tenpercent/shared';
+import { HttpCode, Time } from 'tenpercent/shared';
 import { createAllTransactions, fetchTransactions, fetchTransactionsAll, fetchTransactionsBad } from './TransactionsTestUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -32,7 +32,7 @@ afterAll((done) => {
 });
 
 describe('PATCH /transaction/patch - amount', () => {
-    it(`should create new transaction amount, createAt, description`, async () => {
+    it(`should create new transaction amount, createdAt, description`, async () => {
         const agent = request.agent(app);
 
         const databaseConnection = DatabaseConnection.instance(config);
@@ -62,6 +62,7 @@ describe('PATCH /transaction/patch - amount', () => {
                 targetAccountId,
                 amount: 1000,
                 description: 'Test',
+                createdAt: Time.getISODateNowUTC(),
             })
             .expect(HttpCode.CREATED);
         const transaction = await agent
@@ -69,7 +70,7 @@ describe('PATCH /transaction/patch - amount', () => {
             .set('authorization', authorization)
             .expect(HttpCode.OK);
 
-        const newDate = new Date().toISOString();
+        const newDate = Time.getISODateNowUTC();
         expect(transaction.body.data.amount).toStrictEqual('1000');
         expect(transaction.body.data.description).toStrictEqual('Test');
         expect(transaction.body.data.targetAccountId).toStrictEqual(targetAccountId);
@@ -81,7 +82,7 @@ describe('PATCH /transaction/patch - amount', () => {
             .send({
                 amount: 1500,
                 description: 'Test 1',
-                createAt: newDate,
+                createdAt: newDate,
                 targetAccountId: accountId,
                 accountId: targetAccountId,
             })
@@ -150,7 +151,7 @@ describe('PATCH /transaction/patch - amount', () => {
             const all = await fetchTransactions(agent, userId, authorization, 100, 0, `&${query.name}=${query.id}`);
             for (let i = 0; i < 9; i += 3) {
                 const cursoreId = all.data[i][query.name];
-                for (const field of ['amount', 'createAt']) {
+                for (const field of ['amount', 'createdAt']) {
                     for (const order of ['asc', 'desc']) {
                         const { resLimit, data } = await fetchTransactions(
                             agent,
@@ -188,6 +189,8 @@ describe('PATCH /transaction/patch - amount', () => {
         }
 
         const all = await fetchTransactionsAll(agent, userId, authorization, transactionIds.length, transactionIds[0]);
+        console.log(all)
+        console.log(transactionIds)
         expect(all.limit).toStrictEqual(transactionIds.length);
         expect(all.cursor).toStrictEqual(transactionIds[0]);
         expect(all.data.length).toStrictEqual(transactionIds.length - 1);

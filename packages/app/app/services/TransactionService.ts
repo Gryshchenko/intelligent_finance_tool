@@ -170,7 +170,7 @@ export class TransactionService extends ApiAbstract {
     currencyId: number | undefined
     transactionTypeId: number | undefined
     amount: number | undefined
-    createAt: string | undefined
+    createdAt: string | undefined
     targetAccountId: number | undefined
     description: string | undefined
   }): Promise<
@@ -190,7 +190,7 @@ export class TransactionService extends ApiAbstract {
         currencyId: body.currencyId,
         transactionTypeId: body.transactionTypeId,
         amount: body.amount,
-        createAt: body.createAt,
+        createdAt: body.createdAt,
         targetAccountId: body.targetAccountId,
         description: body.description,
       })
@@ -226,7 +226,7 @@ export class TransactionService extends ApiAbstract {
       categoryId: number | undefined
       currencyId: number | undefined
       amount: number | undefined
-      createAt: string | undefined
+      createdAt: string | undefined
       targetAccountId: number | undefined
       description: string | undefined
     },
@@ -246,7 +246,7 @@ export class TransactionService extends ApiAbstract {
         categoryId: body.categoryId,
         currencyId: body.currencyId,
         amount: body.amount,
-        createAt: body.createAt,
+        createdAt: body.createdAt,
         targetAccountId: body.targetAccountId,
         description: body.description,
       })

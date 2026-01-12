@@ -9,7 +9,6 @@ import registerRouter from './routes/register';
 import userRouter from './routes/user';
 import { getConfig } from 'src/config/config';
 import ResponseBuilder from 'src/helper/responseBuilder/ResponseBuilder';
-// import { swaggerInit } from 'src/swagger/swagger';
 import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
@@ -28,9 +27,8 @@ const app = express();
 const port = getConfig().appPort ?? 3000;
 
 passportSetup(passport);
-// swaggerInit(app);
 
-if (process.env.NODE_ENV !== '') {
+if (process.env.NODE_ENV !== 'test') {
     const limiter = rateLimit({
         windowMs: 15 * 60 * 1000, // 15 min
         limit: 100,

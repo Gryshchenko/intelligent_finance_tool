@@ -10,7 +10,6 @@ import { Time } from 'tenpercent/shared';
 const validateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const errors: string[] = [];
-        console.log(req.path);
         Object.keys(req.query).forEach((key) => {
             if (!schema[key]) {
                 errors.push(`Unexpected query parameter: ${key}`);

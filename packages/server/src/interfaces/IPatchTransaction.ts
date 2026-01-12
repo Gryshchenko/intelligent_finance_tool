@@ -6,5 +6,5 @@ export interface IPatchTransaction {
     categoryId?: number;
     amount: number;
     description: string;
-    createAt: string;
+    createdAt: string;
 }

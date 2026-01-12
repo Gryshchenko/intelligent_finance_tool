@@ -97,7 +97,7 @@ function mergeSections<T>(a: SectionType<T>[], b: SectionType<T>[]): SectionType
 }
 const groupByDate = (transactions: ITransactionListItem[]): SectionType<ITransactionListItem>[] => {
   const groupedByDate = transactions?.reduce((acc: Record<string, unknown[]>, tx) => {
-    const date = Time.formatDate(tx.createAt, DateFormat.YYYY_MM_DD)
+    const date = Time.formatDate(tx.createdAt, DateFormat.YYYY_MM_DD)
     if (!acc[date]) acc[date] = []
     acc[date].push(tx)
     return acc

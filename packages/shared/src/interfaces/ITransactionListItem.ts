@@ -8,7 +8,7 @@ export interface ITransactionListItem {
     targetAccountName?: string;
     amount: number;
     description: string;
-    createAt: string;
+    createdAt: string;
     currencyId: number;
     transactionTypeId: TransactionType;
 }

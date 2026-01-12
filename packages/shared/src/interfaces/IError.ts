@@ -7,6 +7,6 @@ export interface IError {
     statusCode?: HttpCode;
     payload?: {
         field: string;
-        reason: 'not_found' | unknown;
+        reason?: 'not_found' | unknown;
     };
 }

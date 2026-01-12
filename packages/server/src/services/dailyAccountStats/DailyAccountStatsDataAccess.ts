@@ -37,8 +37,8 @@ export class DailyAccountStatsDataAccess extends LoggerBase implements IDailyAcc
             )
             VALUES (
                 ?, ?::date, ?,
-                CASE WHEN ? = 'income' THEN ? ELSE 0 END,
-                CASE WHEN ? = 'expense' THEN ? ELSE 0 END
+                CASE WHEN ? = 'income' THEN ? ELSE 0::numeric END,
+                CASE WHEN ? = 'expense' THEN ? ELSE 0::numeric END
             )
             ON CONFLICT ("userId", date, "accountId")
             DO UPDATE SET

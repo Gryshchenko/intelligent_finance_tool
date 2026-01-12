@@ -7,7 +7,7 @@ import { DBError } from 'src/utils/errors/DBError';
 import { isBaseError } from 'src/utils/errors/isBaseError';
 import { BaseError } from 'src/utils/errors/BaseError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
-import { Utils } from 'tenpercent/shared';
+import { Time, Utils } from 'tenpercent/shared';
 
 export default class BalanceDataAccess extends LoggerBase implements IBalanceDataAccess {
     private readonly _db: IDatabaseConnection;
@@ -22,7 +22,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
 
             const data = await this._db
                 .engine()('balance')
-                .select('balanceId', 'balance', 'updatedAt', 'createAt')
+                .select('balanceId', 'balance', 'updatedAt', 'createdAt')
                 .where({ userId })
                 .first();
 
@@ -81,7 +81,7 @@ export default class BalanceDataAccess extends LoggerBase implements IBalanceDat
             this._logger.info(`Patch balance for userId: ${userId}`);
             const allowedProperties = {
                 balance: properties.amount,
-                updatedAt: new Date().toISOString(),
+                updatedAt: Time.getISODateNowUTC(),
             };
             validateAllowedProperties(allowedProperties, ['updatedAt', 'balance']);
             const query = trx || this._db.engine();

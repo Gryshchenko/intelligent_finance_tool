@@ -153,9 +153,9 @@ export const TransactionFields: FC<IProps> = function TransactionFields(_props) 
       <IgniteDatePicker
         disabled={isView}
         mode={DatePickerType.Datetime}
-        value={form.createAt!}
-        helperTx={errors?.createAt}
-        status={errors?.createAt ? "error" : undefined}
+        value={form.createdAt!}
+        helperTx={errors?.createdAt}
+        status={errors?.createdAt ? "error" : undefined}
         onChange={() => null}
       />
     </GeneralDetailView>

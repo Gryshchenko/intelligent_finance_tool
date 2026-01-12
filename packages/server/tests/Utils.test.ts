@@ -1,4 +1,4 @@
-import Utils from '../src/utils/Utils';
+import { Utils } from 'tenpercent/shared';
 
 describe('Utils', () => {
     describe('roundNumber', () => {

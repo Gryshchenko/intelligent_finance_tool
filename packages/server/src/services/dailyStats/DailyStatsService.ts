@@ -2,7 +2,7 @@ import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { IDailyStatsDataAccess } from 'services/dailyStats/DailyStatsDataAccess';
 import { StatsTransactionType } from 'types/StatsTransactionType';
-import { DateFormat, Time } from 'tenpercent/shared';
+import { statsValidateDate } from 'src/utils/validation/StatsValidateDate';
 
 export interface IDailyStatsService {
     updateTotal: (
@@ -29,7 +29,7 @@ export default class DailyStatsService extends LoggerBase implements IDailyStats
         amount: number,
         trx?: IDBTransaction,
     ): Promise<boolean> {
-        const day = Time.formatDate(date, DateFormat.YYYY_MM_DD);
+        const day: string = statsValidateDate(date);
         return await this._dailyStatsDataAccess.updateTotal(userId, day, category, amount, trx);
     }
 }

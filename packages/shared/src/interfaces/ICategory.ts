@@ -6,6 +6,6 @@ export interface ICategory {
     userId: number;
     currencyId: number;
     status: AccountStatusType;
-    createAt: Date;
+    createdAt: Date;
     updatedAt: Date;
 }

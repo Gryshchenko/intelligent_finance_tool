@@ -30,7 +30,6 @@ export const tokenLongVerify = (req: Request, res: Response, next: NextFunction)
         if (!token || !userId) {
             buildError(`Token or userID invalid - userID: ${userId}`);
         }
-        console.log('long 2', token);
         const payload = jwt.verify(token, getConfig().jwtLongSecret, {
             algorithms: [getConfig().jwtAlgorithm as Algorithm],
             issuer: getConfig().jwtIssuer,

@@ -1,6 +1,6 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { ITransaction } from 'tenpercent/shared';
+import { ITransaction, Time } from 'tenpercent/shared';
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
 import { DBError } from 'src/utils/errors/DBError';
 import { Utils } from 'tenpercent/shared';
@@ -44,7 +44,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                     amount: transaction.amount,
                     description: transaction.description,
                     userId: transaction.userId,
-                    createAt: transaction.createAt,
+                    createdAt: transaction.createdAt,
                     targetAccountId: transaction.targetAccountId,
                 },
                 ['transactionId'],
@@ -81,7 +81,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                     }).filter(([_, value]) => value !== undefined),
                 ) ?? {};
             this._logger.info(`Fetching transactions {${Object.entries(cleanFilters).join(': ')}} for userId: ${userId}`);
-            const orderArr = parseSortBy(orderBy as string, ['amount', 'createAt']);
+            const orderArr = parseSortBy(orderBy as string, ['amount', 'createdAt']);
 
             const query = this._db
                 .engine()('transactions')
@@ -89,7 +89,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                     'transactions.transactionId',
                     'transactions.amount',
                     'transactions.description',
-                    'transactions.createAt',
+                    'transactions.createdAt',
                     'transactions.currencyId',
                     'transactions.targetAccountId',
                     'transactions.transactionTypeId',
@@ -163,7 +163,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                     'transactions.accountId',
                     'transactions.incomeId',
                     'transactions.description',
-                    'transactions.createAt',
+                    'transactions.createdAt',
                     'transactions.updatedAt',
                     'transactions.currencyId',
                     'transactions.targetAccountId',
@@ -183,8 +183,12 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             } else {
                 this._logger.info(`Fetched transaction with transactionId: ${transactionId} for userId: ${userId}`);
             }
+            return {
+                ...data,
+                createdAt: data?.createdAt ? Time.fromJSDateUTC(data.createdAt) : undefined,
+                updatedAt: data?.updatedAt ? Time.fromJSDateUTC(data.updatedAt) : undefined,
 
-            return data;
+            };
         } catch (e) {
             this._logger.error(
                 `Failed to fetch transaction with transactionId: ${transactionId} for userId: ${userId}. Error: ${(e as { message: string }).message}`,
@@ -281,8 +285,8 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             amount: properties.amount,
             description: properties.description,
             targetAccountId: properties.targetAccountId,
-            createAt: properties.createAt,
-            updatedAt: new Date().toISOString(),
+            createdAt: properties.createdAt,
+            updatedAt: Time.getISODateNowUTC(),
         };
         validateAllowedProperties(allowedProperties, [
             'accountId',
@@ -291,7 +295,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             'amount',
             'description',
             'targetAccountId',
-            'createAt',
+            'createdAt',
             'updatedAt',
         ]);
         return allowedProperties;

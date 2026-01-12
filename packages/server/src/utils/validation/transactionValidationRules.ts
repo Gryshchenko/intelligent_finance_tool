@@ -105,17 +105,18 @@ const createTransactionValidationRules = [
     ...createSignupValidationRules('categoryId', 'number', {
         optional: true,
     }),
-    ...createSignupValidationRules('createAt', 'date', {
+    ...createSignupValidationRules('createdAt', 'date', {
         optional: true,
     }),
-    body('createAt')
+    body('createdAt')
         .custom((_, { req }) => {
-            const { createAt } = req.body;
+            const { createdAt } = req.body;
+            if (createdAt === undefined) return true
             try {
-                Time.parseUTC(createAt);
+                Time.parseUTC(createdAt);
             } catch (e) {
                 throw new ValidationError({
-                    message: `Validation failed at createAt': ${(e as { message: string }).message}`,
+                    message: `Validation failed at createdAt': ${(e as { message: string }).message}`,
                     errorCode: ErrorCode.UNEXPECTED_PROPERTY,
                 });
             }
@@ -151,7 +152,7 @@ const patchTransactionValidationRules = [
     ...createSignupValidationRules('categoryId', 'number', {
         optional: true,
     }),
-    ...createSignupValidationRules('createAt', 'date', {
+    ...createSignupValidationRules('createdAt', 'date', {
         optional: true,
     }),
 ];
@@ -182,7 +183,7 @@ export const transactionConvertValidationMessageToErrorCode = (path: string): Er
         case 'description': {
             return ErrorCode.TRANSACTION_ERROR;
         }
-        case 'createAt': {
+        case 'createdAt': {
             return ErrorCode.TRANSACTION_ERROR;
         }
         default: {

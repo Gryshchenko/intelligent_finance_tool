@@ -129,7 +129,12 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
                 });
             }
 
-            return data;
+            return {
+                ...data,
+                createdAt: data?.createdAt ? Time.fromJSDateUTC(data.createdAt) : undefined,
+                updatedAt: data?.updatedAt ? Time.fromJSDateUTC(data.updatedAt) : undefined,
+
+            };
         } catch (e) {
             this._logger.error(
                 `Error fetching income with ID ${incomeId} for userId ${userId}: ${(e as { message: string }).message}`,
@@ -149,6 +154,8 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
                 'incomes.userId',
                 'incomes.incomeName',
                 'incomes.currencyId',
+                'incomes.createdAt',
+                'incomes.updatedAt',
                 'currencies.currencyCode',
                 'currencies.currencyName',
                 'currencies.symbol',
@@ -159,7 +166,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             this._logger.info(`Patch incomeId: ${incomeId} for userId: ${userId}`);
             const allowedProperties = {
                 incomeName: properties.incomeName,
-                updatedAt: new Date().toISOString(),
+                updatedAt: Time.getISODateNowUTC(),
                 status: properties.status,
             };
 

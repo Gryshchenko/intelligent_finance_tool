@@ -1,7 +1,7 @@
 import { IDailyCategoryStatsDataAccess } from 'services/dailyCategoryStats/DailyCategoryStatsDataAccess';
 import { IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { DateFormat, Time } from 'tenpercent/shared';
+import { statsValidateDate } from 'src/utils/validation/StatsValidateDate';
 
 export interface IDailyCategoryStatsService {
     updateTotal(userId: number, date: string, categoryId: number, amount: number, trx?: IDBTransaction): Promise<boolean>;
@@ -13,7 +13,7 @@ export class DailyCategoryStatsService extends LoggerBase implements IDailyCateg
     }
 
     async updateTotal(userId: number, date: string, categoryId: number, amount: number, trx?: IDBTransaction): Promise<boolean> {
-        const day = Time.formatDate(date, DateFormat.YYYY_MM_DD);
+        const day: string = statsValidateDate(date);
         return this.dataAccess.updateTotal(userId, day, categoryId, amount, trx);
     }
 }

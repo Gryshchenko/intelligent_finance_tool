@@ -1,6 +1,6 @@
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
-import { IAccount } from 'tenpercent/shared';
+import { IAccount, Time } from 'tenpercent/shared';
 import { ICreateAccount } from 'interfaces/ICreateAccount';
 import { DBError } from 'src/utils/errors/DBError';
 import { Utils } from 'tenpercent/shared';
@@ -119,7 +119,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             const allowedProperties = {
                 accountName: properties.accountName,
                 amount: properties.amount,
-                updatedAt: new Date().toISOString(),
+                updatedAt: Time.getISODateNowUTC(),
                 status: properties.status,
             };
 
@@ -179,6 +179,8 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 'accounts.amount',
                 'accounts.accountName',
                 'accounts.currencyId',
+                'accounts.createdAt',
+                'accounts.updatedAt',
                 'currencies.currencyCode',
                 'currencies.symbol',
             );

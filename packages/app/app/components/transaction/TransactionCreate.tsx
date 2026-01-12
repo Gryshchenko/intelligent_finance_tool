@@ -24,7 +24,7 @@ export const TransactionCreate: FC<IProps> = function TransactionCreate(_props: 
       amount: 0,
       currencyId: 1,
       transactionTypeId: data?.transactionTypeId,
-      createAt: data?.createAt || Time.getISODateNow(),
+      createdAt: data?.createdAt || Time.getISODateNow(),
     },
     buildTransactionCreateSchema(),
   )
@@ -38,7 +38,7 @@ export const TransactionCreate: FC<IProps> = function TransactionCreate(_props: 
       currencyId: form.currencyId,
       transactionTypeId: form.transactionTypeId,
       amount: form.amount,
-      createAt: form.createAt,
+      createdAt: form.createdAt,
       targetAccountId: form.targetAccountId,
       description: form.description,
     })

@@ -1,7 +1,7 @@
 import { parseSortBy } from '../src/utils/validation/parseSortBy';
 
 describe('parseSortBy', () => {
-    const allowedFields = ['transactionId', 'amount', 'createAt', 'currencyId'];
+    const allowedFields = ['transactionId', 'amount', 'createdAt', 'currencyId'];
 
     it('returns an empty array if sortBy is missing', () => {
         expect(parseSortBy(undefined, allowedFields)).toEqual([]);
@@ -14,15 +14,15 @@ describe('parseSortBy', () => {
     });
 
     it('parses a single key with desc direction', () => {
-        const result = parseSortBy('createAt:desc', allowedFields);
-        expect(result).toEqual([{ column: 'createAt', order: 'desc' }]);
+        const result = parseSortBy('createdAt:desc', allowedFields);
+        expect(result).toEqual([{ column: 'createdAt', order: 'desc' }]);
     });
 
     it('parses multiple keys', () => {
-        const result = parseSortBy('amount:asc,createAt:desc', allowedFields);
+        const result = parseSortBy('amount:asc,createdAt:desc', allowedFields);
         expect(result).toEqual([
             { column: 'amount', order: 'asc' },
-            { column: 'createAt', order: 'desc' },
+            { column: 'createdAt', order: 'desc' },
         ]);
     });
 

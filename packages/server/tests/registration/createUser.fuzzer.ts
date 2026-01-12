@@ -32,7 +32,6 @@ async function fuzzSignup() {
         const response = await axios.post(url, testData, {
             httpsAgent: httpsAgent,
         });
-        console.log('Response:', response.data);
     } catch (error) {
         // @ts-expect-error is necessary
         console.error('Error:', error.response ? error.response.data : error.message);

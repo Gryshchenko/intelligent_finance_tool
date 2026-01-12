@@ -18,6 +18,7 @@ import { ITransactionListItemsRequest } from 'tenpercent/shared';
 import { IAccountService } from 'services/account/AccountService';
 import { IStatsOrchestratorService } from 'services/StatsOrchestrator/StatsOrchestratorService';
 import { ITransactionDataAccess } from 'services/transaction/TransactionDataAccess';
+import { instanceOf } from 'graphql/jsutils/instanceOf';
 
 export interface ITransactionService {
     createTransaction(transactions: ICreateTransaction): Promise<number | null>;
@@ -96,7 +97,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 case TransactionType.Expense: {
                     await this._statsOrchestratorService.handleExpanse(
                         userId,
-                        trs.createAt,
+                        trs.createdAt,
                         trs.accountId,
                         trs.categoryId as number,
                         trs?.amount * -1,
@@ -107,7 +108,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 case TransactionType.Income: {
                     await this._statsOrchestratorService.handleIncomes(
                         userId,
-                        trs.createAt,
+                        trs.createdAt,
                         trs.incomeId as number,
                         trs.accountId as number,
                         trs?.amount * -1,
@@ -118,7 +119,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 case TransactionType.Transafer: {
                     await this._statsOrchestratorService.handleTransfer(
                         userId,
-                        trs.createAt,
+                        trs.createdAt,
                         trs.accountId as number,
                         trs.targetAccountId as number,
                         trs?.amount * -1,
@@ -169,7 +170,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     case TransactionType.Expense: {
                         await this._statsOrchestratorService.handleExpanse(
                             userId,
-                            transaction.createAt,
+                            transaction.createdAt,
                             trs.accountId,
                             trs.categoryId as number,
                             delta,
@@ -180,7 +181,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     case TransactionType.Income: {
                         await this._statsOrchestratorService.handleIncomes(
                             userId,
-                            transaction.createAt,
+                            transaction.createdAt,
                             trs.incomeId as number,
                             trs.accountId as number,
                             delta,
@@ -191,7 +192,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     case TransactionType.Transafer: {
                         await this._statsOrchestratorService.handleTransfer(
                             userId,
-                            transaction.createAt,
+                            transaction.createdAt,
                             trs.accountId as number,
                             trs.targetAccountId as number,
                             delta,
@@ -236,7 +237,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
                 await this._statsOrchestratorService.handleIncomes(
                     userId,
-                    transaction.createAt,
+                    transaction.createdAt,
                     transaction.incomeId as number,
                     accountId,
                     transactionAmount,
@@ -265,7 +266,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
                 await this._statsOrchestratorService.handleExpanse(
                     userId,
-                    transaction.createAt,
+                    transaction.createdAt,
                     accountId,
                     transaction.categoryId as number,
                     transactionAmount * -1,
@@ -304,7 +305,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
 
                 await this._statsOrchestratorService.handleTransfer(
                     userId,
-                    transaction.createAt,
+                    transaction.createdAt,
                     accountId,
                     targetAccountId,
                     newTargetAmount,

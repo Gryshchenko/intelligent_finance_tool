@@ -3,7 +3,7 @@ import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnect
 import { LoggerBase } from 'src/helper/logger/LoggerBase';
 import { IProfile } from 'interfaces/IProfile';
 import { ICreateProfile } from 'interfaces/ICreateProfile';
-import { IProfilePatchRequest } from 'tenpercent/shared';
+import { IProfilePatchRequest, Time } from 'tenpercent/shared';
 import { DBError } from 'src/utils/errors/DBError';
 import { validateAllowedProperties } from 'src/utils/validation/validateAllowedProperties';
 import { getOnlyNotEmptyProperties } from 'src/utils/validation/getOnlyNotEmptyProperties';
@@ -73,7 +73,7 @@ export default class ProfileDataService extends LoggerBase implements IProfileDa
 
             const properestForUpdate = getOnlyNotEmptyProperties(properties, allowedKeys);
 
-            properestForUpdate.updatedAt = new Date().toISOString();
+            properestForUpdate.updatedAt = Time.getISODateNowUTC();
             const query = trx || this._db.engine();
             await query<IProfile>('profiles').where({ userId }).update(properestForUpdate).first();
 

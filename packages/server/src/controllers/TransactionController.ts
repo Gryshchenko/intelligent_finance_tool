@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
-import { ResponseStatusType } from 'tenpercent/shared';
+import { ResponseStatusType, Time } from 'tenpercent/shared';
 import { ErrorCode } from 'tenpercent/shared';
 import Logger from 'helper/logger/Logger';
 import { HttpCode } from 'tenpercent/shared';
@@ -52,7 +52,7 @@ export class TransactionController {
                             transactionTypeId: transaction?.transactionTypeId,
                             amount: transaction?.amount,
                             description: transaction?.description,
-                            createAt: transaction?.createAt,
+                            createdAt: transaction?.createdAt,
                         })
                         .build(),
                 );
@@ -107,7 +107,7 @@ export class TransactionController {
                         currencyId: transaction?.currencyId,
                         amount: transaction?.amount,
                         description: transaction?.description,
-                        createAt: transaction?.createAt,
+                        createdAt: transaction?.createdAt,
                     })),
                 };
                 res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(response).build());
@@ -129,7 +129,7 @@ export class TransactionController {
                 transactionTypeId,
                 amount,
                 description,
-                createAt = new Date().toISOString(),
+                createdAt = Time.getISODateNowUTC(),
                 targetAccountId,
             } = req.body;
             const transactionId = await TransactionServiceBuilder.build().createTransaction({
@@ -141,7 +141,7 @@ export class TransactionController {
                 amount,
                 description,
                 userId: req.user?.userId as number,
-                createAt,
+                createdAt,
                 targetAccountId,
             });
             res.status(HttpCode.CREATED).json(
@@ -156,7 +156,7 @@ export class TransactionController {
     public static async patch(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const { accountId, incomeId, categoryId, amount, description, createAt, targetAccountId } = req.body;
+            const { accountId, incomeId, categoryId, amount, description, createdAt = Time.getISODateNowUTC(), targetAccountId } = req.body;
             await TransactionServiceBuilder.build().patchTransaction(req.user?.userId as number, {
                 transactionId: Number(req.params.transactionId),
                 accountId,
@@ -164,7 +164,7 @@ export class TransactionController {
                 categoryId,
                 amount,
                 description,
-                createAt,
+                createdAt,
                 targetAccountId,
             });
             res.status(HttpCode.NO_CONTENT).json(responseBuilder.setStatus(ResponseStatusType.OK).setData({}).build());

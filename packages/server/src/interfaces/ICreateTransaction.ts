@@ -8,5 +8,5 @@ export interface ICreateTransaction {
     amount: number;
     description: string;
     userId: number;
-    createAt: string;
+    createdAt: string;
 }

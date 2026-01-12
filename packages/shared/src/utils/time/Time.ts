@@ -28,16 +28,23 @@ class Time {
     public static getISODateNow(): string {
         return DateTime.now().toISO();
     }
+    public static getISODateNowUTC(): string {
+        return DateTime.now().toUTC().toISO();
+    }
 
     public static toJSDate(time: string): Date {
         return DateTime.fromISO(time).toJSDate();
+    }
+    public static fromJSDateUTC(time: Date): string {
+        const dt = DateTime.fromJSDate(time, { zone: 'utc' });
+        return dt.toUTC().toISO();
     }
     public static fromISO(isoString: string, throwOnInvalid = true): DateTime {
         const dt = DateTime.fromISO(isoString, { zone: 'utc' });
 
         if (!dt.isValid) {
             if (throwOnInvalid) {
-                throw new Error(`Invalid ISO date: ${isoString}`);
+                throw new Error(`Invalid ISO date: ${isoString}, explanation: ${dt.invalidExplanation}`);
             } else {
                 return DateTime.invalid('Invalid ISO date');
             }
@@ -58,10 +65,6 @@ class Time {
 
         return dt;
     }
-    public static isValidISODate(date: string): boolean {
-        const dt = DateTime.fromISO(date, { zone: 'utc' });
-        return dt.isValid && dt.toISODate() === date;
-    }
     public static getDiff({ from = new Date(), to, duration }: { from?: Date; to: Date; duration: TimeDuration }): number {
         const startLuxon = DateTime.fromJSDate(from);
         const endLuxon = DateTime.fromJSDate(to);
@@ -78,25 +81,6 @@ class Time {
         return timestamp ? timestamp * 1000 : DateTime.now().toMillis();
     }
 
-    public static getISOString(timestamp?: number): string {
-        const dt = timestamp ? DateTime.fromSeconds(timestamp) : DateTime.now();
-        return dt.toUTC().toISO(); // Формат Z
-    }
-
-    public static diffSeconds(from: number, to: number): number {
-        return to - from;
-    }
-
-    public static diffMilliseconds(from: number, to: number): number {
-        return (to - from) * 1000;
-    }
-
-    public static diffISO(from: number, to: number): string {
-        const dtFrom = DateTime.fromSeconds(from).toUTC();
-        const dtTo = DateTime.fromSeconds(to).toUTC();
-        const duration = dtTo.diff(dtFrom);
-        return duration.toISO();
-    }
     public static getSecondsLeft(isoString: string): number {
         const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const target = DateTime.fromISO(isoString, { zone: userZone });
@@ -115,14 +99,16 @@ class Time {
     }
 
     public static formatDate(isoString: string, format: DateFormat): string {
-        const date = DateTime.fromISO(isoString);
-        if (!date.isValid) return '';
-        return date.toFormat(format);
+        const dt = DateTime.fromISO(isoString, {zone: 'utc'});
+        if (!dt.isValid)  {
+            throw new Error(`Invalid ISO date: ${dt}, explanation: ${dt.invalidExplanation}`);
+        }
+        return dt.toFormat(format);
     }
     private static parseISO(dateISO: string): DateTime {
         const dt = DateTime.fromISO(dateISO, { zone: 'utc' });
         if (!dt.isValid) {
-            throw new Error(`Invalid ISO date: ${dateISO}`);
+            throw new Error(`Invalid ISO date: ${dateISO}, explanation: ${dt.invalidExplanation}`);
         }
         return dt;
     }

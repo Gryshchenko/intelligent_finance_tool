@@ -134,7 +134,11 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
                 });
             }
 
-            return data;
+            return {
+                ...data,
+                createdAt: data?.createdAt ? Time.fromJSDateUTC(data.createdAt) : undefined,
+                updatedAt: data?.updatedAt ? Time.fromJSDateUTC(data.updatedAt) : undefined,
+            };
         } catch (e) {
             this._logger.error(
                 `Failed to retrieve category ID ${categoryId} for user: ${userId}. Error: ${(e as { message: string }).message}`,
@@ -151,7 +155,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             this._logger.info(`Patch categoryId: ${categoryId} for userId: ${userId}`);
             const allowedProperties = {
                 categoryName: properties.categoryName,
-                updatedAt: new Date().toISOString(),
+                updatedAt: Time.getISODateNowUTC(),
                 status: properties.status,
             };
 
@@ -208,6 +212,8 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
                 'categories.userId',
                 'categories.categoryName',
                 'categories.currencyId',
+                'categories.createdAt',
+                'categories.updatedAt',
                 'currencies.currencyCode',
                 'currencies.currencyName',
                 'currencies.symbol',
