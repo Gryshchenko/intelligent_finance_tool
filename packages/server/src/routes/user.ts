@@ -8,13 +8,14 @@ import { accountsRouter, accountRouter } from 'src/routes/account';
 import userIdVerify from 'middleware/userIdVerify';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
 import { incomeRouter, incomesRouter } from 'routes/income';
-import balance from 'routes/balance';
 import { UserController } from 'controllers/UserController';
 import { sanitizeRequestBody } from 'src/utils/validation/sanitizeRequestBody';
 import { validateQuery } from 'src/utils/validation/validateQuery';
 import userStatusVerify from 'middleware/userStatusVerify';
 import { UserStatus } from 'tenpercent/shared';
 import { categoriesRouter, categoryRouter } from 'routes/category';
+import { statsRouter } from 'routes/stats';
+import balance from 'routes/balance';
 
 const userRouter = express.Router({ mergeParams: true });
 
@@ -63,6 +64,10 @@ userRouter.use(
     routesInputValidation([validatePathQueryProperty('userId')]),
     categoriesRouter,
 );
+
+userRouter.use('/:userId/category', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), categoryRouter);
+
+userRouter.use('/:userId/stats', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), statsRouter);
 
 userRouter.use('/:userId/balance', userIdVerify, routesInputValidation([validatePathQueryProperty('userId')]), balance);
 

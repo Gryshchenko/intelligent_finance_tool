@@ -105,18 +105,12 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                 .where({
                     'transactions.userId': userId,
                     ...cleanFilters,
+                    'transactions.isDeleted': false,
                 });
 
             if (cursor) {
-                query.andWhere('transactions.transactionId', '<', cursor);
+                query.andWhere('transactions.transactionId', '>', cursor);
             }
-            // if (from && Time.isValidISODate(from)) {
-            //     query.andWhere('transactions.createdAt', '>=', Time.toInclusiveFrom(from));
-            // }
-            //
-            // if (to && Time.isValidISODate(to)) {
-            //     query.andWhere('transactions.createdAt', '<', Time.toExclusiveTo(to));
-            // }
             if (Utils.isArrayNotEmpty(orderArr)) {
                 for (const { column, order } of orderArr) {
                     query.orderBy(`transactions.${column}`, order);
@@ -173,7 +167,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                     'currencies.symbol',
                 )
                 .innerJoin('currencies', 'transactions.currencyId', 'currencies.currencyId')
-                .where({ userId, transactionId })
+                .where({ userId, transactionId, 'transactions.isDeleted': false })
                 .first();
 
             if (!data) {
@@ -187,7 +181,6 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
                 ...data,
                 createdAt: data?.createdAt ? Time.fromJSDateUTC(data.createdAt) : undefined,
                 updatedAt: data?.updatedAt ? Time.fromJSDateUTC(data.updatedAt) : undefined,
-
             };
         } catch (e) {
             this._logger.error(
@@ -207,7 +200,7 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             const query = trx || this._db.engine();
             const data = await query('transactions')
                 .update(this.sanitizePatchTransactionPropeties(properties))
-                .where({ userId, transactionId });
+                .where({ userId, transactionId, isDeleted: false });
 
             if (!data) {
                 throw new NotFoundError({
@@ -233,7 +226,9 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             this._logger.info(`Delete transactionId: ${transactionId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await query('transactions').delete().where({ userId, transactionId });
+            const data = await query('transactions')
+                .update({ isDeleted: true })
+                .where({ userId, transactionId, isDeleted: false });
             if (!data) {
                 throw new NotFoundError({
                     message: `Transaction with transactionId: ${transactionId} not found for userId: ${userId}`,
@@ -256,7 +251,9 @@ export default class TransactionDataAccess extends LoggerBase implements ITransa
             this._logger.info(`Delete transactions for accountId ${accountId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const deletedCount = await query('transactions').delete().where({ userId, accountId });
+            const deletedCount = await query('transactions')
+                .update({ isDeleted: true })
+                .where({ userId, accountId, isDeleted: false });
             if (deletedCount === 0) {
                 this._logger.info(`Transactions for accountId ${accountId} for userId: ${userId} not found`);
                 return false;

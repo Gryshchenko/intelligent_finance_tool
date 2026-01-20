@@ -7,11 +7,11 @@ export const statsValidateDate = (date: string): string => {
         day = Time.formatDate(date, DateFormat.YYYY_MM_DD);
     } catch (e) {
         throw new ValidationError({
-            message: (e as {message: string}).message,
+            message: (e as { message: string }).message,
             payload: {
-                field: 'createdAt'
-            }
-        })
+                field: 'createdAt',
+            },
+        });
     }
     return day;
-}
+};

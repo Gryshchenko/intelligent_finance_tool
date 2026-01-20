@@ -1,7 +1,42 @@
 import { TransactionType } from 'tenpercent/shared';
 import { HttpCode } from 'tenpercent/shared';
 import { Agent } from 'supertest';
-import { generateRandomString, generateSecureRandom } from '../TestsUtils.';
+
+async function patchTransaction(
+    agent: Agent,
+    userId: number,
+    authorization: string,
+    id: number,
+    payload: Record<string, unknown>,
+): Promise<void> {
+    await agent
+        .patch(`/user/${userId}/transaction/${id}`)
+        .set('authorization', authorization)
+        .send(payload)
+        .expect(HttpCode.NO_CONTENT);
+}
+async function deleteTransaction(
+    agent: Agent,
+    userId: number,
+    authorization: string,
+    payload: Record<string, unknown>,
+): Promise<void> {
+    await agent
+        .delete(`/user/${userId}/transaction/${payload.transactionId}`)
+        .set('authorization', authorization)
+        .expect(HttpCode.NO_CONTENT);
+}
+async function getTransaction(
+    agent: Agent,
+    userId: number,
+    authorization: string,
+    payload: Record<string, unknown>,
+): Promise<void> {
+    await agent
+        .get(`/user/${userId}/transaction/${payload.transactionId}`)
+        .set('authorization', authorization)
+        .expect(HttpCode.NO_CONTENT);
+}
 
 async function postTransaction(
     agent: Agent,
@@ -10,14 +45,13 @@ async function postTransaction(
     payload: Record<string, unknown>,
 ): Promise<number> {
     const {
-        body: {
-            data: { transactionId },
-        },
+        body: { data },
     } = await agent
         .post(`/user/${userId}/transaction/`)
         .set('authorization', authorization)
         .send(payload)
         .expect(HttpCode.CREATED);
+    const { transactionId } = data;
     return transactionId;
 }
 
@@ -30,6 +64,7 @@ async function createTransferTransactions(
     currencyId: number,
     amount = 100,
     count = 9,
+    createdAt?: string,
 ): Promise<number[]> {
     const transactionIds: number[] = [];
     for (const _ of Array(count)) {
@@ -38,8 +73,9 @@ async function createTransferTransactions(
             currencyId,
             transactionTypeId: TransactionType.Transafer,
             targetAccountId,
-            amount: amount + generateSecureRandom(),
+            amount: amount,
             description: 'Test transfer',
+            createdAt,
         });
         transactionIds.push(id);
     }
@@ -55,6 +91,7 @@ async function createIncomeTransactions(
     currencyId: number,
     amount = 100,
     count = 9,
+    createdAt?: string,
 ): Promise<number[]> {
     const transactionIds: number[] = [];
     for (const _ of Array(count)) {
@@ -65,6 +102,7 @@ async function createIncomeTransactions(
             amount,
             currencyId,
             description: 'Test income',
+            createdAt,
         });
         transactionIds.push(id);
     }
@@ -80,6 +118,7 @@ async function createExpenseTransactions(
     currencyId: number,
     amount = 100,
     count = 9,
+    createdAt?: string,
 ): Promise<number[]> {
     const transactionIds: number[] = [];
     for (const _ of Array(count)) {
@@ -90,6 +129,7 @@ async function createExpenseTransactions(
             amount,
             currencyId,
             description: 'Test expense',
+            createdAt,
         });
         transactionIds.push(id);
     }
@@ -123,7 +163,7 @@ async function fetchTransactions(agent: Agent, userId: number, authorization: st
     return { resLimit, resCursor, data };
 }
 
-async function fetchTransactionsAll(agent: Agent, userId: number, authorization: string, limit: number, cursor: any) {
+async function fetchTransactionsAll(agent: Agent, userId: number, authorization: string, limit: number, cursor: number) {
     const {
         body: { data: all },
     } = await agent
@@ -140,4 +180,15 @@ async function fetchTransactionsBad(agent: Agent, userId: number, authorization:
         .expect(HttpCode.BAD_REQUEST);
 }
 
-export { fetchTransactionsBad, fetchTransactionsAll, fetchTransactions, createAllTransactions };
+export {
+    fetchTransactionsBad,
+    fetchTransactionsAll,
+    fetchTransactions,
+    createAllTransactions,
+    createExpenseTransactions,
+    createIncomeTransactions,
+    createTransferTransactions,
+    patchTransaction,
+    getTransaction,
+    deleteTransaction,
+};

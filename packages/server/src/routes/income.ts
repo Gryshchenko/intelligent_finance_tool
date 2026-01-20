@@ -9,7 +9,7 @@ import {
     patchIncomeValidationRules,
 } from 'src/utils/validation/incomeValidationRules';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
-import { validateTransactionFromToDateQuery } from 'src/utils/validation/validateTransactionFromToDateQuery';
+import { validateFromToDateQuery } from 'src/utils/validation/validateFromToDateQuery';
 
 const incomeRouter = express.Router({ mergeParams: true });
 const incomesRouter = express.Router({ mergeParams: true });
@@ -17,7 +17,7 @@ const incomesRouter = express.Router({ mergeParams: true });
 incomesRouter.get(
     '/stats',
     validateQuery({ from: 'date', to: 'date', period: 'string' }),
-    validateTransactionFromToDateQuery({ from: 'date', to: 'date' }),
+    validateFromToDateQuery({ from: 'date', to: 'date' }),
     IncomeController.getStats,
 );
 

@@ -22,8 +22,8 @@ beforeAll(() => {
 });
 
 afterAll((done) => {
-    userIds.forEach((id) => {
-        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    userIds.forEach(async (id) => {
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
     // @ts-expect-error is necessary
@@ -221,7 +221,7 @@ describe('POST /balance', () => {
         };
 
         const getCurrencyData = async (currency: string, auth: string) => {
-            const res = await agent.get(`/currencies/?currency=${currency}`).set('authorization', auth).expect(HttpCode.OK);
+            const res = await agent.get(`/currency/?currency=${currency}`).set('authorization', auth).expect(HttpCode.OK);
             return res.body.data;
         };
 
@@ -252,7 +252,7 @@ describe('POST /balance', () => {
                 .send({
                     accountName: `Test EURO ${currency}`,
                     amount: newAmount,
-                    currencyId,
+                    currencyId: Number(currencyId),
                 })
                 .expect(HttpCode.OK);
             return res.body.data;

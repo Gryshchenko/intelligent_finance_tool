@@ -8,7 +8,7 @@ import { BaseError } from 'src/utils/errors/BaseError';
 import { ResponseStatusType } from 'tenpercent/shared';
 import { Utils } from 'tenpercent/shared';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
+import ExchangeRateServiceBuilder from 'services/exchangeRateService/ExchangeRateServiceBuilder';
 
 export class ExchangeRateController {
     private static readonly logger = Logger.Of('ExchangeRateController');

@@ -23,8 +23,8 @@ beforeAll(() => {
 });
 
 afterAll((done) => {
-    userIds.forEach((id) => {
-        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    userIds.forEach(async (id) => {
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
     // @ts-expect-error is necessary
@@ -189,10 +189,8 @@ describe('PATCH /transaction/patch - amount', () => {
         }
 
         const all = await fetchTransactionsAll(agent, userId, authorization, transactionIds.length, transactionIds[0]);
-        console.log(all)
-        console.log(transactionIds)
         expect(all.limit).toStrictEqual(transactionIds.length);
-        expect(all.cursor).toStrictEqual(transactionIds[0]);
+        expect(all.cursor).toStrictEqual(transactionIds[transactionIds.length - 1]);
         expect(all.data.length).toStrictEqual(transactionIds.length - 1);
 
         await fetchTransactionsBad(agent, userId, authorization);

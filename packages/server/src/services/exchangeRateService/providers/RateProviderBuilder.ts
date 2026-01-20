@@ -1,4 +1,4 @@
-import { FreeCurrencyApi } from 'services/ExchangeRateService/providers/FreeCurrencyApi';
+import { FreeCurrencyApi } from 'services/exchangeRateService/providers/FreeCurrencyApi';
 import { getConfig } from 'src/config/config';
 
 export default class RateProviderBuilder {

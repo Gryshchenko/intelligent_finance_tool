@@ -24,6 +24,8 @@ export * from './interfaces/ITransaction';
 export * from './interfaces/ITransactionListItem';
 export * from './interfaces/ITransactionListItemsRequest';
 export * from './interfaces/IUserClient';
+export * from './interfaces/ISummary';
+export * from './interfaces/ITimeseries';
 
 // --- Types ---
 export * from './types/AccountStatusType';

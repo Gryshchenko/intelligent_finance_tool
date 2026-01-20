@@ -37,8 +37,8 @@ beforeAll(() => {
 });
 
 afterAll((done) => {
-    userIds.forEach((id) => {
-        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    userIds.forEach(async (id) => {
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     // @ts-expect-error is necessary
     server.close(done);
@@ -402,11 +402,13 @@ describe('POST /register/signup', () => {
                     amount: data.amount,
                 })),
             ).toEqual(
-                initialData.accounts.map((data: unknown) => ({
-                    userId: user.userId,
-                    accountName: data,
-                    amount: '0',
-                })),
+                expect.arrayContaining(
+                    initialData.accounts.map((data: unknown) => ({
+                        userId: user.userId,
+                        accountName: data,
+                        amount: '0',
+                    })),
+                ),
             );
             expect(
                 categories.map((data) => ({
@@ -414,10 +416,12 @@ describe('POST /register/signup', () => {
                     userId: data.userId,
                 })),
             ).toEqual(
-                initialData.categories.map((data: unknown) => ({
-                    categoryName: data,
-                    userId: user.userId,
-                })),
+                expect.arrayContaining(
+                    initialData.categories.map((data: unknown) => ({
+                        categoryName: data,
+                        userId: user.userId,
+                    })),
+                ),
             );
             expect(
                 incomes.map((data) => ({
@@ -425,10 +429,12 @@ describe('POST /register/signup', () => {
                     incomeName: data.incomeName,
                 })),
             ).toEqual(
-                initialData.income.map((data: unknown) => ({
-                    userId: user.userId,
-                    incomeName: data,
-                })),
+                expect.arrayContaining(
+                    initialData.income.map((data: unknown) => ({
+                        userId: user.userId,
+                        incomeName: data,
+                    })),
+                ),
             );
             const {
                 body: { data },

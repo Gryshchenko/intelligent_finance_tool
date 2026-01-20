@@ -100,7 +100,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
         try {
             const data = await this.getIncomeBaseQuery()
                 .innerJoin('currencies', 'incomes.currencyId', 'currencies.currencyId')
-                .where({ userId, status: AccountStatusType.Enable });
+                .where({ userId, 'status': AccountStatusType.Enable, 'incomes.isDeleted': false });
 
             this._logger.info(`Successfully fetched incomes for userId ${userId}`);
             return data;
@@ -133,7 +133,6 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
                 ...data,
                 createdAt: data?.createdAt ? Time.fromJSDateUTC(data.createdAt) : undefined,
                 updatedAt: data?.updatedAt ? Time.fromJSDateUTC(data.updatedAt) : undefined,
-
             };
         } catch (e) {
             this._logger.error(
@@ -174,7 +173,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             validateAllowedProperties(allowedProperties, allowedKeys);
             const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();
-            const data = await query('incomes').update(properestForUpdate).where({ userId, incomeId });
+            const data = await query('incomes').update(properestForUpdate).where({ userId, incomeId, isDeleted: false });
 
             if (!data) {
                 throw new NotFoundError({
@@ -200,7 +199,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
             this._logger.info(`Delete incomeID: ${incomeId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await query('incomes').delete().where({ userId, incomeId });
+            const data = await query('incomes').update({ isDeleted: true }).where({ userId, incomeId, isDeleted: false });
             if (!data) {
                 throw new NotFoundError({
                     message: `Income with incomeId: ${incomeId} not found for userId: ${userId}`,

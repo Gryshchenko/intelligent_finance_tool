@@ -32,6 +32,11 @@ export function generateRandomEmail(len = 10) {
 
     return `${generateRandomString(len)}@${domain}`;
 }
+
+export function generateRandomNumber(min: number, max: number) {
+    return crypto.randomInt(min, max + 1);
+}
+
 export function generateRandomName(len = 6) {
     return generateRandomString(len);
 }
@@ -63,6 +68,11 @@ export function generateRandomPassword(len = Math.floor(generateSecureRandom() *
 }
 
 export async function deleteUserAfterTest(id: number, db: IDatabaseConnection) {
+    await db.engine()('daily_accounts_stats').delete().where({ userId: id });
+    await db.engine()('daily_categories_stats').delete().where({ userId: id });
+    await db.engine()('daily_incomes_stats').delete().where({ userId: id });
+    await db.engine()('daily_stats').delete().where({ userId: id });
+    await db.engine()('daily_transfer_stats').delete().where({ userId: id });
     await db.engine()('transactions').delete().where({ userId: id });
     await db.engine()('accounts').delete().where({ userId: id });
     await db.engine()('incomes').delete().where({ userId: id });

@@ -33,8 +33,8 @@ beforeAll(() => {
 });
 
 afterAll((done) => {
-    userIds.forEach((id) => {
-        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    userIds.forEach(async (id) => {
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     // @ts-expect-error is necessary
     server.close(done);

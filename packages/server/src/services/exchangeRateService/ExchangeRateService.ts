@@ -1,5 +1,5 @@
 import { IRateProvider } from 'interfaces/IRateProvider';
-import RateProviderBuilder from 'services/ExchangeRateService/providers/RateProviderBuilder';
+import RateProviderBuilder from 'services/exchangeRateService/providers/RateProviderBuilder';
 import { Time, TimeDuration } from 'tenpercent/shared';
 import { LoggerBase } from 'helper/logger/LoggerBase';
 import { IExchangeRateService } from 'interfaces/IExchangeRateService';

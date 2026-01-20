@@ -47,6 +47,7 @@ export enum ErrorCode {
     CURRENCY_ERROR = 5018,
     USER_ERROR = 5019,
     EMAIL_CONFIRMATION_ERROR = 5020,
+    STATS_ERROR = 5021,
 
     // 6000 - 6999 App errors
     CLIENT_UNKNOWN_ERROR = 6000,

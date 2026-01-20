@@ -13,14 +13,16 @@ import { checkCors } from 'middleware/checkCors';
 import { getLocalIP } from 'src/utils/getLocalIP';
 
 import passport from 'passport';
-import currencyRouter from 'routes/currency';
+import { currenciesRouter, currencyRouter } from 'routes/currency';
 import exchangeRates from 'routes/exchangeRates';
-import ExchangeRateServiceBuilder from 'services/ExchangeRateService/ExchangeRateServiceBuilder';
+import ExchangeRateServiceBuilder from 'services/exchangeRateService/ExchangeRateServiceBuilder';
 import Logger from 'helper/logger/Logger';
 import { ResponseStatusType } from 'tenpercent/shared';
 import { ErrorCode } from 'tenpercent/shared';
-import * as process from 'node:process';
 import { createServer } from 'src/createServer';
+import DatabaseConnection from 'src/repositories/DatabaseConnection';
+import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
+import { KeyValueStoreBuilder } from 'src/repositories/keyValueStore/KeyValueStoreBuilder';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const app = express();
@@ -59,7 +61,8 @@ app.use(passport.initialize());
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/register', registerRouter);
-app.use('/currencies', currencyRouter);
+app.use('/currencies', currenciesRouter);
+app.use('/currency', currencyRouter);
 app.use('/exchange-rates', exchangeRates);
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!!!');
@@ -78,5 +81,30 @@ if (process.env.NODE_ENV !== 'test') {
         Logger.Of('App').info(`Server running at: ${ip}:${port}`);
     });
 }
+
+async function shutdown(signal: unknown): Promise<void> {
+    Logger.Of('shutdown').info(`[app] received ${signal}, closing…`);
+    httpsServer.close();
+    await DatabaseConnectionBuilder.build().close();
+    await KeyValueStoreBuilder.build().disconnect();
+    Logger.Of('shutdown').info('[app] closed');
+}
+process.on('SIGINT', () => void shutdown('SIGINT'));
+
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+
+process.on('uncaughtException', (err) => {
+    Logger.Of('uncaughtException').error('Error', {
+        error: err instanceof Error ? err.message : JSON.stringify(err),
+        stack: err instanceof Error ? err.stack : undefined,
+    });
+});
+
+process.on('unhandledRejection', (err) => {
+    Logger.Of('unhandledRejection').error('Error', {
+        error: err instanceof Error ? err.message : JSON.stringify(err),
+        stack: err instanceof Error ? err.stack : undefined,
+    });
+});
 
 module.exports = httpsServer;

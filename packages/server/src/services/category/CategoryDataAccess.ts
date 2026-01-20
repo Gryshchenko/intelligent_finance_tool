@@ -100,7 +100,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         try {
             const data = await this.getCategoryBaseQuery()
                 .innerJoin('currencies', 'categories.currencyId', 'currencies.currencyId')
-                .where({ userId });
+                .where({ userId, 'categories.isDeleted': false });
 
             if (data) {
                 this._logger.info(`Fetched ${data.length} categories retrieved successfully for user: ${userId}`);
@@ -123,7 +123,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
         try {
             const data = await this.getCategoryBaseQuery()
                 .innerJoin('currencies', 'categories.currencyId', 'currencies.currencyId')
-                .where({ userId, categoryId })
+                .where({ userId, categoryId, 'categories.isDeleted': false })
                 .first();
 
             if (data) {
@@ -187,7 +187,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
             this._logger.info(`Delete categoryID: ${categoryId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await query('categories').delete().where({ userId, categoryId });
+            const data = await query('categories').update({ isDeleted: true }).where({ userId, categoryId, isDeleted: false });
             if (!data) {
                 throw new NotFoundError({
                     message: `Category with categoryId: ${categoryId} not found for userId: ${userId}`,

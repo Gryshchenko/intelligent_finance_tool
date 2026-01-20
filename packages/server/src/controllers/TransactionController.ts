@@ -156,7 +156,7 @@ export class TransactionController {
     public static async patch(req: Request, res: Response) {
         const responseBuilder = new ResponseBuilder();
         try {
-            const { accountId, incomeId, categoryId, amount, description, createdAt = Time.getISODateNowUTC(), targetAccountId } = req.body;
+            const { accountId, incomeId, categoryId, amount, description, createdAt, targetAccountId } = req.body;
             await TransactionServiceBuilder.build().patchTransaction(req.user?.userId as number, {
                 transactionId: Number(req.params.transactionId),
                 accountId,

@@ -111,7 +111,7 @@ const createTransactionValidationRules = [
     body('createdAt')
         .custom((_, { req }) => {
             const { createdAt } = req.body;
-            if (createdAt === undefined) return true
+            if (createdAt === undefined) return true;
             try {
                 Time.parseUTC(createdAt);
             } catch (e) {
@@ -155,6 +155,21 @@ const patchTransactionValidationRules = [
     ...createSignupValidationRules('createdAt', 'date', {
         optional: true,
     }),
+    body('createdAt')
+        .custom((_, { req }) => {
+            const { createdAt } = req.body;
+            if (createdAt === undefined) return true;
+            try {
+                Time.parseUTC(createdAt);
+            } catch (e) {
+                throw new ValidationError({
+                    message: `Validation failed at createdAt': ${(e as { message: string }).message}`,
+                    errorCode: ErrorCode.UNEXPECTED_PROPERTY,
+                });
+            }
+            return true;
+        })
+        .bail(),
 ];
 
 export const transactionConvertValidationMessageToErrorCode = (path: string): ErrorCode => {

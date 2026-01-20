@@ -11,7 +11,9 @@ export enum DateFormat {
     YYYY_MM_DD = 'yyyy-MM-dd',
     /** 27/09/2025 */
     DD_MM_YYYY_SLASH = 'dd/MM/yyyy',
-    /** 27.09.2025 */
+    /** 2025.09.27 */
+    YYYY_MM_dd = 'yyyy-MM-dd',
+    /** 2025-09-17 */
     DD_MM_YYYY_DOT = 'dd.MM.yyyy',
     /** 27 September 2025 */
     FULL_DATE = 'dd LLLL yyyy',
@@ -24,6 +26,9 @@ export enum DateFormat {
 class Time {
     public static utc(): DateTime<boolean> {
         return DateTime.utc();
+    }
+    public static getISODate(date: Date): string {
+        return DateTime.fromJSDate(date).toUTC().toISO();
     }
     public static getISODateNow(): string {
         return DateTime.now().toISO();
@@ -99,8 +104,8 @@ class Time {
     }
 
     public static formatDate(isoString: string, format: DateFormat): string {
-        const dt = DateTime.fromISO(isoString, {zone: 'utc'});
-        if (!dt.isValid)  {
+        const dt = DateTime.fromISO(isoString, { zone: 'utc' });
+        if (!dt.isValid) {
             throw new Error(`Invalid ISO date: ${dt}, explanation: ${dt.invalidExplanation}`);
         }
         return dt.toFormat(format);

@@ -9,7 +9,7 @@ import {
     patchCategoryValidationRules,
 } from 'src/utils/validation/categoryValidationRules';
 import { validatePathQueryProperty } from 'src/utils/validation/validatePathQueryProperty';
-import { validateTransactionFromToDateQuery } from 'src/utils/validation/validateTransactionFromToDateQuery';
+import { validateFromToDateQuery } from 'src/utils/validation/validateFromToDateQuery';
 
 const categoryRouter = express.Router({ mergeParams: true });
 const categoriesRouter = express.Router({ mergeParams: true });
@@ -22,10 +22,10 @@ categoryRouter.post(
     CategoryController.post,
 );
 
-categoryRouter.get(
+categoriesRouter.get(
     '/stats',
     validateQuery({ from: 'date', to: 'date', period: 'string' }),
-    validateTransactionFromToDateQuery({ from: 'date', to: 'date' }),
+    validateFromToDateQuery({ from: 'date', to: 'date' }),
     CategoryController.getStats,
 );
 

@@ -1,0 +1,41 @@
+import { Request, Response } from 'express';
+import ResponseBuilder from 'helper/responseBuilder/ResponseBuilder';
+import { ErrorCode, StatsPeriod } from 'tenpercent/shared';
+import Logger from 'helper/logger/Logger';
+import { HttpCode } from 'tenpercent/shared';
+import { generateErrorResponse } from 'src/utils/generateErrorResponse';
+import { BaseError } from 'src/utils/errors/BaseError';
+import { ResponseStatusType } from 'tenpercent/shared';
+import { StatsOrchestratorServiceBuilder } from 'services/StatsOrchestrator/StatsOrchestratorServiceBuilder';
+
+export class StatsController {
+    private static readonly logger = Logger.Of('StatsController');
+    // public static async timeseries(req: Request, res: Response) {
+    //     const responseBuilder = new ResponseBuilder();
+    //     try {
+    //         const from = String(req.query?.from);
+    //         const to = String(req.query?.to);
+    //         const cursor = Number(req.query?.cursor);
+    //         const limit = Number(req.query?.limit);
+    //         const period = String(req.query?.period) as StatsPeriod;
+    //         const category = await StatsOrchestratorServiceBuilder.build().timeseries(req.user?.userId as number, from, to, period, cursor, limit);
+    //         res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(category).build());
+    //     } catch (e: unknown) {
+    //         StatsController.logger.error(`Get timeseries failed due reason: ${(e as { message: string }).message}`);
+    //         generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.STATS_ERROR);
+    //     }
+    // }
+    public static async summary(req: Request, res: Response) {
+        const responseBuilder = new ResponseBuilder();
+        try {
+            const from = String(req.query?.from);
+            const to = String(req.query?.to);
+            const period = String(req.query?.period) as StatsPeriod;
+            const category = await StatsOrchestratorServiceBuilder.build().summary(req.user?.userId as number, from, to, period);
+            res.status(HttpCode.OK).json(responseBuilder.setStatus(ResponseStatusType.OK).setData(category).build());
+        } catch (e: unknown) {
+            StatsController.logger.error(`Get summary failed due reason: ${(e as { message: string }).message}`);
+            generateErrorResponse(res, responseBuilder, e as BaseError, ErrorCode.STATS_ERROR);
+        }
+    }
+}

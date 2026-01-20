@@ -1,24 +1,25 @@
 import { ICreateTransaction } from 'interfaces/ICreateTransaction';
-import { ITransaction } from 'tenpercent/shared';
+import {
+    ErrorCode,
+    HttpCode,
+    IAccount,
+    IPagination,
+    ITransaction,
+    ITransactionListItem,
+    ITransactionListItemsRequest,
+    Utils,
+} from 'tenpercent/shared';
 import { TransactionType } from 'types/TransactionType';
 import { UnitOfWork } from 'src/repositories/UnitOfWork';
 import { ValidationError } from 'src/utils/errors/ValidationError';
-import { ErrorCode } from 'tenpercent/shared';
-import { Utils } from 'tenpercent/shared';
 import { CustomError } from 'src/utils/errors/CustomError';
-import { HttpCode } from 'tenpercent/shared';
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
 import { LoggerBase } from 'helper/logger/LoggerBase';
-import { IAccount } from 'tenpercent/shared';
 import { IPatchTransaction } from 'interfaces/IPatchTransaction';
-import { IPagination } from 'tenpercent/shared';
 import { IBalanceService } from 'interfaces/IBalanceService';
-import { ITransactionListItem } from 'tenpercent/shared';
-import { ITransactionListItemsRequest } from 'tenpercent/shared';
 import { IAccountService } from 'services/account/AccountService';
 import { IStatsOrchestratorService } from 'services/StatsOrchestrator/StatsOrchestratorService';
 import { ITransactionDataAccess } from 'services/transaction/TransactionDataAccess';
-import { instanceOf } from 'graphql/jsutils/instanceOf';
 
 export interface ITransactionService {
     createTransaction(transactions: ICreateTransaction): Promise<number | null>;
@@ -95,36 +96,45 @@ export default class TransactionService extends LoggerBase implements ITransacti
             );
             switch (trs.transactionTypeId) {
                 case TransactionType.Expense: {
-                    await this._statsOrchestratorService.handleExpanse(
+                    await this._statsOrchestratorService.delete({
+                        type: TransactionType.Expense,
                         userId,
-                        trs.createdAt,
-                        trs.accountId,
-                        trs.categoryId as number,
-                        trs?.amount * -1,
+                        data: {
+                            date: trs.createdAt,
+                            accountId: trs.accountId,
+                            categoryId: trs.categoryId as number,
+                            amount: trs.amount,
+                        },
                         trx,
-                    );
+                    });
                     break;
                 }
                 case TransactionType.Income: {
-                    await this._statsOrchestratorService.handleIncomes(
+                    await this._statsOrchestratorService.delete({
+                        type: TransactionType.Income,
                         userId,
-                        trs.createdAt,
-                        trs.incomeId as number,
-                        trs.accountId as number,
-                        trs?.amount * -1,
+                        data: {
+                            date: trs.createdAt,
+                            accountId: trs.accountId,
+                            incomeId: trs.incomeId as number,
+                            amount: trs.amount,
+                        },
                         trx,
-                    );
+                    });
                     break;
                 }
                 case TransactionType.Transafer: {
-                    await this._statsOrchestratorService.handleTransfer(
+                    await this._statsOrchestratorService.delete({
+                        type: TransactionType.Transafer,
                         userId,
-                        trs.createdAt,
-                        trs.accountId as number,
-                        trs.targetAccountId as number,
-                        trs?.amount * -1,
+                        data: {
+                            date: trs.createdAt,
+                            accountId: trs.accountId,
+                            targetAccountId: trs.targetAccountId as number,
+                            amount: trs.amount,
+                        },
                         trx,
-                    );
+                    });
                     break;
                 }
             }
@@ -156,48 +166,87 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     message: 'Transaction could not be deleted',
                 });
             }
-            if (Utils.isNotNull(transaction.amount)) {
-                const delta = transaction.amount - trs.amount;
-                await this._balanceService.patch(
-                    userId,
-                    {
-                        amount: delta,
-                        currencyCode: trs.currencyCode,
-                    },
-                    trx,
-                );
+            if (Utils.isNotNull(transaction.amount) || Utils.isNotNull(transaction.createdAt)) {
+                if (Utils.isNull(transaction.amount)) {
+                    const delta = transaction.amount - trs.amount;
+                    await this._balanceService.patch(
+                        userId,
+                        {
+                            amount: delta,
+                            currencyCode: trs.currencyCode,
+                        },
+                        trx,
+                    );
+                }
+                const transactionsInWork: IPatchTransaction = {
+                    transactionId: transaction.transactionId,
+                    accountId: transaction?.accountId ?? trs.accountId,
+                    incomeId: transaction.incomeId ?? trs.incomeId,
+                    categoryId: transaction.categoryId ?? (trs.categoryId as number),
+                    amount: transaction.amount ?? trs.amount,
+                    description: transaction.description ?? trs.description,
+                    createdAt: transaction.createdAt ?? trs.createdAt,
+                    targetAccountId: transaction.targetAccountId ?? (trs.targetAccountId as number),
+                };
                 switch (trs.transactionTypeId) {
                     case TransactionType.Expense: {
-                        await this._statsOrchestratorService.handleExpanse(
+                        await this._statsOrchestratorService.patch({
                             userId,
-                            transaction.createdAt,
-                            trs.accountId,
-                            trs.categoryId as number,
-                            delta,
+                            type: TransactionType.Expense,
+                            after: {
+                                categoryId: transactionsInWork.categoryId as number,
+                                accountId: transactionsInWork.accountId,
+                                date: transactionsInWork.createdAt,
+                                amount: transactionsInWork.amount,
+                            },
+                            before: {
+                                categoryId: trs.categoryId as number,
+                                accountId: trs.accountId,
+                                date: trs.createdAt,
+                                amount: trs.amount,
+                            },
                             trx,
-                        );
+                        });
                         break;
                     }
                     case TransactionType.Income: {
-                        await this._statsOrchestratorService.handleIncomes(
+                        await this._statsOrchestratorService.patch({
                             userId,
-                            transaction.createdAt,
-                            trs.incomeId as number,
-                            trs.accountId as number,
-                            delta,
+                            type: TransactionType.Income,
+                            after: {
+                                incomeId: transactionsInWork.incomeId as number,
+                                accountId: transactionsInWork.accountId,
+                                date: transactionsInWork.createdAt,
+                                amount: transactionsInWork.amount,
+                            },
+                            before: {
+                                incomeId: trs.incomeId as number,
+                                accountId: trs.accountId,
+                                date: trs.createdAt,
+                                amount: trs.amount,
+                            },
                             trx,
-                        );
+                        });
                         break;
                     }
                     case TransactionType.Transafer: {
-                        await this._statsOrchestratorService.handleTransfer(
+                        await this._statsOrchestratorService.patch({
                             userId,
-                            transaction.createdAt,
-                            trs.accountId as number,
-                            trs.targetAccountId as number,
-                            delta,
+                            type: TransactionType.Transafer,
+                            after: {
+                                targetAccountId: transactionsInWork.targetAccountId as number,
+                                accountId: transactionsInWork.accountId,
+                                date: transactionsInWork.createdAt,
+                                amount: transactionsInWork.amount,
+                            },
+                            before: {
+                                targetAccountId: trs.targetAccountId as number,
+                                accountId: trs.accountId,
+                                date: trs.createdAt,
+                                amount: trs.amount,
+                            },
                             trx,
-                        );
+                        });
                         break;
                     }
                 }
@@ -235,14 +284,17 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     trx,
                 );
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
-                await this._statsOrchestratorService.handleIncomes(
+                await this._statsOrchestratorService.create({
+                    type: TransactionType.Income,
                     userId,
-                    transaction.createdAt,
-                    transaction.incomeId as number,
-                    accountId,
-                    transactionAmount,
+                    data: {
+                        amount: transactionAmount,
+                        incomeId: transaction.incomeId as number,
+                        accountId,
+                        date: transaction.createdAt,
+                    },
                     trx,
-                );
+                });
             },
             'income',
         );
@@ -264,14 +316,17 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     trx,
                 );
                 await this._accountService.patchAccount(userId, accountId as number, { amount: newAmount }, trx);
-                await this._statsOrchestratorService.handleExpanse(
+                await this._statsOrchestratorService.create({
+                    type: TransactionType.Expense,
                     userId,
-                    transaction.createdAt,
-                    accountId,
-                    transaction.categoryId as number,
-                    transactionAmount * -1,
+                    data: {
+                        date: transaction.createdAt,
+                        accountId,
+                        categoryId: transaction.categoryId as number,
+                        amount: transactionAmount,
+                    },
                     trx,
-                );
+                });
             },
             'expense',
         );
@@ -302,15 +357,17 @@ export default class TransactionService extends LoggerBase implements ITransacti
                     Utils.roundNumber((sourceAccount as IAccount).amount) - Utils.roundNumber(transactionAmount);
                 const newTargetAmount =
                     Utils.roundNumber((targetAccount as IAccount).amount) + Utils.roundNumber(transactionAmount);
-
-                await this._statsOrchestratorService.handleTransfer(
+                await this._statsOrchestratorService.create({
+                    type: TransactionType.Transafer,
+                    data: {
+                        date: transaction.createdAt,
+                        accountId,
+                        targetAccountId: targetAccountId,
+                        amount: Utils.roundNumber(transactionAmount),
+                    },
                     userId,
-                    transaction.createdAt,
-                    accountId,
-                    targetAccountId,
-                    newTargetAmount,
                     trx,
-                );
+                });
                 await this._accountService.patchAccount(userId, accountId, { amount: newSourceAmount }, trx);
                 await this._accountService.patchAccount(userId, targetAccountId, { amount: newTargetAmount }, trx);
             },

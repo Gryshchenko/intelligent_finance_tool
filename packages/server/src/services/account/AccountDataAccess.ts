@@ -66,7 +66,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             const data = await this._db
                 .engine()('accounts')
                 .select('accounts.accountId', 'accounts.amount', 'accounts.accountName', 'accounts.currencyId')
-                .where({ userId, status: AccountStatusType.Enable });
+                .where({ userId, 'status': AccountStatusType.Enable, 'accounts.isDeleted': false });
 
             if (!data.length) {
                 this._logger.info(`No accounts found for userId: ${userId}`);
@@ -88,9 +88,20 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
         try {
             this._logger.info(`Fetching account with accountId: ${accountId} for userId: ${userId}`);
 
-            const data = await this.getAccountBaseQuery()
+            const data = await this._db
+                .engine()('accounts')
+                .select(
+                    'accounts.accountId',
+                    'accounts.amount',
+                    'accounts.accountName',
+                    'accounts.currencyId',
+                    'accounts.createdAt',
+                    'accounts.updatedAt',
+                    'currencies.currencyCode',
+                    'currencies.symbol',
+                )
                 .innerJoin('currencies', 'accounts.currencyId', 'currencies.currencyId')
-                .where({ userId, accountId, status: AccountStatusType.Enable })
+                .where({ userId, accountId, 'status': AccountStatusType.Enable, 'accounts.isDeleted': false })
                 .first();
 
             if (!data) {
@@ -127,7 +138,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             validateAllowedProperties(allowedProperties, allowedKeys);
             const properestForUpdate = getOnlyNotEmptyProperties(allowedProperties, allowedKeys);
             const query = trx || this._db.engine();
-            const data = await query('accounts').update(properestForUpdate).where({ userId, accountId });
+            const data = await query('accounts').update(properestForUpdate).where({ userId, accountId, isDeleted: false });
 
             if (!data) {
                 throw new NotFoundError({
@@ -153,7 +164,7 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
             this._logger.info(`Delete accountID: ${accountId} for userId: ${userId}`);
 
             const query = trx || this._db.engine();
-            const data = await query('accounts').delete().where({ userId, accountId });
+            const data = await query('accounts').update({ isDeleted: true }).where({ userId, accountId, isDeleted: false });
             if (!data) {
                 throw new NotFoundError({
                     message: `Account with accountId: ${accountId} not found for userId: ${userId}`,
@@ -169,20 +180,5 @@ export default class AccountDataAccess extends LoggerBase implements IAccountDat
                 message: `Delete account failed due to a database error: ${(e as { message: string }).message}`,
             });
         }
-    }
-
-    protected getAccountBaseQuery() {
-        return this._db
-            .engine()('accounts')
-            .select(
-                'accounts.accountId',
-                'accounts.amount',
-                'accounts.accountName',
-                'accounts.currencyId',
-                'accounts.createdAt',
-                'accounts.updatedAt',
-                'currencies.currencyCode',
-                'currencies.symbol',
-            );
     }
 }

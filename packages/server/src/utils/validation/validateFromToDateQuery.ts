@@ -8,7 +8,7 @@ import { Time, DateTime } from 'tenpercent/shared';
 import { ValidationError } from 'src/utils/errors/ValidationError';
 import { BaseError } from 'src/utils/errors/BaseError';
 
-const validateTransactionFromToDateQuery = (schema: Record<string, string>) => {
+const validateFromToDateQuery = (schema: Record<string, string>) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             let from: DateTime | null = null;
@@ -58,4 +58,4 @@ const validateTransactionFromToDateQuery = (schema: Record<string, string>) => {
     };
 };
 
-export { validateTransactionFromToDateQuery };
+export { validateFromToDateQuery };

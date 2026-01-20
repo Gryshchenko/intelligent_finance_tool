@@ -22,8 +22,8 @@ beforeAll(() => {
 });
 
 afterAll((done) => {
-    userIds.forEach((id) => {
-        deleteUserAfterTest(id, DatabaseConnection.instance(config));
+    userIds.forEach(async (id) => {
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
     // @ts-expect-error is necessary
