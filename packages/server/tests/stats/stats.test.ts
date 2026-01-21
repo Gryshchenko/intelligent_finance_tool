@@ -6,9 +6,10 @@ import {
     createExpenseTransactions,
     createIncomeTransactions,
     createTransferTransactions,
+    deleteTransaction,
     patchTransaction,
 } from '../transactions/TransactionsTestUtils';
-import { getCategoriesWithStats, getSummary } from './StatsTestUtils';
+import { getCategoriesWithStats, getIncomesWithStats, getSummary } from './StatsTestUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const request = require('supertest');
@@ -30,7 +31,7 @@ beforeAll(() => {
 
 afterAll((done) => {
     userIds.forEach(async (id) => {
-        // await deleteUserAfterTest(id, DatabaseConnection.instance(config));
+        await deleteUserAfterTest(id, DatabaseConnection.instance(config));
     });
     userIds = [];
     // @ts-expect-error is necessary
@@ -131,6 +132,23 @@ describe('Stats', () => {
         expect(Utils.roundNumber(summary.expense_total)).toEqual(Utils.roundNumber(sumBefore));
         expect(Utils.roundNumber(summary.income_total)).toEqual(Utils.roundNumber(sumBefore));
         expect(Utils.roundNumber(summary.transfer_total)).toEqual(Utils.roundNumber(sumBefore));
+
+        const categoriesWithStats = await getCategoriesWithStats(agent, userId, authorization, {
+            from: '2025-12-01T00:00:00.000Z',
+            to: '2025-12-31T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(categoriesWithStats.total).toEqual(Utils.roundNumber(sumBefore));
+
+        const incomesWithStates = await getIncomesWithStats(agent, userId, authorization, {
+            from: '2025-12-01T00:00:00.000Z',
+            to: '2025-12-31T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(incomesWithStates.total).toEqual(Utils.roundNumber(sumBefore));
+
         await patchTransaction(agent, userId, authorization, incomesResultIds[0], {
             amount: 50,
         });
@@ -140,11 +158,74 @@ describe('Stats', () => {
         await patchTransaction(agent, userId, authorization, expanseResultIds[0], {
             amount: 50,
         });
+
+        const categoriesWithStats1 = await getCategoriesWithStats(agent, userId, authorization, {
+            from: '2025-12-01T00:00:00.000Z',
+            to: '2025-12-31T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(categoriesWithStats1.total).toEqual(Utils.roundNumber(sumBefore - 50));
+
+        const incomesWithStates1 = await getIncomesWithStats(agent, userId, authorization, {
+            from: '2025-12-01T00:00:00.000Z',
+            to: '2025-12-31T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(incomesWithStates1.total).toEqual(Utils.roundNumber(sumBefore - 50));
+
         const summary2 = await getSummary(agent, userId, authorization, {
             from: '2025-12-01T00:00:00.000Z',
             to: '2025-12-31T00:00:00.000Z',
             period: StatsPeriod.Month,
         });
-        console.log(summary2);
+
+        expect(Utils.roundNumber(summary2.expense_total)).toEqual(Utils.roundNumber(sumBefore - 50));
+        expect(Utils.roundNumber(summary2.income_total)).toEqual(Utils.roundNumber(sumBefore - 50));
+        expect(Utils.roundNumber(summary2.transfer_total)).toEqual(Utils.roundNumber(sumBefore - 50));
+
+        await patchTransaction(agent, userId, authorization, incomesResultIds[0], {
+            createdAt: Time.getISODate(new Date('2025-11-01T11:00:00')),
+        });
+        await patchTransaction(agent, userId, authorization, transferResultIds[0], {
+            createdAt: Time.getISODate(new Date('2025-11-01T11:00:00')),
+        });
+        await patchTransaction(agent, userId, authorization, expanseResultIds[0], {
+            createdAt: Time.getISODate(new Date('2025-11-01T11:00:00')),
+        });
+
+        const summary3 = await getSummary(agent, userId, authorization, {
+            from: '2025-12-01T00:00:00.000Z',
+            to: '2025-12-31T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(Utils.roundNumber(summary3.expense_total)).toEqual(Utils.roundNumber(sumBefore - 100));
+        expect(Utils.roundNumber(summary3.income_total)).toEqual(Utils.roundNumber(sumBefore - 100));
+        expect(Utils.roundNumber(summary3.transfer_total)).toEqual(Utils.roundNumber(sumBefore - 100));
+
+        const summary4 = await getSummary(agent, userId, authorization, {
+            from: '2025-11-01T00:00:00.000Z',
+            to: '2025-11-30T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+
+        expect(Utils.roundNumber(summary4.expense_total)).toEqual(Utils.roundNumber(50));
+        expect(Utils.roundNumber(summary4.income_total)).toEqual(Utils.roundNumber(50));
+        expect(Utils.roundNumber(summary4.transfer_total)).toEqual(Utils.roundNumber(50));
+
+        await deleteTransaction(agent, userId, authorization, { transactionId: incomesResultIds[0] });
+        await deleteTransaction(agent, userId, authorization, { transactionId: transferResultIds[0] });
+        await deleteTransaction(agent, userId, authorization, { transactionId: expanseResultIds[0] });
+
+        const summary5 = await getSummary(agent, userId, authorization, {
+            from: '2025-11-01T00:00:00.000Z',
+            to: '2025-11-30T00:00:00.000Z',
+            period: StatsPeriod.Month,
+        });
+        expect(Utils.roundNumber(summary5.expense_total)).toEqual(Utils.roundNumber(0));
+        expect(Utils.roundNumber(summary5.income_total)).toEqual(Utils.roundNumber(0));
+        expect(Utils.roundNumber(summary5.transfer_total)).toEqual(Utils.roundNumber(0));
     });
 });

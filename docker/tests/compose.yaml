@@ -10,7 +10,7 @@ services:
             # App
             # ====================
             - ENV=test
-            - APP_NAME=Tenpercent
+            - APP_NAME=Tenpercent-test
             - PORT=3001
             - ORIGN=localhost:3001
 

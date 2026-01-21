@@ -75,7 +75,7 @@ export class DailyCategoryStatsDataAccess extends LoggerBase implements IDailyCa
                 })
                 .onConflict(['userId', 'date', 'categoryId'])
                 .merge({
-                    amount_total: query.raw('daily_categories_stats.amount_total + ?', [amount]),
+                    amount_total: query.raw('daily_categories_stats.amount_total - ?', [amount]),
                     updatedAt,
                 });
             this._logger.info(`Successfully subtractFromScore daily stats for userId: ${userId}`);

@@ -10,3 +10,10 @@ start-tests: ## Start the development docker container.
 stop-tests: ## Stop the development docker container.
 	docker compose -f docker/tests/compose.yaml down
 
+.PHONY: test-ci
+test-ci:
+	docker compose -f docker/tests/compose.yaml up \
+		--build \
+		--abort-on-container-exit \
+		--exit-code-from tests
+	docker compose -f docker/tests/compose.yaml down

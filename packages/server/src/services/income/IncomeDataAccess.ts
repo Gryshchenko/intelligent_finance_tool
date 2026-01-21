@@ -43,7 +43,7 @@ export default class IncomeDataAccess extends LoggerBase implements IIncomeDataA
                     'incomes.currencyId',
                     this._db.engine().raw('COALESCE(SUM(dis.amount_total), 0) as amount'),
                 )
-                .innerJoin('daily_incomes_stats as dis', function () {
+                .leftJoin('daily_incomes_stats as dis', function () {
                     this.on('incomes.incomeId', '=', 'dis.incomeId')
                         .andOnVal('dis.userId', '=', userId)
                         .andOnBetween('dis.date', [

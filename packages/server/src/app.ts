@@ -20,7 +20,6 @@ import Logger from 'helper/logger/Logger';
 import { ResponseStatusType } from 'tenpercent/shared';
 import { ErrorCode } from 'tenpercent/shared';
 import { createServer } from 'src/createServer';
-import DatabaseConnection from 'src/repositories/DatabaseConnection';
 import DatabaseConnectionBuilder from 'src/repositories/DatabaseConnectionBuilder';
 import { KeyValueStoreBuilder } from 'src/repositories/keyValueStore/KeyValueStoreBuilder';
 

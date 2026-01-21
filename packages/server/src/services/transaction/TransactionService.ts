@@ -167,7 +167,7 @@ export default class TransactionService extends LoggerBase implements ITransacti
                 });
             }
             if (Utils.isNotNull(transaction.amount) || Utils.isNotNull(transaction.createdAt)) {
-                if (Utils.isNull(transaction.amount)) {
+                if (Utils.isNotNull(transaction.amount)) {
                     const delta = transaction.amount - trs.amount;
                     await this._balanceService.patch(
                         userId,

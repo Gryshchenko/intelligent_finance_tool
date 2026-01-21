@@ -39,7 +39,7 @@ export default class CategoryDataAccess extends LoggerBase implements ICategoryD
                     'categories.currencyId',
                     this._db.engine().raw('COALESCE(SUM(dcs.amount_total), 0) as amount'),
                 )
-                .innerJoin('daily_categories_stats as dcs', function () {
+                .leftJoin('daily_categories_stats as dcs', function () {
                     this.on('categories.categoryId', '=', 'dcs.categoryId')
                         .andOnVal('dcs.userId', '=', userId)
                         .andOnBetween('dcs.date', [
