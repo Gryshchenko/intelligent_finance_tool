@@ -22,7 +22,7 @@ RUN  echo "test" && ls -la
 
 RUN corepack enable && corepack prepare pnpm@9 --activate
 RUN pnpm --filter tenpercent/shared build || true
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 WORKDIR /app/packages/server
 CMD ["pnpm", "run", "jest-test"]
