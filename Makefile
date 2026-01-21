@@ -15,5 +15,5 @@ test-ci:
 	docker compose -f docker/tests/compose.yaml up \
 		--build \
 		--abort-on-container-exit \
-		--exit-code-from tests
+		--exit-code-from ten-percent
 	docker compose -f docker/tests/compose.yaml down
