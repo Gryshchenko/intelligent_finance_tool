@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+    tenpercent - compute. One Graviton EC2 host in the public subnet with an Elastic IP,
+    running the docker compose stack (caddy + server + redis). This stack only
+    bootstraps docker; putting the app on it is the deploy's job, not the template's.
+
+Parameters:
+    Env:
+        Type: String
+        Default: prod
+        AllowedValues: [prod, staging]
+    NetworkStack:
+        Type: String
+        Default: tenpercent-prod-network
+    SecurityStack:
+        Type: String
+        Default: tenpercent-prod-security
+    InstanceType:
+        Type: String
+        Default: t4g.micro
+        # arm64 only: the image is built for linux/arm64 (PROD_PLATFORM in the Makefile)
+        # and the AMI below is the arm64 one.
+        AllowedValues: [t4g.micro, t4g.small, t4g.medium]
+        Description: >-
+            t4g.small (2 GiB) fits node + redis + caddy with room to spare;
+            t4g.micro (1 GiB) saves ~$6/mo but leans on swap.
+    ImageId:
+        # Resolved on every create/update. When AWS publishes a newer AMI, the next
+        # stack update picks it up - and a new ImageId REPLACES the instance.
+        Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+        Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+    RootVolumeSize:
+        Type: Number
+        Default: 20
+        MinValue: 8
+        Description: GiB of gp3 - images, redis AOF, caddy certificates, logs.
+    KeyName:
+        Type: String
+        Default: ''
+        Description: >-
+            Optional EC2 key pair. Session Manager needs none; set it only together with
+            SshIngressCidr in the security stack.
+
+Conditions:
+    HasKeyName: !Not [!Equals [!Ref KeyName, '']]
+
+Resources:
+    AppLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
+        Properties:
+            LaunchTemplateData:
+                IamInstanceProfile:
+                    Name: !ImportValue
+                        Fn::Sub: ${SecurityStack}-AppInstanceProfileName
+                # A plain AWS::EC2::Instance has no MetadataOptions - this is why there is a
+                # launch template at all. Hop limit 2: a request from inside a container
+                # crosses the docker bridge, one hop more than from the host, and with the
+                # default of 1 the SDK in the server never gets the role credentials.
+                MetadataOptions:
+                    HttpTokens: required
+                    HttpPutResponseHopLimit: 2
+                    HttpEndpoint: enabled
+                BlockDeviceMappings:
+                    - DeviceName: /dev/xvda
+                      Ebs:
+                          VolumeType: gp3
+                          VolumeSize: !Ref RootVolumeSize
+                          Encrypted: true
+                          DeleteOnTermination: true
+                Monitoring:
+                    # Detailed (1-minute) monitoring is billed per metric; the free 5-minute
+                    # basic metrics are enough for now.
+                    Enabled: false
+                UserData:
+                    Fn::Base64: !Sub |
+                        #!/bin/bash
+                        set -euo pipefail
+                        exec > >(tee -a /var/log/user-data.log) 2>&1
+
+                        signal() {
+                          /opt/aws/bin/cfn-signal --exit-code "$1" \
+                            --stack ${AWS::StackName} --resource AppInstance --region ${AWS::Region} || true
+                        }
+                        trap 'signal 1' ERR
+
+                        dnf install -y docker aws-cfn-bootstrap
+                        systemctl enable --now docker
+                        usermod -aG docker ec2-user
+                        dnf install -y ruby
+
+                        curl -fsSL -o /tmp/install "https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install"
+                        chmod +x /tmp/install && /tmp/install auto
+                        systemctl enable --now codedeploy-agent
+
+                        # AL2023 does not package the compose plugin.
+                        mkdir -p /usr/local/lib/docker/cli-plugins
+                        curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-compose \
+                          "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)"
+                        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+                        docker compose version
+
+                        # 1 GiB of swap: a safety net for image pulls and node GC spikes on a
+                        # small instance, not working memory.
+                        if [ ! -f /swapfile ]; then
+                          dd if=/dev/zero of=/swapfile bs=1M count=1024
+                          chmod 600 /swapfile
+                          mkswap /swapfile
+                          echo '/swapfile none swap sw 0 0' >> /etc/fstab
+                        fi
+                        swapon -a
+
+                        # Where the deploy puts compose.yaml, Caddyfile and the rendered .env.
+                        install -d -o ec2-user -g ec2-user /opt/tenpercent
+
+                        signal 0
+            TagSpecifications:
+                - ResourceType: instance
+                  Tags:
+                      - Key: Name
+                        Value: !Sub tenpercent-${Env}-app
+                - ResourceType: volume
+                  Tags:
+                      - Key: Name
+                        Value: !Sub tenpercent-${Env}-app
+
+    AppInstance:
+        Type: AWS::EC2::Instance
+        # The stack reports CREATE_COMPLETE only after user data ran to the end; a failed
+        # bootstrap (or none within 15 min) rolls the create back instead of leaving a
+        # half-provisioned host behind.
+        CreationPolicy:
+            ResourceSignal:
+                Count: 1
+                Timeout: PT15M
+        Properties:
+            LaunchTemplate:
+                LaunchTemplateId: !Ref AppLaunchTemplate
+                Version: !GetAtt AppLaunchTemplate.LatestVersionNumber
+            ImageId: !Ref ImageId
+            InstanceType: !Ref InstanceType
+            KeyName: !If [HasKeyName, !Ref KeyName, !Ref AWS::NoValue]
+            SubnetId: !ImportValue
+                Fn::Sub: ${NetworkStack}-PublicSubnetId
+            SecurityGroupIds:
+                - !ImportValue
+                  Fn::Sub: ${SecurityStack}-AppSecurityGroupId
+
+    # The DNS A record for API_DOMAIN points here. Tied to the stack: deleting the
+    # stack releases the address, and a recreated stack gets a new one.
+    AppElasticIp:
+        Type: AWS::EC2::EIP
+        Properties:
+            Domain: vpc
+            InstanceId: !Ref AppInstance
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-app
+
+Outputs:
+    InstanceId:
+        Description: aws ssm start-session --target <this>
+        Value: !Ref AppInstance
+        Export:
+            Name: !Sub ${AWS::StackName}-InstanceId
+    PublicIp:
+        Description: A record for API_DOMAIN.
+        Value: !Ref AppElasticIp
+        Export:
+            Name: !Sub ${AWS::StackName}-PublicIp

@@ -9,6 +9,25 @@
 # REDIS_HOST at the managed endpoints, set DB_SSL=true, and delete the two
 # services below along with the server's `depends_on`.
 services:
+    migrate:
+        image: ${SERVER_IMAGE:-tenpercent-server}:${SERVER_IMAGE_TAG:-latest}
+        container_name: tenpercent-migrate
+        command: ['node', 'dist/src/migrate.js']
+        restart: 'no'
+        environment:
+            - DB_NAME=${DB_NAME:?DB_NAME is required}
+            - DB_USER=${DB_USER_MIGRATOR:?DB_USER_MIGRATOR is required}
+            # Unset with DB_IAM_AUTH=true: the password is then an IAM token
+            # signed with the instance role (needs AWS_REGION).
+            - DB_HOST=${DB_HOST:?DB_HOST is required}
+            - DB_PORT=${DB_PORT:-5432}
+            - DB_SSL=${DB_SSL:-true}
+            - DB_IAM_AUTH=${DB_IAM_AUTH:-false}
+            - AWS_REGION
+        security_opt:
+            - no-new-privileges:true
+        networks:
+            - backend
     server:
         image: ${SERVER_IMAGE:-tenpercent-server}:${SERVER_IMAGE_TAG:-latest}
         build:
@@ -19,8 +38,8 @@ services:
         init: true
         stop_grace_period: 30s
         depends_on:
-            postgres:
-                condition: service_healthy
+            migrate:
+                condition: service_completed_successfully
             redis:
                 condition: service_healthy
         environment:
@@ -55,11 +74,12 @@ services:
             # (DatabaseConnection.ts), so the provider's CA has to reach Node
             # through NODE_EXTRA_CA_CERTS.
             - DB_NAME=${DB_NAME:?DB_NAME is required}
-            - DB_USER=${DB_USER:?DB_USER is required}
-            - DB_PASS=${DB_PASS:?DB_PASS is required}
+            - DB_USER=${DB_USER_APP:?DB_USER_APP is required}
+            # Unset with DB_IAM_AUTH=true - see the migrate service.
             - DB_HOST=${DB_HOST:-postgres}
             - DB_PORT=${DB_PORT:-5432}
             - DB_SSL=${DB_SSL:-false}
+            - DB_IAM_AUTH=${DB_IAM_AUTH:-false}
 
             # ====================
             # Redis
@@ -116,7 +136,7 @@ services:
         # the instance itself for debugging, use `docker compose exec`.
         expose:
             - '${PORT:-3000}'
-            # Reachable from the compose network only - this is what prometheus scrapes.
+            # Reachable from the compose network only - nothing scrapes it at the moment.
             - '${METRICS_PORT:-9464}'
         healthcheck:
             test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:${PORT:-3000}/']
@@ -152,10 +172,6 @@ services:
             - '443:443'
             # HTTP/3. Dropping this line costs nothing but a fallback to TCP.
             - '443:443/udp'
-        # Not under `ports`: the metrics site block in the Caddyfile is for prometheus on the
-        # compose network, and must stay off the public interface.
-        expose:
-            - '2020'
         volumes:
             - ./Caddyfile:/etc/caddy/Caddyfile:ro
             # Issued certificates and the ACME account key. Losing this volume
@@ -170,54 +186,6 @@ services:
             timeout: 5s
             retries: 3
             start_period: 10s
-        security_opt:
-            - no-new-privileges:true
-        logging:
-            driver: json-file
-            options:
-                max-size: '10m'
-                max-file: '5'
-        networks:
-            - backend
-
-    postgres:
-        image: postgres:16-alpine
-        container_name: tenpercent-postgres
-        restart: unless-stopped
-        # A slow shutdown risks an unclean stop; give the checkpoint room.
-        stop_grace_period: 60s
-        environment:
-            - POSTGRES_DB=${DB_NAME:?DB_NAME is required}
-            - POSTGRES_USER=${DB_USER:?DB_USER is required}
-            - POSTGRES_PASSWORD=${DB_PASS:?DB_PASS is required}
-            - POSTGRES_INITDB_ARGS=--data-checksums
-        # Sized for a 1GB instance. Raise along with the instance type.
-        # max_connections sits above knex's pool max (100, DatabaseConnection.ts)
-        # so an exhausted pool cannot lock out the superuser slots.
-        command:
-            - postgres
-            - -c
-            - max_connections=20
-            - -c
-            - shared_buffers=128MB
-            - -c
-            - effective_cache_size=384MB
-            - -c
-            - work_mem=4MB
-            - -c
-            - maintenance_work_mem=64MB
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
-            # Runs once, and only against an empty volume. Every later schema
-            # change needs a migration - editing this file does nothing to a
-            # database that already exists.
-            - ../local/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-        healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 30s
         security_opt:
             - no-new-privileges:true
         logging:
@@ -271,7 +239,6 @@ services:
             - backend
 
 volumes:
-    postgres-data:
     redis-data:
     caddy-data:
     caddy-config:

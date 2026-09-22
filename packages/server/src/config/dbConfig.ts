@@ -7,6 +7,8 @@ const config = {
     user: getConfig().dbUser,
     host: getConfig().dbHost,
     ssl: getConfig().dbSsl,
+    iamAuth: getConfig().dbIamAuth,
+    region: getConfig().awsRegion,
     // cert: getConfig().dbCACert,
 };
 export default config;

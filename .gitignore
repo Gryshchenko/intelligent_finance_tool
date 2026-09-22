@@ -141,9 +141,6 @@ dist
 # IDE
 .idea/
 
-# Sert
-*.pem
-
 # OSX
 #
 .DS_Store

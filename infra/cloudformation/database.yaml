@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+    tenpercent - database. Single-AZ RDS Postgres 16 in the private subnets, reachable
+    from the app security group only. Roles, schema and grants are not managed here -
+    see RDS_TODO.md sections 2-3.
+
+Parameters:
+    Env:
+        Type: String
+        Default: prod
+        AllowedValues: [prod, staging]
+    NetworkStack:
+        Type: String
+        Default: tenpercent-prod-network
+    SecurityStack:
+        Type: String
+        Default: tenpercent-prod-security
+    InstanceClass:
+        Type: String
+        Default: db.t4g.micro
+    AllocatedStorage:
+        Type: Number
+        Default: 20
+        MinValue: 20
+        Description: GiB of gp3. 20 is the gp3 minimum.
+    MaxAllocatedStorage:
+        Type: Number
+        Default: 50
+        Description: Storage autoscaling ceiling in GiB.
+    MasterUsername:
+        Type: String
+        Default: tenpercent_admin
+        Description: Admin tasks by a human only - never the app or the migrator.
+    BackupRetentionDays:
+        Type: Number
+        Default: 7
+        MinValue: 1
+        MaxValue: 35
+    DeletionProtection:
+        Type: String
+        Default: 'false'
+        AllowedValues: ['true', 'false']
+        Description: Switch to true once there are real users (RDS_TODO.md section 8).
+    EnableIamAuth:
+        Type: String
+        Default: 'false'
+        AllowedValues: ['true', 'false']
+        Description: >-
+            Turns on IAM database authentication and grants the app role rds-db:connect for
+            the app and migrator users. The GRANT rds_iam in Postgres is still manual
+            (RDS_TODO.md section 9).
+
+Conditions:
+    IamAuth: !Equals [!Ref EnableIamAuth, 'true']
+
+Resources:
+    DbSubnetGroup:
+        Type: AWS::RDS::DBSubnetGroup
+        Properties:
+            DBSubnetGroupDescription: !Sub tenpercent ${Env} private subnets
+            SubnetIds: !Split
+                - ','
+                - !ImportValue
+                  Fn::Sub: ${NetworkStack}-PrivateSubnetIds
+
+    DbParameterGroup:
+        Type: AWS::RDS::DBParameterGroup
+        Properties:
+            Description: !Sub tenpercent ${Env} postgres16
+            Family: postgres16
+            Parameters:
+                # Already the postgres15+ default; pinned so a plaintext connection is
+                # rejected even if the default ever changes. The server connects with
+                # DB_SSL=true and verifies the chain against rds-global-bundle.pem.
+                rds.force_ssl: '1'
+                # Log statements slower than 1s - the only slow-query signal without
+                # Performance Insights.
+                log_min_duration_statement: '1000'
+
+    Db:
+        Type: AWS::RDS::DBInstance
+        # A delete (stack teardown) or a replacement (e.g. a changed DBName) leaves a
+        # final snapshot behind instead of losing the data. Snapshots outlive the stack
+        # and are billed as backup storage - delete stale ones by hand.
+        DeletionPolicy: Snapshot
+        UpdateReplacePolicy: Snapshot
+        Properties:
+            DBInstanceIdentifier: !Sub tenpercent-${Env}
+            DBName: tenpercent
+            Engine: postgres
+            # Same minor as docker/local (schema.sql was dumped from 16.15). Upgrades are
+            # a template bump, not AutoMinorVersionUpgrade: an auto-upgraded instance runs
+            # ahead of the template, and the next stack update then fails trying to
+            # "downgrade" it back to the version written here.
+            EngineVersion: '16.15'
+            AutoMinorVersionUpgrade: false
+            DBInstanceClass: !Ref InstanceClass
+            StorageType: gp3
+            AllocatedStorage: !Ref AllocatedStorage
+            MaxAllocatedStorage: !Ref MaxAllocatedStorage
+            # AWS managed aws/rds key - no CMK fee.
+            StorageEncrypted: true
+            MultiAZ: false
+            PubliclyAccessible: false
+            DBSubnetGroupName: !Ref DbSubnetGroup
+            DBParameterGroupName: !Ref DbParameterGroup
+            VPCSecurityGroups:
+                - !ImportValue
+                  Fn::Sub: ${SecurityStack}-DbSecurityGroupId
+            MasterUsername: !Ref MasterUsername
+            # RDS generates the password and keeps it in Secrets Manager (~$0.40/mo, no
+            # rotation Lambda). It never passes through this template or the CLI.
+            ManageMasterUserPassword: true
+            EnableIAMDatabaseAuthentication: !If [IamAuth, true, false]
+            BackupRetentionPeriod: !Ref BackupRetentionDays
+            # UTC. Backup first, maintenance right after - both at night in Europe.
+            PreferredBackupWindow: '01:00-01:30'
+            PreferredMaintenanceWindow: 'sun:02:00-sun:02:30'
+            CopyTagsToSnapshot: true
+            DeletionProtection: !Ref DeletionProtection
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}
+
+    # Attached here rather than in security.yaml: the resource ARN needs the
+    # DbiResourceId, and security.yaml deploys before the database exists.
+    AppDbConnectPolicy:
+        Type: AWS::IAM::Policy
+        Condition: IamAuth
+        Properties:
+            PolicyName: rds-db-connect
+            Roles:
+                - !ImportValue
+                  Fn::Sub: ${SecurityStack}-AppInstanceRoleName
+            PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Action: rds-db:connect
+                      Resource:
+                          - !Sub arn:aws:rds-db:${AWS::Region}:${AWS::AccountId}:dbuser:${Db.DbiResourceId}/tenpercent_app
+                          - !Sub arn:aws:rds-db:${AWS::Region}:${AWS::AccountId}:dbuser:${Db.DbiResourceId}/tenpercent_migrator
+
+Outputs:
+    DbEndpoint:
+        Description: DB_HOST
+        Value: !GetAtt Db.Endpoint.Address
+        Export:
+            Name: !Sub ${AWS::StackName}-DbEndpoint
+    DbPort:
+        Description: DB_PORT
+        Value: !GetAtt Db.Endpoint.Port
+        Export:
+            Name: !Sub ${AWS::StackName}-DbPort
+    DbResourceId:
+        Description: The db-XXXX id that rds-db:connect ARNs are built from.
+        Value: !GetAtt Db.DbiResourceId
+    MasterUserSecretArn:
+        Description: Secrets Manager -> Retrieve secret value for the master password.
+        Value: !GetAtt Db.MasterUserSecret.SecretArn

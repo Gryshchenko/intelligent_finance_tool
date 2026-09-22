@@ -9,6 +9,8 @@
         "build": "tsc --project tsconfig.build.json && tscpaths -p tsconfig.json -s . -o ./dist",
         "build:dev": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s . -o ./dist",
         "build-translation": "node scripts/translations.js",
+        "migrate": "ts-node --files src/migrate.ts",
+        "migrate:make": "knex migrate:make --client pg -x ts --migrations-directory src/migrations",
         "start": "pnpm run build-translation && NODE_ENV=development nodemon --exec NODE_OPTIONS='--inspect' ts-node --files src/app.ts",
         "redis": "sudo service redis-server start",
         "type-check": "tsc -v && tsc -p tsconfig.json",
@@ -28,6 +30,7 @@
     },
     "license": "All rights reserved",
     "dependencies": {
+        "@aws-sdk/rds-signer": "^3.700.0",
         "@aws-sdk/client-sesv2": "^3.700.0",
         "@sentry/node": "^10.70.0",
         "@tenpercent/shared": "workspace:*",

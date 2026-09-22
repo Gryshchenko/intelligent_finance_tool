@@ -53,3 +53,54 @@ start-prod: ## Start the production stack locally. Needs a filled-in docker/prod
 .PHONY: stop-prod
 stop-prod: ## Stop the production server container.
 	docker compose -f docker/prod/compose.yaml down
+
+# ======================
+# AWS infrastructure (CloudFormation)
+# ======================
+# Four stacks, deployed in this order and deleted in reverse - each one imports the
+# previous stacks' exports, and CloudFormation refuses to delete an export that is
+# still imported. Region and credentials come from the usual AWS_PROFILE /
+# AWS_REGION. Extra overrides go through CFN_PARAMS, e.g.
+#   make cfn-database CFN_PARAMS="EnableIamAuth=true"
+CFN_ENV ?= prod
+CFN_PREFIX = tenpercent-$(CFN_ENV)
+CFN_DIR = infra/cloudformation
+CFN_PARAMS ?=
+CFN_DEPLOY = aws cloudformation deploy --no-fail-on-empty-changeset \
+	--tags Project=tenpercent Env=$(CFN_ENV)
+
+.PHONY: cfn-lint
+cfn-lint: ## Lint the CloudFormation templates (pip install cfn-lint).
+	cfn-lint $(CFN_DIR)/*.yaml
+
+.PHONY: cfn-network
+cfn-network: ## Deploy the VPC and subnets.
+	$(CFN_DEPLOY) --template-file $(CFN_DIR)/network.yaml --stack-name $(CFN_PREFIX)-network \
+		--parameter-overrides Env=$(CFN_ENV) $(CFN_PARAMS)
+
+.PHONY: cfn-security
+cfn-security: ## Deploy security groups and the instance role.
+	$(CFN_DEPLOY) --template-file $(CFN_DIR)/security.yaml --stack-name $(CFN_PREFIX)-security \
+		--capabilities CAPABILITY_IAM \
+		--parameter-overrides Env=$(CFN_ENV) NetworkStack=$(CFN_PREFIX)-network $(CFN_PARAMS)
+
+.PHONY: cfn-database
+cfn-database: ## Deploy RDS Postgres (~10 min on create).
+	$(CFN_DEPLOY) --template-file $(CFN_DIR)/database.yaml --stack-name $(CFN_PREFIX)-database \
+		--capabilities CAPABILITY_IAM \
+		--parameter-overrides Env=$(CFN_ENV) NetworkStack=$(CFN_PREFIX)-network \
+		SecurityStack=$(CFN_PREFIX)-security $(CFN_PARAMS)
+
+.PHONY: cfn-compute
+cfn-compute: ## Deploy the EC2 host and its Elastic IP.
+	$(CFN_DEPLOY) --template-file $(CFN_DIR)/compute.yaml --stack-name $(CFN_PREFIX)-compute \
+		--parameter-overrides Env=$(CFN_ENV) NetworkStack=$(CFN_PREFIX)-network \
+		SecurityStack=$(CFN_PREFIX)-security $(CFN_PARAMS)
+
+.PHONY: cfn-outputs
+cfn-outputs: ## Print the outputs of all four stacks.
+	@for s in network security database compute; do \
+		echo "== $(CFN_PREFIX)-$$s"; \
+		aws cloudformation describe-stacks --stack-name $(CFN_PREFIX)-$$s \
+			--query 'Stacks[0].Outputs[].[OutputKey,OutputValue]' --output text || true; \
+	done

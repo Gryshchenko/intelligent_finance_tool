@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+    tenpercent - network. A VPC with one public subnet (the app host) and two private
+    subnets (RDS needs a subnet group spanning two AZs). No NAT Gateway: nothing in the
+    private subnets needs to reach the internet, and a NAT costs ~$33/mo before traffic.
+
+Parameters:
+    Env:
+        Type: String
+        Default: prod
+        AllowedValues: [prod, staging]
+    VpcCidr:
+        Type: String
+        Default: 10.20.0.0/16
+    PublicSubnetCidr:
+        Type: String
+        Default: 10.20.0.0/24
+    PrivateSubnetACidr:
+        Type: String
+        Default: 10.20.10.0/24
+    PrivateSubnetBCidr:
+        Type: String
+        Default: 10.20.11.0/24
+
+Resources:
+    Vpc:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: !Ref VpcCidr
+            # Both are needed for the RDS endpoint name to resolve inside the VPC.
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}
+
+    InternetGateway:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}
+
+    InternetGatewayAttachment:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref Vpc
+            InternetGatewayId: !Ref InternetGateway
+
+    # ====================
+    # Public
+    # ====================
+    PublicSubnet:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref Vpc
+            CidrBlock: !Ref PublicSubnetCidr
+            AvailabilityZone: !Select [0, !GetAZs '']
+            # Off on purpose: the instance gets an Elastic IP from the compute stack, and an
+            # auto-assigned address on top of it would be a second billed public IPv4.
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-public-a
+
+    PublicRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref Vpc
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-public
+
+    PublicDefaultRoute:
+        Type: AWS::EC2::Route
+        # The route cannot target the gateway until it is attached to the VPC.
+        DependsOn: InternetGatewayAttachment
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+
+    PublicSubnetRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnet
+            RouteTableId: !Ref PublicRouteTable
+
+    # ====================
+    # Private
+    # ====================
+    # AZ a matches the public subnet, so app -> db traffic stays in one AZ (no
+    # cross-AZ data charge). AZ b exists only to satisfy the subnet group.
+    PrivateSubnetA:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref Vpc
+            CidrBlock: !Ref PrivateSubnetACidr
+            AvailabilityZone: !Select [0, !GetAZs '']
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-private-a
+
+    PrivateSubnetB:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref Vpc
+            CidrBlock: !Ref PrivateSubnetBCidr
+            AvailabilityZone: !Select [1, !GetAZs '']
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-private-b
+
+    # No default route: the private subnets reach the VPC and nothing else.
+    PrivateRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref Vpc
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-private
+
+    PrivateSubnetARouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetA
+            RouteTableId: !Ref PrivateRouteTable
+
+    PrivateSubnetBRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetB
+            RouteTableId: !Ref PrivateRouteTable
+
+Outputs:
+    VpcId:
+        Value: !Ref Vpc
+        Export:
+            Name: !Sub ${AWS::StackName}-VpcId
+    VpcCidr:
+        Value: !GetAtt Vpc.CidrBlock
+        Export:
+            Name: !Sub ${AWS::StackName}-VpcCidr
+    PublicSubnetId:
+        Value: !Ref PublicSubnet
+        Export:
+            Name: !Sub ${AWS::StackName}-PublicSubnetId
+    PrivateSubnetIds:
+        Value: !Join [',', [!Ref PrivateSubnetA, !Ref PrivateSubnetB]]
+        Export:
+            Name: !Sub ${AWS::StackName}-PrivateSubnetIds

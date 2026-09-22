@@ -1,0 +1,38 @@
+version: 0.0
+os: linux
+
+# Everything in the bundle lands here: compose.yaml, Caddyfile, image.env and
+# scripts/. The hooks below run from the unpacked archive, not from this path.
+files:
+    - source: /
+      destination: /opt/tenpercent
+
+permissions:
+    - object: /opt/tenpercent
+      owner: root
+      group: root
+      mode: 755
+      type:
+          - directory
+          - file
+
+# No ApplicationStop on purpose: `compose up -d` recreates what changed, and a
+# full `down` would take Caddy offline for no reason. It would also run from the
+# PREVIOUS revision's scripts, so a broken one blocks every later deployment.
+hooks:
+    BeforeInstall:
+        - location: scripts/cleanup.sh
+          runas: root
+          timeout: 60
+    AfterInstall:
+        - location: scripts/render_env.sh
+          runas: root
+          timeout: 120
+    ApplicationStart:
+        - location: scripts/start.sh
+          runas: root
+          timeout: 600
+    ValidateService:
+        - location: scripts/validate.sh
+          runas: root
+          timeout: 180

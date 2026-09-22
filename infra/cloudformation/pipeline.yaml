@@ -1,0 +1,371 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+    tenpercent - release pipeline. GitHub -> CodeBuild (image to ECR, config bundle to
+    S3) -> manual approval -> CodeDeploy in-place onto the EC2 host. Deployed after the
+    four infrastructure stacks; it targets the instance by tag, not by id.
+
+Parameters:
+    Env:
+        Type: String
+        Default: prod
+        AllowedValues: [prod, staging]
+    SecurityStack:
+        Type: String
+        Default: tenpercent-prod-security
+    EcrRepositoryName:
+        Type: String
+        Default: pagoda/tenpercent
+    FullRepositoryId:
+        Type: String
+        Default: Gryshchenko/intelligent_finance_tool
+    BranchName:
+        Type: String
+        Default: main
+
+Resources:
+    # ====================
+    # Artifact store
+    # ====================
+    # Retained on stack delete: a bucket with objects in it cannot be deleted, and a
+    # failed teardown in the middle of a stack delete is worse than one stray bucket.
+    ArtifactBucket:
+        Type: AWS::S3::Bucket
+        DeletionPolicy: Retain
+        UpdateReplacePolicy: Retain
+        Properties:
+            BucketEncryption:
+                ServerSideEncryptionConfiguration:
+                    - ServerSideEncryptionByDefault:
+                          SSEAlgorithm: AES256
+            PublicAccessBlockConfiguration:
+                BlockPublicAcls: true
+                BlockPublicPolicy: true
+                IgnorePublicAcls: true
+                RestrictPublicBuckets: true
+            # CodePipeline keeps every execution's artifacts here; versioning is what it
+            # expects of an artifact store.
+            VersioningConfiguration:
+                Status: Enabled
+            LifecycleConfiguration:
+                Rules:
+                    - Id: expire-old-artifacts
+                      Status: Enabled
+                      ExpirationInDays: 30
+                      NoncurrentVersionExpirationInDays: 7
+                      AbortIncompleteMultipartUpload:
+                          DaysAfterInitiation: 7
+
+    # ====================
+    # GitHub connection
+    # ====================
+    # Created in PENDING state. Developer Tools -> Settings -> Connections -> this
+    # connection -> Update pending connection, and authorise the GitHub app. Nothing
+    # in the pipeline works until it reads AVAILABLE - that handshake cannot be
+    # automated, by design.
+    GitHubConnection:
+        Type: AWS::CodeStarConnections::Connection
+        Properties:
+            ConnectionName: !Sub tenpercent-${Env}
+            ProviderType: GitHub
+
+    # ====================
+    # Build
+    # ====================
+    BuildLogGroup:
+        Type: AWS::Logs::LogGroup
+        # The name CodeBuild would create by itself - declaring it here is only about
+        # getting a retention period instead of "never expire".
+        Properties:
+            LogGroupName: !Sub /aws/codebuild/tenpercent-${Env}-build
+            RetentionInDays: 14
+
+    CodeBuildRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: codebuild.amazonaws.com
+                      Action: sts:AssumeRole
+            Policies:
+                - PolicyName: build
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - logs:CreateLogGroup
+                                - logs:CreateLogStream
+                                - logs:PutLogEvents
+                            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/tenpercent-${Env}-build:*
+                          # Reads the source artifact, writes the deploy bundle.
+                          - Effect: Allow
+                            Action:
+                                - s3:GetObject
+                                - s3:GetObjectVersion
+                                - s3:PutObject
+                            Resource: !Sub ${ArtifactBucket.Arn}/*
+                          - Effect: Allow
+                            Action: ecr:GetAuthorizationToken
+                            Resource: '*'
+                          # Push only - the pipeline never needs to delete an image.
+                          - Effect: Allow
+                            Action:
+                                - ecr:BatchCheckLayerAvailability
+                                - ecr:InitiateLayerUpload
+                                - ecr:UploadLayerPart
+                                - ecr:CompleteLayerUpload
+                                - ecr:PutImage
+                            Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}
+
+    BuildProject:
+        Type: AWS::CodeBuild::Project
+        DependsOn: BuildLogGroup
+        Properties:
+            Name: !Sub tenpercent-${Env}-build
+            ServiceRole: !GetAtt CodeBuildRole.Arn
+            TimeoutInMinutes: 30
+            Source:
+                Type: CODEPIPELINE
+                BuildSpec: buildspec.yml
+            Artifacts:
+                Type: CODEPIPELINE
+            Environment:
+                # ARM because the image is built for linux/arm64 and `make build-prod`
+                # passes no --platform: the architecture comes from the build host. An x86
+                # builder would produce an image that dies on t4g with `exec format error`.
+                Type: ARM_CONTAINER
+                Image: aws/codebuild/amazonlinux2-aarch64-standard:3.0
+                ComputeType: BUILD_GENERAL1_SMALL
+                # Needed for a docker daemon inside the build container.
+                PrivilegedMode: true
+                EnvironmentVariables:
+                    - Name: ECR_REGISTRY
+                      Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
+                    - Name: ECR_REPOSITORY
+                      Value: !Ref EcrRepositoryName
+            Cache:
+                # Layer cache lives on the build host and survives between builds on the
+                # same warm host - a miss only costs the time a cold build would take.
+                Type: LOCAL
+                Modes:
+                    - LOCAL_DOCKER_LAYER_CACHE
+                    - LOCAL_SOURCE_CACHE
+            LogsConfig:
+                CloudWatchLogs:
+                    Status: ENABLED
+                    GroupName: !Ref BuildLogGroup
+
+    # ====================
+    # Deploy
+    # ====================
+    CodeDeployRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: codedeploy.amazonaws.com
+                      Action: sts:AssumeRole
+            ManagedPolicyArns:
+                # Lets CodeDeploy read EC2 tags to find the instances of a deployment group.
+                - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+
+    DeployApplication:
+        Type: AWS::CodeDeploy::Application
+        Properties:
+            ApplicationName: !Sub tenpercent-${Env}
+            ComputePlatform: Server
+
+    DeploymentGroup:
+        Type: AWS::CodeDeploy::DeploymentGroup
+        Properties:
+            ApplicationName: !Ref DeployApplication
+            DeploymentGroupName: !Sub tenpercent-${Env}-ec2
+            ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+            DeploymentConfigName: CodeDeployDefault.AllAtOnce
+            # By tag, not by instance id: a replaced instance carries the same Name tag
+            # from the launch template and joins this group on its own.
+            Ec2TagFilters:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-app
+                  Type: KEY_AND_VALUE
+            DeploymentStyle:
+                DeploymentType: IN_PLACE
+                DeploymentOption: WITHOUT_TRAFFIC_CONTROL
+            AutoRollbackConfiguration:
+                Enabled: true
+                # A failing ValidateService hook reinstalls the last good revision.
+                Events:
+                    - DEPLOYMENT_FAILURE
+
+    # Attached from here for the same reason as rds-db:connect in database.yaml: the
+    # bucket does not exist when the security stack is deployed. Without it the agent
+    # cannot download the bundle and every deployment fails at DownloadBundle.
+    InstanceArtifactAccess:
+        Type: AWS::IAM::Policy
+        Properties:
+            PolicyName: read-deploy-bundle
+            Roles:
+                - !ImportValue
+                  Fn::Sub: ${SecurityStack}-AppInstanceRoleName
+            PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Action:
+                          - s3:GetObject
+                          - s3:GetObjectVersion
+                      Resource: !Sub ${ArtifactBucket.Arn}/*
+                    # The agent's own installer, fetched by user data from the regional bucket.
+                    - Effect: Allow
+                      Action: s3:GetObject
+                      Resource: !Sub arn:aws:s3:::aws-codedeploy-${AWS::Region}/*
+
+    # ====================
+    # Pipeline
+    # ====================
+    PipelineRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: codepipeline.amazonaws.com
+                      Action: sts:AssumeRole
+            Policies:
+                - PolicyName: orchestrate
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - s3:GetObject
+                                - s3:GetObjectVersion
+                                - s3:PutObject
+                                - s3:GetBucketVersioning
+                            Resource:
+                                - !GetAtt ArtifactBucket.Arn
+                                - !Sub ${ArtifactBucket.Arn}/*
+                          - Effect: Allow
+                            Action:
+                                - codebuild:StartBuild
+                                - codebuild:BatchGetBuilds
+                            Resource: !GetAtt BuildProject.Arn
+                          - Effect: Allow
+                            Action:
+                                - codedeploy:CreateDeployment
+                                - codedeploy:GetDeployment
+                                - codedeploy:GetApplication
+                                - codedeploy:GetApplicationRevision
+                                - codedeploy:RegisterApplicationRevision
+                                - codedeploy:GetDeploymentGroup
+                            Resource:
+                                - !Sub arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:application:${DeployApplication}
+                                - !Sub arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${DeployApplication}/${DeploymentGroup}
+                          - Effect: Allow
+                            Action: codedeploy:GetDeploymentConfig
+                            Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentconfig:*
+                          # Both spellings: the service was renamed to CodeConnections and the
+                          # old action name is still what existing policies carry.
+                          - Effect: Allow
+                            Action:
+                                - codestar-connections:UseConnection
+                                - codeconnections:UseConnection
+                            Resource: !Ref GitHubConnection
+
+    Pipeline:
+        Type: AWS::CodePipeline::Pipeline
+        Properties:
+            Name: !Sub tenpercent-${Env}
+            # V2: billed per action-minute with 100 free each month, instead of V1's flat
+            # $1/month per pipeline. Cheaper at this release rate, and it is what the
+            # variable syntax below needs.
+            PipelineType: V2
+            RoleArn: !GetAtt PipelineRole.Arn
+            ArtifactStore:
+                Type: S3
+                Location: !Ref ArtifactBucket
+            Stages:
+                - Name: Source
+                  Actions:
+                      - Name: GitHub
+                        ActionTypeId:
+                            Category: Source
+                            Owner: AWS
+                            Provider: CodeStarSourceConnection
+                            Version: '1'
+                        Configuration:
+                            ConnectionArn: !Ref GitHubConnection
+                            FullRepositoryId: !Ref FullRepositoryId
+                            BranchName: !Ref BranchName
+                            # A push to the branch starts the pipeline through the connection's
+                            # webhook - no polling.
+                            DetectChanges: true
+                            OutputArtifactFormat: CODE_ZIP
+                        OutputArtifacts:
+                            - Name: SourceOutput
+                        # Publishes CommitId, CommitMessage, BranchName... for later stages.
+                        Namespace: SourceVariables
+
+                - Name: Build
+                  Actions:
+                      - Name: Image
+                        ActionTypeId:
+                            Category: Build
+                            Owner: AWS
+                            Provider: CodeBuild
+                            Version: '1'
+                        Configuration:
+                            ProjectName: !Ref BuildProject
+                            # The zip artifact carries no .git, so the commit sha is handed to
+                            # buildspec.yml as an environment variable instead.
+                            EnvironmentVariables: '[{"name":"COMMIT_ID","value":"#{SourceVariables.CommitId}","type":"PLAINTEXT"}]'
+                        InputArtifacts:
+                            - Name: SourceOutput
+                        OutputArtifacts:
+                            - Name: BuildOutput
+
+                - Name: Approve
+                  Actions:
+                      - Name: Manual
+                        ActionTypeId:
+                            Category: Approval
+                            Owner: AWS
+                            Provider: Manual
+                            Version: '1'
+                        Configuration:
+                            CustomData: !Sub 'Deploy #{SourceVariables.CommitId} to ${Env}?'
+
+                - Name: Deploy
+                  Actions:
+                      - Name: CodeDeploy
+                        ActionTypeId:
+                            Category: Deploy
+                            Owner: AWS
+                            Provider: CodeDeploy
+                            Version: '1'
+                        Configuration:
+                            ApplicationName: !Ref DeployApplication
+                            DeploymentGroupName: !Ref DeploymentGroup
+                        InputArtifacts:
+                            - Name: BuildOutput
+
+Outputs:
+    ConnectionArn:
+        Description: PENDING until authorised in the console - nothing runs before that.
+        Value: !Ref GitHubConnection
+    ArtifactBucketName:
+        Value: !Ref ArtifactBucket
+    PipelineName:
+        Value: !Ref Pipeline
+    DeployApplicationName:
+        Value: !Ref DeployApplication
+    DeploymentGroupName:
+        Value: !Ref DeploymentGroup

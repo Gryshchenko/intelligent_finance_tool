@@ -1,43 +1,21 @@
 import knex, { Knex } from 'knex';
 
 import { IDatabaseConnection, IDBTransaction } from 'interfaces/IDatabaseConnection';
-
-interface IDatabaseConnectionConstructor {
-    host: string | undefined;
-    port: number | undefined;
-    database: string | undefined;
-    user: string | undefined;
-    password: string | undefined;
-    ssl: boolean | undefined;
-    // cert: string | undefined;
-}
+import { IPgConnectionSettings, pgConnection } from 'src/repositories/pgConnection';
 
 export default class DatabaseConnection implements IDatabaseConnection {
     private readonly _db: Knex;
 
     private static _inspect: IDatabaseConnection;
 
-    public static instance(config: IDatabaseConnectionConstructor): IDatabaseConnection {
+    public static instance(config: IPgConnectionSettings): IDatabaseConnection {
         return DatabaseConnection._inspect || (DatabaseConnection._inspect = new DatabaseConnection(config));
     }
 
-    public constructor({ host, port, database, user, password, ssl }: IDatabaseConnectionConstructor) {
+    public constructor(config: IPgConnectionSettings) {
         this._db = knex({
             client: 'pg',
-            connection: {
-                host,
-                port,
-                database,
-                user,
-                password,
-                // Certificate is always verified when TLS is on; to trust a custom/self-signed
-                // CA in dev, point NODE_EXTRA_CA_CERTS at its root cert instead of disabling checks.
-                ssl: ssl ? { rejectUnauthorized: true } : false,
-                pool: {
-                    min: 1,
-                    max: 20,
-                },
-            },
+            connection: pgConnection(config),
             pool: {
                 min: 1,
                 max: 20,

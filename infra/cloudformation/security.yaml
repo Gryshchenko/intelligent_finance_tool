@@ -1,0 +1,187 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+    tenpercent - security. Security groups for the app host and the database, and the
+    instance role the app host runs with. Grants that name a resource from a later stack
+    live with that resource instead (rds-db:connect is in database.yaml).
+
+Parameters:
+    Env:
+        Type: String
+        Default: prod
+        AllowedValues: [prod, staging]
+    NetworkStack:
+        Type: String
+        Default: tenpercent-prod-network
+    EcrRepositoryName:
+        Type: String
+        Default: pagoda/tenpercent
+        Description: The repository release.yml pushes the server image to.
+    SshIngressCidr:
+        Type: String
+        Default: ''
+        Description: >-
+            Leave empty to keep port 22 closed and use SSM Session Manager (shell and port
+            forwarding) instead. Set e.g. 203.0.113.7/32 only for a one-off debug session.
+
+Conditions:
+    AllowSsh: !Not [!Equals [!Ref SshIngressCidr, '']]
+
+Resources:
+    # ====================
+    # Security groups
+    # ====================
+    AppSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: tenpercent app host - Caddy on 80/443
+            VpcId: !ImportValue
+                Fn::Sub: ${NetworkStack}-VpcId
+            SecurityGroupIngress:
+                # 80 stays open for the ACME HTTP-01 challenge and the redirect to https.
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  CidrIp: 0.0.0.0/0
+                - IpProtocol: tcp
+                  FromPort: 443
+                  ToPort: 443
+                  CidrIp: 0.0.0.0/0
+                # HTTP/3 - see the 443/udp mapping in docker/prod/compose.yaml.
+                - IpProtocol: udp
+                  FromPort: 443
+                  ToPort: 443
+                  CidrIp: 0.0.0.0/0
+            # Default egress (all) is kept: the host pulls images, talks to SES, SSM,
+            # Sentry and the rate provider over the internet gateway.
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-app
+
+    AppSshIngress:
+        Type: AWS::EC2::SecurityGroupIngress
+        Condition: AllowSsh
+        Properties:
+            GroupId: !Ref AppSecurityGroup
+            IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: !Ref SshIngressCidr
+
+    DbSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: tenpercent RDS - Postgres from the app host only
+            VpcId: !ImportValue
+                Fn::Sub: ${NetworkStack}-VpcId
+            SecurityGroupIngress:
+                # By group, not by CIDR: whatever instance carries AppSecurityGroup gets in,
+                # including a replacement with a new private IP.
+                - IpProtocol: tcp
+                  FromPort: 5432
+                  ToPort: 5432
+                  SourceSecurityGroupId: !Ref AppSecurityGroup
+            # Listing any egress rule replaces the allow-all default; a rule to loopback
+            # matches nothing, so the database cannot open connections of its own.
+            SecurityGroupEgress:
+                - IpProtocol: '-1'
+                  CidrIp: 127.0.0.1/32
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-db
+
+    # ====================
+    # Instance role
+    # ====================
+    # No RoleName: a generated name keeps deploys on CAPABILITY_IAM instead of
+    # CAPABILITY_NAMED_IAM and lets two envs coexist in one account.
+    AppInstanceRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: ec2.amazonaws.com
+                      Action: sts:AssumeRole
+            ManagedPolicyArns:
+                # Session Manager shell/port forwarding and Run Command - replaces SSH.
+                - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+            Policies:
+                - PolicyName: pull-server-image
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          # GetAuthorizationToken is account-wide and takes no resource.
+                          - Effect: Allow
+                            Action: ecr:GetAuthorizationToken
+                            Resource: '*'
+                          - Effect: Allow
+                            Action:
+                                - ecr:BatchGetImage
+                                - ecr:GetDownloadUrlForLayer
+                                - ecr:BatchCheckLayerAvailability
+                            Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}
+                - PolicyName: read-app-config
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          # The runtime .env lives under /tenpercent/<env>/ as SecureStrings.
+                          # They use the AWS managed aws/ssm key, whose key policy already lets
+                          # SSM decrypt for callers in this account - so no kms:Decrypt here.
+                          - Effect: Allow
+                            Action:
+                                - ssm:GetParametersByPath
+                                - ssm:GetParameters
+                                - ssm:GetParameter
+                            Resource:
+                                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/tenpercent/${Env}
+                                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/tenpercent/${Env}/*
+                - PolicyName: send-mail
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          # AwsSesProvider (SESv2 SendEmail). Any region: SES may be set up
+                          # outside the region the stack runs in.
+                          - Effect: Allow
+                            Action: ses:SendEmail
+                            Resource: !Sub arn:aws:ses:*:${AWS::AccountId}:identity/*
+            Tags:
+                - Key: Name
+                  Value: !Sub tenpercent-${Env}-app
+
+    AppInstanceProfile:
+        Type: AWS::IAM::InstanceProfile
+        Properties:
+            Roles:
+                - !Ref AppInstanceRole
+    ServerImageRepository:
+        Type: AWS::ECR::Repository
+        DeletionPolicy: Retain
+        UpdateReplacePolicy: Retain
+        Properties:
+            RepositoryName: !Ref EcrRepositoryName
+            ImageScanningConfiguration:
+                ScanOnPush: true
+            LifecyclePolicy:
+                LifecyclePolicyText: |
+                    {"rules":[{"rulePriority":1,"description":"keep last 10 images",
+                    "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},
+                    "action":{"type":"expire"}}]}
+Outputs:
+    AppSecurityGroupId:
+        Value: !Ref AppSecurityGroup
+        Export:
+            Name: !Sub ${AWS::StackName}-AppSecurityGroupId
+    DbSecurityGroupId:
+        Value: !Ref DbSecurityGroup
+        Export:
+            Name: !Sub ${AWS::StackName}-DbSecurityGroupId
+    AppInstanceRoleName:
+        Value: !Ref AppInstanceRole
+        Export:
+            Name: !Sub ${AWS::StackName}-AppInstanceRoleName
+    AppInstanceProfileName:
+        Value: !Ref AppInstanceProfile
+        Export:
+            Name: !Sub ${AWS::StackName}-AppInstanceProfileName

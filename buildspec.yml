@@ -1,0 +1,21 @@
+version: 0.2
+phases:
+    pre_build:
+        commands:
+            - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+            - TAG="${COMMIT_ID:0:7}"
+    build:
+        commands:
+            - make build-prod PROD_IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY" PROD_TAG="$TAG"
+            - docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$TAG"
+            - docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+    post_build:
+        commands:
+            - mkdir -p bundle/scripts
+            - cp infra/codedeploy/appspec.yml bundle/
+            - cp infra/codedeploy/scripts/* bundle/scripts/
+            - cp docker/prod/compose.yaml docker/prod/Caddyfile bundle/
+            - printf 'SERVER_IMAGE=%s\nSERVER_IMAGE_TAG=%s\nSENTRY_RELEASE=%s\n' "$ECR_REGISTRY/$ECR_REPOSITORY" "$TAG" "$TAG" > bundle/image.env
+artifacts:
+    base-directory: bundle
+    files: ['**/*']

@@ -59,6 +59,9 @@ FROM base AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
+COPY --chown=node:node docker/prod/rds-global-bundle.pem /app/certs/rds-global-bundle.pem
+ENV NODE_EXTRA_CA_CERTS=/app/certs/rds-global-bundle.pem
+
 COPY --from=prod-deps --chown=node:node /app /app
 COPY --from=build --chown=node:node /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build --chown=node:node /app/packages/server/dist ./packages/server/dist
