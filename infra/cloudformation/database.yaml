@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-    tenpercent - database. Single-AZ RDS Postgres 16 in the private subnets, reachable
+    tenpercent - database. Single-AZ RDS Postgres 18 in the private subnets, reachable
     from the app security group only. Roles, schema and grants are not managed here -
     see RDS_TODO.md sections 2-3.
 
@@ -66,8 +66,8 @@ Resources:
     DbParameterGroup:
         Type: AWS::RDS::DBParameterGroup
         Properties:
-            Description: !Sub tenpercent ${Env} postgres16
-            Family: postgres16
+            Description: !Sub tenpercent ${Env} postgres18
+            Family: postgres18
             Parameters:
                 # Already the postgres15+ default; pinned so a plaintext connection is
                 # rejected even if the default ever changes. The server connects with
@@ -92,7 +92,9 @@ Resources:
             # a template bump, not AutoMinorVersionUpgrade: an auto-upgraded instance runs
             # ahead of the template, and the next stack update then fails trying to
             # "downgrade" it back to the version written here.
-            EngineVersion: '16.15'
+            EngineVersion: '18.6'
+            # RDS rejects a major EngineVersion bump without this flag.
+            AllowMajorVersionUpgrade: true
             AutoMinorVersionUpgrade: false
             DBInstanceClass: !Ref InstanceClass
             StorageType: gp3

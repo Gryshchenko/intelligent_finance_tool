@@ -49,6 +49,15 @@ Resources:
         Type: AWS::EC2::LaunchTemplate
         Properties:
             LaunchTemplateData:
+                TagSpecifications:
+                    - ResourceType: instance
+                      Tags:
+                          - Key: Name
+                            Value: !Sub tenpercent-${Env}-app
+                    - ResourceType: volume
+                      Tags:
+                          - Key: Name
+                            Value: !Sub tenpercent-${Env}-app
                 IamInstanceProfile:
                     Name: !ImportValue
                         Fn::Sub: ${SecurityStack}-AppInstanceProfileName
@@ -113,15 +122,6 @@ Resources:
                         install -d -o ec2-user -g ec2-user /opt/tenpercent
 
                         signal 0
-            TagSpecifications:
-                - ResourceType: instance
-                  Tags:
-                      - Key: Name
-                        Value: !Sub tenpercent-${Env}-app
-                - ResourceType: volume
-                  Tags:
-                      - Key: Name
-                        Value: !Sub tenpercent-${Env}-app
 
     AppInstance:
         Type: AWS::EC2::Instance
@@ -139,11 +139,19 @@ Resources:
             ImageId: !Ref ImageId
             InstanceType: !Ref InstanceType
             KeyName: !If [HasKeyName, !Ref KeyName, !Ref AWS::NoValue]
-            SubnetId: !ImportValue
-                Fn::Sub: ${NetworkStack}-PublicSubnetId
-            SecurityGroupIds:
-                - !ImportValue
-                  Fn::Sub: ${SecurityStack}-AppSecurityGroupId
+            # The Elastic IP attaches only after this resource is CREATE_COMPLETE, i.e. after
+            # the bootstrap signal - but the bootstrap needs the internet (dnf, CodeDeploy,
+            # GitHub, the cfn-signal endpoint) and the subnet does not map public IPs. A
+            # temporary public IP breaks that loop; AWS releases it once the EIP attaches.
+            NetworkInterfaces:
+                - DeviceIndex: '0'
+                  AssociatePublicIpAddress: true
+                  DeleteOnTermination: true
+                  SubnetId: !ImportValue
+                      Fn::Sub: ${NetworkStack}-PublicSubnetId
+                  GroupSet:
+                      - !ImportValue
+                        Fn::Sub: ${SecurityStack}-AppSecurityGroupId
 
     # The DNS A record for API_DOMAIN points here. Tied to the stack: deleting the
     # stack releases the address, and a recreated stack gets a new one.
