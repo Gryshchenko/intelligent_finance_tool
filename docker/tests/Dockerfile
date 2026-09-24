@@ -1,7 +1,7 @@
 # ======================
 # Test
 # ======================
-FROM node:20-alpine AS test
+FROM node:24-alpine AS test
 
 RUN apk add --no-cache git python3 make g++
 RUN corepack enable && corepack prepare pnpm@9 --activate

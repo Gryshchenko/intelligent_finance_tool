@@ -6,7 +6,7 @@
 # only. The runtime image copies the result of both, so neither the compiler
 # nor the native build toolchain ships to production.
 
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 
