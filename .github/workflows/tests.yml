@@ -18,13 +18,15 @@ jobs:
               with:
                   fetch-depth: 0
 
+            # pnpm must be installed before setup-node: setup-node@v5 caches the
+            # store automatically because package.json has "packageManager".
+            - name: Install pnpm
+              # Version comes from "packageManager" in package.json
+              uses: pnpm/action-setup@v6
             - name: Use Node.js
               uses: actions/setup-node@v5
               with:
                   node-version: '24.x'
-            - name: Install pnpm
-              # Version comes from "packageManager" in package.json
-              uses: pnpm/action-setup@v6
             - name: Install dependencies
               run: pnpm i
 
