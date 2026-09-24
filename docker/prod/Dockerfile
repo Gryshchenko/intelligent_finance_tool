@@ -7,7 +7,7 @@
 # nor the native build toolchain ships to production.
 
 FROM node:24-alpine AS base
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN corepack enable && corepack prepare pnpm@11.5.3 --activate
 WORKDIR /app
 
 # ----------------------
@@ -48,9 +48,9 @@ RUN apk add --no-cache python3 make g++
 COPY package.json pnpm-lock.yaml ./
 COPY packages/server/package.json ./packages/server/
 COPY packages/shared/package.json ./packages/shared/
-RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));delete p.dependencies;delete p.devDependencies;delete p.scripts;fs.writeFileSync('package.json',JSON.stringify(p,null,4));" \
-    && printf 'packages:\n    - packages/server\n    - packages/shared\n\nallowBuilds:\n    argon2: true\n' > pnpm-workspace.yaml
-RUN pnpm install --prod --filter "@tenpercent/server..."
+#RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));delete p.dependencies;delete p.devDependencies;delete p.scripts;fs.writeFileSync('package.json',JSON.stringify(p,null,4));" \
+#    && printf 'packages:\n    - packages/server\n    - packages/shared\n\nallowBuilds:\n    argon2: true\n' > pnpm-workspace.yaml
+RUN pnpm install --prod --filter @tenpercent/server
 
 # ----------------------
 # Runtime
