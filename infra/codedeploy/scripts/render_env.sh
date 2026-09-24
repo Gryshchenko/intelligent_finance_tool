@@ -47,6 +47,10 @@ sys.stdout.write("\n".join(sorted(out)) + "\n")
 # what pins the deployment to the exact image built from this commit.
 cat /opt/tenpercent/image.env >> "$TARGET"
 
+# The IAM token signer (RDS) and the SES client need it; it is the host's own
+# region, not a secret, so it comes from instance metadata rather than SSM.
+echo "AWS_REGION=${AWS_REGION}" >> "$TARGET"
+
 chmod 600 "$TARGET"
 chown root:root "$TARGET"
 
