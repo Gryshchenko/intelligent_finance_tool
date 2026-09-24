@@ -19,7 +19,7 @@ umask 077
 # The CLI paginates by itself; --with-decryption is what turns SecureString into
 # its plaintext, and the instance role is allowed exactly this path.
 aws ssm get-parameters-by-path \
-    --path "/tenpercent/${ENV_NAME}" \
+    --path "/tenpercent/" \
     --recursive \
     --with-decryption \
     --output json \
