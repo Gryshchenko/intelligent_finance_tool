@@ -23,9 +23,8 @@ jobs:
               with:
                   node-version: '24.x'
             - name: Install pnpm
+              # Version comes from "packageManager" in package.json
               uses: pnpm/action-setup@v6
-              with:
-                  version: 9
             - name: Install dependencies
               run: pnpm i
 
