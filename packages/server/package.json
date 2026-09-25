@@ -62,7 +62,6 @@
         "redis": "4.6.12",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1",
-        "ts-jest": "29.1.2",
         "ua-parser-js": "2.0.0-beta.3"
     },
     "devDependencies": {
@@ -101,6 +100,7 @@
         "nodemon": "3.0.3",
         "prettier": "^3.2.5",
         "supertest": "7.0.0",
+        "ts-jest": "29.1.2",
         "ts-node": "10.9.2",
         "tsconfig-paths": "4.2.0",
         "tscpaths": "^0.0.9",

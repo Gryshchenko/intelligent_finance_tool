@@ -421,9 +421,6 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.21.2)
-      ts-jest:
-        specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.28.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.0))(jest@29.7.0(@types/node@20.11.0)(ts-node@10.9.2(@types/node@20.11.0)(typescript@5.3.3)))(typescript@5.3.3)
       ua-parser-js:
         specifier: 2.0.0-beta.3
         version: 2.0.0-beta.3
@@ -533,6 +530,9 @@ importers:
       supertest:
         specifier: 7.0.0
         version: 7.0.0
+      ts-jest:
+        specifier: 29.1.2
+        version: 29.1.2(@babel/core@7.28.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.0))(jest@29.7.0(@types/node@20.11.0)(ts-node@10.9.2(@types/node@20.11.0)(typescript@5.3.3)))(typescript@5.3.3)
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@types/node@20.11.0)(typescript@5.3.3)
